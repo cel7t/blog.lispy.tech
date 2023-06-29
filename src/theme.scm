@@ -89,12 +89,12 @@
                               ,(link "Haunt" "https://dthompson.us/projects/haunt.html"))
                            (link (@ (rel "webmention")
                                     (href ,(string-append "https://webmention.io/blog.lispy.tech/"
-                                                          (kebabify title)
-                                                          "/webmention"))))
+                                           ;               (kebabify title)
+                                                          "webmention"))))
                            (link (@ (rel "pingback")
                                     (href ,(string-append "https://webmention.io/blog.lispy.tech/"
-                                                          (kebabify title)
-                                                          "/xmlrpc"))))
+                                           ;               (kebabify title)
+                                                          "xmlrpc"))))
                            (link (@ (rel "me")
                                     (href "mailto:shahsarthakw@gmail.com")))
                            (p (@ (class "copyright"))
