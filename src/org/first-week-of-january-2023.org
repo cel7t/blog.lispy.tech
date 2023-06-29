@@ -1,0 +1,19 @@
+#+TITLE:The First Week of January 2023
+#+DATE: 2023-01-10 13:37
+#+AUTHOR:Sarthak Shah
+#+TAGS: Personal, Programming, Web
+#+HAUNT_BASE_DIR: /home/sixtyfour/Documents/Code/Guile/blog
+
+I decided to start writing a blog to talk about my ventures in programming and system administration to document my progress and motivate me to do more. This entry covers what I did in the first week of January, 2023.
+* Torus Wrapper
+One of the projects I poured a bunch of time into was [[https://github.com/cel7t/TorusWrapper][Torus Wrapper]], which was an effort to wrap transparent PNGs into tiles that can be tiled to make tiling wallpapers, tiling game assets, et cetera. A high-level overview of how this is done is that the program takes in a transparent png, finds the *biggest* rectangle /inside/ it and then wraps the parts not fitting in the rectangle atop it. Here's an example of a tile created with it:
+[[./images/tile.png]]
+* /Lots/ of Websites
+I worked on a /lot/ of websites during this break; [[https://untyped.ml][my personal site]], [[https://bits-sos.ml][BITS SOS' site]] and the Journal Club's new website.
+I used static site generators to build BITS SOS and JC's sites, as they provide a simple way to theme huge websites; however, these are not free of hiccups.
+Themes often come configured wrong and can cause CSS and images to not load if the paths are not set right. Luckily, there were no other major problems setting up either of them with [[https://gohugo.io][HUGO]].
+For my personal site, I wrote the main site in [[https://clojurescript.org][ClojureScript]] (with [[https://github.com/reagent-project/reagent][Reagent]]) and the blog site in [[https://docs.racket-lang.org/frog/index.html][Frog]]. The blog (this site) is based on [[https://blog.racket-lang.org][Racket lang's blog]].
+* Tiny Improvements to my R6RS Infix Calculator
+I abstracted away a lot of the recursion in my [[https://github.com/cel7t/R6RS-Calculator][R6RS infix expression calculator]] by defining a new macro to handle functions that iterate over a carry-forwarded list and adding the Clojure thread-first macro (->). I planned on implementing something called the /Nestedness Theorem/, which is that /the rightmost open paren is always safe to evaluate/. However, my current approach is more-or-less similar to this, hence I did not rewrite it. I also added additional error checking; the program now checks if parens are balanced.
+* Adding a DDNS to my Home Server
+I was previously connecting to my home server through a static IP, however I realized that my usage needs could be met with a dynamic IP using a dynamic DNS. I thus set up a DDNS on the server and bound its internal IP to ensure that I could boot into it after it rebooted. Home servers are excellent for maintaining private remote project repositories, hosting messenger bots or services like IRC bouncers and testing out dynamic websites.
