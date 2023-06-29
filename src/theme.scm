@@ -69,8 +69,6 @@
              (head
               (meta (@ (charset "utf-8")))
               (title ,(string-append "(" (kebabify title) " . " (site-title site) ")"))
-              ;; (link (@ (rel "me")
-              ;;          (href "mailto:shahsarthakw@gmail.com")))
               ,(stylesheet "reset")
               ,(stylesheet "fonts")
               ,(stylesheet "blog"))
@@ -85,7 +83,9 @@
                    (footer (@ (class "text-center"))
                            (p (@ (class "copyright"))
                               "© 2023 Sarthak Shah • Built with "
-															,(link "Haunt" "https://dthompson.us/projects/haunt.html"))
+                              ,(link "Haunt" "https://dthompson.us/projects/haunt.html"))
+                           (link (@ (rel "me")
+                                    (href "mailto:shahsarthakw@gmail.com")))
                            (p (@ (class "copyright"))
                               ,%cc-by-sa-button
                               ,%emacs-button
