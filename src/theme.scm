@@ -69,6 +69,8 @@
              (head
               (meta (@ (charset "utf-8")))
               (title ,(string-append "(" (kebabify title) " . " (site-title site) ")"))
+              (script (@ (type "module")
+                         (src "https://esm.run/seia")))
               ,(stylesheet "reset")
               ,(stylesheet "fonts")
               ,(stylesheet "blog"))
@@ -80,6 +82,7 @@
                             (li ,(link "#:about" "/about.html"))
                             (li ,(link "#:posts" "/index.html"))))
                    ,body
+                   (s-e-i-a) 
                    (footer (@ (class "text-center"))
                            (p (@ (class "copyright"))
                               "© 2023 Sarthak Shah • Built with "
