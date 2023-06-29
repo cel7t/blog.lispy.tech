@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>(blog . (lispy . tech))</title><id>https://blog.lispy.tech/feeds/tags/GSoC.xml</id><subtitle>Tag: GSoC</subtitle><updated>2023-06-29T23:39:56Z</updated><link href="blog.lispy.tech/feeds/tags/GSoC.xml" rel="self" /><link href="blog.lispy.tech" /><entry><title>Parameterized Packages: An Update</title><id>https://blog.lispy.tech/parameterized-packages-an-update.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-06-22T13:40:00Z</updated><link href="https://blog.lispy.tech/parameterized-packages-an-update.html" rel="alternate" /><summary type="html">&lt;p&gt;
+I started work on adding &lt;a href=&quot;https://guix.gnu.org/blog/2023/parameterized-packages-for-gnu-guix/&quot;&gt;Parameterized Packages&lt;/a&gt; to GNU Guix 3 weeks ago, and this post is a short status update on the things I've done so far.
+&lt;/p&gt;&lt;div id=&quot;outline-container-org9f84998&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org9f84998&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;1.&lt;/span&gt; Summary of additions&lt;/h2&gt;
+&lt;div id=&quot;text-1&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I have written
+&lt;/p&gt;
+&lt;ul class=&quot;org-ul&quot;&gt;
+&lt;li&gt;Record types for parameters&lt;/li&gt;
+&lt;li&gt;Processors for boolean, non-negative parameters&lt;/li&gt;
+&lt;li&gt;Macros for using parameters inside package definitions&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+I started my work by writing draft parsers that acted on S-expressions, before moving on to records.
+The parameterization process follows 3 phases:
+&lt;/p&gt;
+&lt;ol class=&quot;org-ol&quot;&gt;
+&lt;li&gt;Reading values from the parameter-spec record&lt;/li&gt;
+&lt;li&gt;Resolving the values against user-input, and returning a final parameter list&lt;/li&gt;
+&lt;li&gt;Applying transforms and macros in accordance with the final parameter list&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+The parsers can currently resolve &lt;b&gt;boolean&lt;/b&gt; and &lt;b&gt;non-negative&lt;/b&gt; parameters.
+This means that parameters can either be &lt;b&gt;on&lt;/b&gt; or &lt;b&gt;off&lt;/b&gt;, and the parser does &lt;b&gt;not&lt;/b&gt; automatically assume that &lt;i&gt;parameter!&lt;/i&gt; implies &lt;code&gt;(not parameter)&lt;/code&gt;. I am now working on adding support for enumerable parameters (i.e. parameters with multiple values which are not just on and off) and adding support for negation of boolean parameters.
+I next wrote Guix-style &lt;a href=&quot;https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/define_002drecord_002dtype-_0028SRFI-9_0029.html&quot;&gt;record types&lt;/a&gt; for parameters, parameter types and parameter specification. I also wrote sanitizers and macros to make it convenient to input values in these records, as the code otherwise gets a bit boilerplate-y.
+I then ported the previously written parsers to these newly made records, and also wrote a few macros that let you use parameters inside special &lt;code&gt;if&lt;/code&gt; and &lt;code&gt;cond&lt;/code&gt;-style expressions inside the package definition to have conditional options for fields depending on if one or all of the required parameters are switched on.
+Next I wrote a macro &lt;code&gt;package-with-parameters&lt;/code&gt; that returns a package definition with the default parameter transforms applied. This means that if by default my package uses two parameters &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt;, the macro will return the package with both their parameter transforms applied to it.
+Lastly, I wrote a modified &lt;code&gt;modify-inputs&lt;/code&gt; macro that accepts parameters as conditions for the traditional modify inputs actions.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org864c9d5&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org864c9d5&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;2.&lt;/span&gt; Illustrative example&lt;/h2&gt;
+&lt;div id=&quot;text-2&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+The following code builds Guile from the git source.
+Please keep in mind that the syntax is still heavily subject to change, however the underlying mechanisms will remain consistent.
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;  &lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #af85ff; font-weight: bold;&quot;&gt;define-public&lt;/span&gt; &lt;span style=&quot;color: #e580ea;&quot;&gt;guile-parameterized&lt;/span&gt;
+         &lt;span style=&quot;color: #3f95f6;&quot;&gt;(&lt;/span&gt;package-with-parameters
+     &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;inherit guile-3.0&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;name &lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;guile-parameterized&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;properties
+       `&lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;,&lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;parameter-spec-property
+      &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;local &lt;span style=&quot;color: #ff5a7a;&quot;&gt;(&lt;/span&gt;list
+         &lt;span style=&quot;color: #6aad0f;&quot;&gt;(&lt;/span&gt;package-parameter
+           &lt;span style=&quot;color: #bf9032;&quot;&gt;(&lt;/span&gt;name &lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;git&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #bf9032;&quot;&gt;)&lt;/span&gt;
+           &lt;span style=&quot;color: #bf9032;&quot;&gt;(&lt;/span&gt;transforms
+             &lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;build-system/transform-match
+               &lt;span style=&quot;color: #3f95f6;&quot;&gt;(&lt;/span&gt;_ -&amp;gt;
+            &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;with-git-url .
+&lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;guile-parameterized=https://git.savannah.gnu.org/git/guile.git&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3f95f6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bf9032;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6aad0f;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ff5a7a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;defaults '&lt;span style=&quot;color: #ff5a7a;&quot;&gt;(&lt;/span&gt;git&lt;span style=&quot;color: #ff5a7a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;use-transforms '&lt;span style=&quot;color: #ff5a7a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6aad0f;&quot;&gt;(&lt;/span&gt;git . #t&lt;span style=&quot;color: #6aad0f;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ff5a7a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;inputs &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;parameter/modify-inputs &lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;package-inputs guile-3.0&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;'git &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append autoconf&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+                    &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append automake&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+                    &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append libtool&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+                    &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append gnu-gettext&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+                    &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append flex&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+                    &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append gperf&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+                    &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;append texinfo&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;arguments &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append
+            &lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;parameter/if 'git
+        &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;list &lt;span style=&quot;color: #d369af; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt; #~'&lt;span style=&quot;color: #ff5a7a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #ff5a7a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;
+              '&lt;span style=&quot;color: #af85ff;&quot;&gt;()&lt;/span&gt;&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;package-arguments guile-3.0&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3f95f6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+The &lt;code&gt;package-with-parameters&lt;/code&gt; macro takes in a package definition and gets the default parameter alist from it, and applies transformations according to it.
+Here we're defining a version of guile that inherits guile code and adds a &lt;code&gt;parameter-spec&lt;/code&gt; property.
+The &lt;code&gt;parameter-spec-property&lt;/code&gt; takes a &lt;code&gt;parameter-spec&lt;/code&gt; definition and returns it in the property format expected by the &lt;code&gt;package&lt;/code&gt; record.
+Inside the &lt;code&gt;parameter-spec&lt;/code&gt; definition, we start by defining &lt;code&gt;local&lt;/code&gt; parameters. These parameters are only available to the package, and override any global parameters with the same name.
+This overriding feature will make parameter specifications resilient to globalization of previously local parameters, and also make it possible to globally declare what local parameters you'd like to access across packages.
+The name field of the parameter record accepts both strings and symbols, but when referring to a parameter in other fields one must use a symbol.
+The transforms field of the parameter record takes a hash-table of build systems mapped to a sequence of transforms.
+I have written a handy macro called &lt;code&gt;build-system/transform-match&lt;/code&gt; that takes in a list of lists of the form &lt;code&gt;(build-systems -&amp;gt; transforms ...)&lt;/code&gt; and returns the expected value to the parameter.
+You can use a &lt;code&gt;_&lt;/code&gt; to match all build systems, provide one build system or provide a list of build systems. Having &lt;code&gt;_&lt;/code&gt; is particularly useful for &lt;i&gt;local&lt;/i&gt; definitions as their transforms obviously apply to their package's build system.
+The transforms follow the usual cons cell syntax used when &lt;a href=&quot;https://guix.gnu.org/manual/en/html_node/Defining-Package-Variants.html&quot;&gt;defining package variants&lt;/a&gt;.
+Next we have the &lt;code&gt;defaults&lt;/code&gt; field, which takes a list of parameters which are expected to be switched on by default.
+Lastly, we have the &lt;code&gt;use-transforms&lt;/code&gt; field which takes an alist of the form &lt;code&gt;(parameter . transform)&lt;/code&gt; where if the transform is &lt;code&gt;#t&lt;/code&gt;, the parameter's default transform is used, and otherwise the transform defined there is used. This can save time when writing local parameters as you can define them just by putting a string or symbol with their name in the &lt;code&gt;local&lt;/code&gt; field's list.
+It is important to note that transforms for a given parameter will only be used if the &lt;code&gt;use-transforms&lt;/code&gt; alist contains it.
+Some fields of the parameter-spec record omitted from this example are:
+&lt;/p&gt;
+&lt;ul class=&quot;org-ul&quot;&gt;
+&lt;li&gt;&lt;code&gt;optional&lt;/code&gt;, for declaring global parameters that can optionally be used&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;one-of&lt;/code&gt;, which is a list of lists of parameters of which only one can be used per list&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;required&lt;/code&gt;, which is a list of parameters that are &lt;b&gt;absolutely&lt;/b&gt; required. It exists mostly for global parameters&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;canonical&lt;/code&gt;, which contains &lt;i&gt;canonical combinations&lt;/i&gt;, a proposed feature for solving the substitute problem&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parameter-alist&lt;/code&gt;, (not meant to be modified by the user) contains the final list of active parameters and their values, on or off.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;
+These all come together to make it possible to define an arbitrary combination of parameters in arbitrary states and test them against the parameter-spec to see if they work and apply them if they do.
+The &lt;code&gt;package-with-parameters&lt;/code&gt; macro is proof of this working, it calculates transforms pertaining to default values and applies them to the &lt;code&gt;package&lt;/code&gt; record defined inside it based on the contents of the &lt;code&gt;parameter-spec&lt;/code&gt;.
+If you are just using parameters for conditionals within the package record and have no use for transforms, you do not need to use &lt;code&gt;package-with-parameters&lt;/code&gt;.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org6b8eacf&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org6b8eacf&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;3.&lt;/span&gt; Parametric Conditionals&lt;/h2&gt;
+&lt;div id=&quot;text-3&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I have written a number of conditional macros that check if a given parameter is set to on in the &lt;code&gt;parameter-alist&lt;/code&gt; and update the &lt;code&gt;package&lt;/code&gt; record appropriately.
+&lt;code&gt;parameter/if&lt;/code&gt; and &lt;code&gt;parameter/modify-inputs&lt;/code&gt; have been used in the example above, and below is an explanation of how they work:
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org36a2941&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org36a2941&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.1.&lt;/span&gt; parameter/if&lt;/h3&gt;
+&lt;div id=&quot;text-3-1&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+&lt;code&gt;parameter/if&lt;/code&gt; takes a parameter or a list of parameters and checks if any of them are on.
+If they are, it returns the first expression, but if all of them are off, it returns either nothing or the second expression. It behaves similarly to Guile's &lt;code&gt;if&lt;/code&gt; macro.
+It is being used in this snippet from the &lt;code&gt;guile-parameterized&lt;/code&gt; example:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;inside package definition&lt;/span&gt;
+&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;arguments &lt;span style=&quot;color: #3f95f6;&quot;&gt;(&lt;/span&gt;append
+            &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;parameter/if 'git
+                          &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;list &lt;span style=&quot;color: #d369af; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt; #~'&lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                          '&lt;span style=&quot;color: #1dbfcf;&quot;&gt;()&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;package-arguments guile-3.0&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3f95f6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Here, the arguments field is given a list formed by appending &lt;code&gt;#:make-flags&lt;/code&gt; with the value &lt;code&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/code&gt; if the parameter &lt;code&gt;git&lt;/code&gt; is switched on, or appending an empty list &lt;code&gt;'()&lt;/code&gt; otherwise.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-orgda51a6a&quot; class=&quot;outline-4&quot;&gt;
+&lt;h4 id=&quot;orgda51a6a&quot;&gt;&lt;span class=&quot;section-number-4&quot;&gt;3.1.1.&lt;/span&gt; parameter/if-all&lt;/h4&gt;
+&lt;div id=&quot;text-3-1-1&quot; class=&quot;outline-text-4&quot;&gt;
+&lt;p&gt;
+&lt;code&gt;parameter/if-all&lt;/code&gt; is similar to &lt;code&gt;parameter/if&lt;/code&gt;, but unlike it it requires all parameters in the list to be switched on.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-orgd4211e5&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;orgd4211e5&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.2.&lt;/span&gt; parameter/match&lt;/h3&gt;
+&lt;div id=&quot;text-3-2&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+&lt;code&gt;parameter/match&lt;/code&gt; is somewhat similar to Guile's &lt;code&gt;cond&lt;/code&gt;, but also very different.
+It takes in a set of lists of the form &lt;code&gt;((parameters ...) clauses ...)&lt;/code&gt;, wherein if any in the list of parameters is set to on, the clauses are executed. This behavior is not short-circuiting, and the other lists are checked once one is evaluated regardless of the result.
+A list may be prefixed with &lt;code&gt;all&lt;/code&gt; if all parameters are required to be switched on.
+Alternatively, a &lt;code&gt;_&lt;/code&gt; can be used to match any and all parameters.
+For example, the &lt;code&gt;parameter/if&lt;/code&gt; example above can be rewritten with &lt;code&gt;parameter/match&lt;/code&gt; like this:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;arguments &lt;span style=&quot;color: #3f95f6;&quot;&gt;(&lt;/span&gt;append
+            &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;parameter/match
+             &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;'git &lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;list &lt;span style=&quot;color: #d369af; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt; #~'&lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+             &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;_ '&lt;span style=&quot;color: #df8a5a;&quot;&gt;()&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;package-arguments guile-3.0&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3f95f6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org06bf07a&quot; class=&quot;outline-4&quot;&gt;
+&lt;h4 id=&quot;org06bf07a&quot;&gt;&lt;span class=&quot;section-number-4&quot;&gt;3.2.1.&lt;/span&gt; parameter/match variants&lt;/h4&gt;
+&lt;div id=&quot;text-3-2-1&quot; class=&quot;outline-text-4&quot;&gt;
+&lt;ul class=&quot;org-ul&quot;&gt;
+&lt;li&gt;&lt;code&gt;parameter/match-case&lt;/code&gt; is the same as &lt;code&gt;parameter/match&lt;/code&gt;, but it short-circuits when a matching list is found&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parameter/match-any&lt;/code&gt; a variant of &lt;code&gt;parameter/match&lt;/code&gt; where &lt;code&gt;all&lt;/code&gt; cannot be used&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parameter/match-all&lt;/code&gt; a variant of &lt;code&gt;parameter/match&lt;/code&gt; where &lt;code&gt;all&lt;/code&gt; is the default and only method for evaluating parameters&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parameter/match-case-all&lt;/code&gt; is a variant of &lt;code&gt;parameter/match-case&lt;/code&gt; requiring all parameters to be switched on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org6b1d8a2&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org6b1d8a2&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.3.&lt;/span&gt; parameter/modify-inputs&lt;/h3&gt;
+&lt;div id=&quot;text-3-3&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+The &lt;code&gt;modify-inputs&lt;/code&gt; macro is used very frequently when defining package variants, but due to it being a macro we cannot use &lt;code&gt;parameter/match&lt;/code&gt; inside it to pick arguments.
+Because of this, I have defined a new macro called &lt;code&gt;parameter/modify-inputs&lt;/code&gt; that takes in a list of parameters and a corresponding list of arguments to &lt;code&gt;modify-inputs&lt;/code&gt; that can be used instead of it.
+&lt;code&gt;_&lt;/code&gt; can be used to always execute the clauses, and &lt;code&gt;all&lt;/code&gt; may be used to require all parameters to be on.
+In the example package above, it has been used like this:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;inside the package definition&lt;/span&gt;
+&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;inputs &lt;span style=&quot;color: #3f95f6;&quot;&gt;(&lt;/span&gt;parameter/modify-inputs &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;package-inputs guile-3.0&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;'git &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append autoconf&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                  &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append automake&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                  &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append libtool&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                  &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append gnu-gettext&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                  &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append flex&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                  &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append gperf&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;
+                  &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;append texinfo&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3f95f6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Here, if the parameter &lt;code&gt;git&lt;/code&gt; is switched on, &lt;code&gt;autoconf&lt;/code&gt;, &lt;code&gt;automake&lt;/code&gt;, &lt;code&gt;libtool&lt;/code&gt;, &lt;code&gt;gnu-gettext&lt;/code&gt;, &lt;code&gt;flex&lt;/code&gt;, &lt;code&gt;gperf&lt;/code&gt; and &lt;code&gt;texinfo&lt;/code&gt; are added to the package's inputs. This is quite useful as these inputs are required for building guile from its git source.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgedc1943&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgedc1943&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;4.&lt;/span&gt; Global Parameters&lt;/h2&gt;
+&lt;div id=&quot;text-4&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+The handling of global parameters is an important topic that needs more discussion.
+Right now, the idea is to require all global parameters to be defined in one file and to access them through a hash-table called &lt;code&gt;%global-parameters&lt;/code&gt;.
+To make the process of adding values to this hash-table easier, I've written a macro called &lt;code&gt;define-global-parameter&lt;/code&gt; that takes a parameter definition and makes it global.
+For example, if I wanted to define a global parameter that disables tests for &lt;code&gt;guile-3.0&lt;/code&gt;, I can do it like this:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;define-global-parameter
+  &lt;span style=&quot;color: #3f95f6;&quot;&gt;(&lt;/span&gt;package-parameter
+    &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;name &lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;guile-3.0-tests!&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;description &lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;Disables tests for Guile 3.0&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #e580ea;&quot;&gt;(&lt;/span&gt;transforms
+     &lt;span style=&quot;color: #1dbfcf;&quot;&gt;(&lt;/span&gt;build-system/transforms
+      &lt;span style=&quot;color: #df8a5a;&quot;&gt;(&lt;/span&gt;_ -&amp;gt; &lt;span style=&quot;color: #af85ff;&quot;&gt;(&lt;/span&gt;without-tests . &lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;guile-3.0&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #af85ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #df8a5a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #1dbfcf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e580ea;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3f95f6;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+Now any package that uses this global transform will have &lt;code&gt;guile-3.0&lt;/code&gt;'s tests disabled.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgf46c57c&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgf46c57c&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;5.&lt;/span&gt; Results&lt;/h2&gt;
+&lt;div id=&quot;text-5&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+It is now possible to define a package with parameters and change the parameter-alist to use the parameters.
+Next, I'll be working on parsing negated and enumerated parameters, along with adding support for modify-inputs and package-rewriting in the parameter record itself.
+&lt;/p&gt;
+
+&lt;p&gt;
+Stay tuned for updates, and happy hacking!
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</summary></entry><entry><title>An Introduction to Parameterized Packages</title><id>https://blog.lispy.tech/an-introduction-to-parameterized-packages.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-05-09T02:40:00Z</updated><link href="https://blog.lispy.tech/an-introduction-to-parameterized-packages.html" rel="alternate" /><summary type="html">&lt;p&gt;
+I will be working on bringing Parameterized Packages to &lt;a href=&quot;https://guix.gnu.org&quot;&gt;GNU Guix&lt;/a&gt; this summer as a part of the &lt;a href=&quot;https://summerofcode.withgoogle.com/&quot;&gt;Google Summer of Code&lt;/a&gt; program under the mentorship of Pjotr Prins and Gábor Boskovits.
+This post will go over the basic ideas behind Parameterized Packages, their benefits and how I am planning on implementing them.
+&lt;/p&gt;&lt;div id=&quot;outline-container-org1819726&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org1819726&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;1.&lt;/span&gt; What are Parameterized Packages?&lt;/h2&gt;
+&lt;div id=&quot;text-1&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+Parameterized packages will provide users with a simple way to configure many aspects of packages, à la Gentoo USE flags.
+&lt;/p&gt;
+
+&lt;p&gt;
+GNU Guix is the only GNU/Linux distribution capable of achieving a &lt;a href=&quot;https://guix.gnu.org/en/blog/2023/the-full-source-bootstrap-building-from-source-all-the-way-down/&quot;&gt;full-source bootstrap&lt;/a&gt;, and this comes with many unique advantages.
+Every package in Guix can be built from source, and as a result it is possible to configure a wide variety of options for each package that just aren't exposed on binary-based distributions using &lt;a href=&quot;https://guix.gnu.org/manual/en/html_node/Package-Transformation-Options.html&quot;&gt;Package Transformations&lt;/a&gt;. While package transformations are extremely powerful, they require some experience with packaging software for Guix and are generally expected to be used by power users for applications such as &lt;a href=&quot;https://hpc.guix.info&quot;&gt;High-Performance Computing&lt;/a&gt;.
+&lt;/p&gt;
+
+&lt;p&gt;
+Parameterized Packages aim to not only bring the benefits of package transformations to all users, but to also make it possible to globally specify some aspects to include or exclude from packages similar to &lt;a href=&quot;https://wiki.gentoo.org/wiki/USE_flag&quot;&gt;Gentoo's USE flags&lt;/a&gt;.
+&lt;/p&gt;
+
+&lt;p&gt;
+Some of the benefits of Parameterized Packages are:
+&lt;/p&gt;
+&lt;ol class=&quot;org-ol&quot;&gt;
+&lt;li&gt;Significantly smaller binaries&lt;/li&gt;
+&lt;li&gt;More fine-grained control over the entire system&lt;/li&gt;
+&lt;li&gt;Access to additional features only accessible through compile-time options&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+Among many more.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org88364ae&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org88364ae&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;2.&lt;/span&gt; Example Usage&lt;/h2&gt;
+&lt;div id=&quot;text-2&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+Here is an example config.scm file with parameters:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #aa8da7;&quot;&gt;use-modules&lt;/span&gt; &lt;span style=&quot;color: #959;&quot;&gt;(&lt;/span&gt;gnu parameters&lt;span style=&quot;color: #959;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;)&lt;/span&gt;
+
+&lt;span style=&quot;color: #a9f;&quot;&gt;(&lt;/span&gt;operating-system
+  &lt;span style=&quot;color: #7078a2;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #505f89;&quot;&gt;...&lt;/span&gt;
+  &lt;span style=&quot;color: #959;&quot;&gt;(&lt;/span&gt;parameters '&lt;span style=&quot;color: #535;&quot;&gt;(&lt;/span&gt;x11 wayland! alsa&lt;span style=&quot;color: #535;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #959;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+In this example, the user wants to build &lt;i&gt;all&lt;/i&gt; the packages in the system with support for X11 and alsa, and without Wayland support. 
+Note that all parameter names are lowercase, and that &lt;code&gt;!&lt;/code&gt; indicates the &lt;i&gt;negation&lt;/i&gt; of a parameter.
+&lt;/p&gt;
+
+&lt;p&gt;
+Another possible way of using parameters is through the command-line interface, for example
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-bash&quot;&gt;guix build emacs --with-parameter=&lt;span style=&quot;color: #8e8eb8;&quot;&gt;emacs&lt;/span&gt;=&lt;span style=&quot;color: #a0adee;&quot;&gt;&amp;quot;png!&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+This will build Emacs &lt;b&gt;without&lt;/b&gt; PNG support.
+The user interface is very much subject to change, and I would love input from Guix users on the same.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orge3440c9&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orge3440c9&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;3.&lt;/span&gt; Example Usage for Package Maintainers&lt;/h2&gt;
+&lt;div id=&quot;text-3&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+Package definitions &lt;i&gt;with&lt;/i&gt; parameters will look like this:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #aa8da7;&quot;&gt;define-public&lt;/span&gt; &lt;span style=&quot;color: #8083be;&quot;&gt;emacs&lt;/span&gt;
+  &lt;span style=&quot;color: #959;&quot;&gt;(&lt;/span&gt;package
+    &lt;span style=&quot;color: #535;&quot;&gt;(&lt;/span&gt;parameters &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #aa8da7;&quot;&gt;and&lt;/span&gt;
+      &lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;optional jit^ png^ alsa^&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;one-of motif gtk^ x11!*&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #535;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #535;&quot;&gt;(&lt;/span&gt;parameter-transforms
+      &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;x11!&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;
+       &lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;changes-to-be-made-to-the-package&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #535;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #959;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+The &lt;code&gt;^&lt;/code&gt; indicates that inclusion of a certain parameter is &lt;i&gt;default&lt;/i&gt;. This is very important as if parameters are not specified or if a package is a dependency of another package without parameters, the &lt;i&gt;default&lt;/i&gt; version is used.
+&lt;code&gt;(optional ...)&lt;/code&gt; is syntactic sugar for &lt;code&gt;(p-or ... #t)&lt;/code&gt; and &lt;code&gt;(one-of ...)&lt;/code&gt; translates to &lt;code&gt;(p-xor ...)&lt;/code&gt;. Note that while &lt;code&gt;p-or&lt;/code&gt; behaves like the regular &lt;code&gt;or&lt;/code&gt; logic gate, it does &lt;b&gt;not&lt;/b&gt; short circuit.
+The &lt;code&gt;(and ...)&lt;/code&gt; within &lt;code&gt;(parameters ...)&lt;/code&gt; &lt;b&gt;must&lt;/b&gt; resolve to &lt;code&gt;#t&lt;/code&gt;, otherwise the default version of the package will be used.
+When a &lt;code&gt;*&lt;/code&gt; is added to a parameter, it means that a generic transform cannot be used- every build system has &lt;i&gt;standard&lt;/i&gt; transforms for parameters, and if your package requires a non-standard transform when the given parameters is used this is what you use to specify that. In the &lt;code&gt;(package-transforms ...)&lt;/code&gt; macro each of these non-standard transforms is specified. Package-transforms can also contain specific cases like &lt;code&gt;(and x11! alsa)&lt;/code&gt; if the transforms for both do not compose.
+&lt;/p&gt;
+
+&lt;p&gt;
+Alternatively, the following arguably simpler syntax may be employed:
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #aa8da7;&quot;&gt;define-public&lt;/span&gt; &lt;span style=&quot;color: #8083be;&quot;&gt;emacs&lt;/span&gt;
+  &lt;span style=&quot;color: #959;&quot;&gt;(&lt;/span&gt;package
+    &lt;span style=&quot;color: #535;&quot;&gt;(&lt;/span&gt;let-parameters
+      &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #aa8da7;&quot;&gt;and&lt;/span&gt;
+        &lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;optional jit^ png^ alsa^&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;
+        &lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;one-of motif gtk^ x11!&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;p-if &lt;span style=&quot;color: #636;&quot;&gt;(&lt;/span&gt;not jit&lt;span style=&quot;color: #636;&quot;&gt;)&lt;/span&gt;
+        &lt;span style=&quot;color: #636;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;some-code-for-the-no-jit-version&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #636;&quot;&gt;]&lt;/span&gt;
+        &lt;span style=&quot;color: #636;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;same-code-for-the-jit-version&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #636;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #7078a2;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #505f89;&quot;&gt;more package definition code ...&lt;/span&gt;
+      &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;p-case
+        &lt;span style=&quot;color: #636;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;motif gtk&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;
+         &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;code-for-motif-and-gtk-version&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #636;&quot;&gt;]&lt;/span&gt;
+        &lt;span style=&quot;color: #636;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;x11!&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;
+         &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;code-for-motif-version&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #636;&quot;&gt;]&lt;/span&gt;
+        &lt;span style=&quot;color: #636;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #aa8da7;&quot;&gt;else&lt;/span&gt;
+         &lt;span style=&quot;color: #639;&quot;&gt;(&lt;/span&gt;some-default-code&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #636;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #639;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #535;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #959;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a9f;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;
+This has the benefit of seamlessly being integrated into existing code. Not that the else clauses in &lt;code&gt;p-if&lt;/code&gt; and &lt;code&gt;p-case&lt;/code&gt; are optional. There will be a few more constructs like these ones, for example &lt;code&gt;p-cond&lt;/code&gt;. I will be adding more based on community feedback.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgde41dbd&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgde41dbd&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;4.&lt;/span&gt; What if a package record does not contain the parameter value?&lt;/h2&gt;
+&lt;div id=&quot;text-4&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+In the instance that parameter values are not specified, the package will be used in its default state by all of the packages depending on it. &lt;i&gt;In general,&lt;/i&gt; parameters propogate to dependencies if a valid configuration can be acheived with them, and if this is not possible the default state of the package is used. This will help with the gradual adoption of package parameters, as not every package will have to specify parameters and at the same time the packages specifying parameters will be able to use them even if their dependencies do not have the given parameter.
+&lt;/p&gt;
+
+
+&lt;p&gt;
+One awesome feature of this arrangement is that a user could have two packages with conflicting parameters but they would both work on the system thanks to Guix building both versions of dependencies. This would &lt;b&gt;not&lt;/b&gt; work on imperative package managers with similar functionality. For example if a music player application depends on mpd built with pulseaudio while another depends on it built with jack, Guix will create two versions of mpd, one built with each so that both of these packages may coexist.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org7c7afb1&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org7c7afb1&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;5.&lt;/span&gt; More on parameter symbols&lt;/h2&gt;
+&lt;div id=&quot;text-5&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+&lt;i&gt;Fairly generic&lt;/i&gt; options such as x11, gcc or en&lt;sub&gt;us&lt;/sub&gt; (locale) will be accepted as parameters, and all of them will have to be &lt;i&gt;lowercase&lt;/i&gt; without exception. Parameters, along with their converses, will have pre-defined &lt;i&gt;standard transforms&lt;/i&gt; for every build system they are valid for. Note that having too many parameters in a given package will lead to combinatorial explosion of states, and thus it is best to limit the number of parameters to a manageable amount. I will be attempting to add 10~20 such parameter symbols after finishing this project.
+&lt;/p&gt;
+
+&lt;p&gt;
+Users will be able to specify per-user global package parameters by creating a file at &lt;code&gt;~/.config/guix/parameters.scm&lt;/code&gt; containing the parameter symbols that all their packages will be built with. Syntax could also be created to allow for per-package fine-tuning of parameters in this file.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org5b04327&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org5b04327&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;6.&lt;/span&gt; Conclusion&lt;/h2&gt;
+&lt;div id=&quot;text-6&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+Parameterized Packages have the potential to add more functionality to GNU Guix for all users, however they will require the &lt;b&gt;feedback&lt;/b&gt; and support of the entire Guix community. I would immensely appreciate any kind of suggestions and comments in the new thread on Parameterized Packages which can be found in the mailing list, especially suggestions on what parameter symbols users would like to use.
+&lt;/p&gt;
+
+&lt;p&gt;
+Happy Hacking!
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</summary></entry></feed>

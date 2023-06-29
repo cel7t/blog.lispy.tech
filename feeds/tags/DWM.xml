@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>(blog . (lispy . tech))</title><id>https://blog.lispy.tech/feeds/tags/DWM.xml</id><subtitle>Tag: DWM</subtitle><updated>2023-06-29T23:39:56Z</updated><link href="blog.lispy.tech/feeds/tags/DWM.xml" rel="self" /><link href="blog.lispy.tech" /><entry><title>Running a Patched DWM on GNU Guix</title><id>https://blog.lispy.tech/running-a-patched-dwm-on-gnu-guix.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-06-12T13:37:00Z</updated><link href="https://blog.lispy.tech/running-a-patched-dwm-on-gnu-guix.html" rel="alternate" /><summary type="html">&lt;p&gt;
+If like me you use a lot of patches with dwm, you probably use &lt;a href=&quot;https://github.com/bakkeby/dwm-flexipatch&quot;&gt;dwm-flexipatch&lt;/a&gt; for configuring dwm. You probably also have an existing build of dwm with a lot of customizations in &lt;code&gt;config.def.h&lt;/code&gt;. Research online might lead you to the conclusion that you need to set up a git repository and a guix channel with your dwm folder to make it work, but that's not necessary at all. In this post I'll go over how I got my dwm-flexipatch build to work on GNU Guix without any of that.
+&lt;/p&gt;&lt;p&gt;
+We want to start by making a directory for our dwm folder and build file.
+&lt;/p&gt;&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-bash&quot;&gt;mkdir DWM_MODULE
+&lt;/pre&gt;
+&lt;/div&gt;&lt;p&gt;
+Next, copy your dwm folder here.
+&lt;/p&gt;&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-bash&quot;&gt;cp -r /path/to/dwm DWM_MODULE/
+&lt;/pre&gt;
+&lt;/div&gt;&lt;p&gt;
+Now, this step is &lt;b&gt;very important&lt;/b&gt;:
+run &lt;code&gt;make clean&lt;/code&gt; once in the dwm folder, otherwise guix will run into a RUNPATH error during the build phase.
+&lt;/p&gt;&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-bash&quot;&gt;&lt;span style=&quot;color: #f78fe7;&quot;&gt;cd&lt;/span&gt; DWM_MODULE/dwm
+make clean
+&lt;span style=&quot;color: #f78fe7;&quot;&gt;cd&lt;/span&gt; ..
+&lt;/pre&gt;
+&lt;/div&gt;&lt;p&gt;
+And finally, inside the &lt;code&gt;DWM_MODULE&lt;/code&gt; directory create a file named &lt;code&gt;USER-dwm.scm&lt;/code&gt;, where USER can be your username or anything else.
+Then put this in the file:
+&lt;/p&gt;&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #b6a0ff;&quot;&gt;define-module&lt;/span&gt; &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6ae4b9;&quot;&gt;USER-dwm&lt;/span&gt;&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #ffffff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #b6a0ff;&quot;&gt;use-modules&lt;/span&gt; &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;gnu packages suckless&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;
+             &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;gnu packages xorg&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;
+             &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;gnu packages image&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;
+             &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;guix gexp&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;
+             &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;guix packages&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;)&lt;/span&gt;
+
+&lt;span style=&quot;color: #ffffff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #b6a0ff;&quot;&gt;define-public&lt;/span&gt; &lt;span style=&quot;color: #feacd0;&quot;&gt;USER-dwm&lt;/span&gt;
+  &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;package
+    &lt;span style=&quot;color: #00eff0;&quot;&gt;(&lt;/span&gt;inherit dwm&lt;span style=&quot;color: #00eff0;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #00eff0;&quot;&gt;(&lt;/span&gt;name &lt;span style=&quot;color: #79a8ff;&quot;&gt;&amp;quot;USER-dwm&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #00eff0;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #00eff0;&quot;&gt;(&lt;/span&gt;inputs &lt;span style=&quot;color: #ff6b55;&quot;&gt;(&lt;/span&gt;modify-inputs &lt;span style=&quot;color: #efef00;&quot;&gt;(&lt;/span&gt;package-inputs dwm&lt;span style=&quot;color: #efef00;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #efef00;&quot;&gt;(&lt;/span&gt;append libxcb&lt;span style=&quot;color: #efef00;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #efef00;&quot;&gt;(&lt;/span&gt;append imlib2&lt;span style=&quot;color: #efef00;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ff6b55;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00eff0;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #00eff0;&quot;&gt;(&lt;/span&gt;source &lt;span style=&quot;color: #ff6b55;&quot;&gt;(&lt;/span&gt;local-file &lt;span style=&quot;color: #79a8ff;&quot;&gt;&amp;quot;dwm&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #f78fe7;&quot;&gt;#:recursive?&lt;/span&gt; #t&lt;span style=&quot;color: #ff6b55;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00eff0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;)&lt;/span&gt;
+
+USER-dwm
+&lt;/pre&gt;
+&lt;/div&gt;&lt;p&gt;
+Here I have added &lt;code&gt;libxcb&lt;/code&gt; and &lt;code&gt;imlib2&lt;/code&gt; to inputs as I have patches requiring them.
+If you are using a patch requiring some other library, you can add it by putting another &lt;code&gt;(append libname)&lt;/code&gt; statement in the &lt;code&gt;modify-inputs&lt;/code&gt; expression.
+The &lt;code&gt;source&lt;/code&gt; expression searches for a folder named &lt;code&gt;dwm&lt;/code&gt; in the file's pwd and uses its contents as the package's source.
+Running &lt;code&gt;guix package -f USER-dwm.scm&lt;/code&gt; will now install your flexipatched dwm.
+If you want to add this to your system configuration, modify your &lt;code&gt;config.scm&lt;/code&gt; like this:
+&lt;/p&gt;&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #b6a0ff;&quot;&gt;use-modules&lt;/span&gt; &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;USER-dwm&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt; ...&lt;span style=&quot;color: #ffffff;&quot;&gt;)&lt;/span&gt;
+
+&lt;span style=&quot;color: #ffffff;&quot;&gt;(&lt;/span&gt;operating-system
+  ...
+  &lt;span style=&quot;color: #ff66ff;&quot;&gt;(&lt;/span&gt;packages &lt;span style=&quot;color: #00eff0;&quot;&gt;(&lt;/span&gt;list USER-dwm ...&lt;span style=&quot;color: #00eff0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ff66ff;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;&lt;p&gt;
+And now, reconfigure the system with the following command:
+&lt;/p&gt;&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-bash&quot;&gt;guix system reconfigure /path/to/config.scm -L $&lt;span style=&quot;color: #00d3d0;&quot;&gt;HOME&lt;/span&gt;/DWM_MODULE
+&lt;/pre&gt;
+&lt;/div&gt;&lt;p&gt;
+If you don't want to run the reconfigure command with &lt;code&gt;-L&lt;/code&gt; every time, add &lt;code&gt;$HOME/DWM_MODULE&lt;/code&gt; to &lt;code&gt;GUIX_PACKAGE_PATH&lt;/code&gt;.
+&lt;/p&gt;&lt;p&gt;
+Here's a customary screencap:
+&lt;img src=&quot;../images/dwm-screenshot.png&quot; alt=&quot;dwm-screenshot.png&quot; /&gt;
+&lt;/p&gt;</summary></entry></feed>

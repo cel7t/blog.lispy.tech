@@ -1,0 +1,148 @@
+<!DOCTYPE html><head><meta charset="utf-8" /><title>(an-introduction-to-parameterized-packages . (blog . (lispy . tech)))</title><link rel="me" href="mailto:shahsarthakw@gmail.com" /><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul></div><h1 class="title">An Introduction to Parameterized Packages</h1><div class="date">May 09, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Guix.xml">Guix</a></li><li>#:<a href="/feeds/tags/GSoC.xml">GSoC</a></li><li>#:<a href="/feeds/tags/Scheme.xml">Scheme</a></li></ul></div><div class="post"><p>
+I will be working on bringing Parameterized Packages to <a href="https://guix.gnu.org">GNU Guix</a> this summer as a part of the <a href="https://summerofcode.withgoogle.com/">Google Summer of Code</a> program under the mentorship of Pjotr Prins and Gábor Boskovits.
+This post will go over the basic ideas behind Parameterized Packages, their benefits and how I am planning on implementing them.
+</p><div id="outline-container-org1819726" class="outline-2">
+<h2 id="org1819726"><span class="section-number-2">1.</span> What are Parameterized Packages?</h2>
+<div id="text-1" class="outline-text-2">
+<p>
+Parameterized packages will provide users with a simple way to configure many aspects of packages, à la Gentoo USE flags.
+</p>
+
+<p>
+GNU Guix is the only GNU/Linux distribution capable of achieving a <a href="https://guix.gnu.org/en/blog/2023/the-full-source-bootstrap-building-from-source-all-the-way-down/">full-source bootstrap</a>, and this comes with many unique advantages.
+Every package in Guix can be built from source, and as a result it is possible to configure a wide variety of options for each package that just aren't exposed on binary-based distributions using <a href="https://guix.gnu.org/manual/en/html_node/Package-Transformation-Options.html">Package Transformations</a>. While package transformations are extremely powerful, they require some experience with packaging software for Guix and are generally expected to be used by power users for applications such as <a href="https://hpc.guix.info">High-Performance Computing</a>.
+</p>
+
+<p>
+Parameterized Packages aim to not only bring the benefits of package transformations to all users, but to also make it possible to globally specify some aspects to include or exclude from packages similar to <a href="https://wiki.gentoo.org/wiki/USE_flag">Gentoo's USE flags</a>.
+</p>
+
+<p>
+Some of the benefits of Parameterized Packages are:
+</p>
+<ol class="org-ol">
+<li>Significantly smaller binaries</li>
+<li>More fine-grained control over the entire system</li>
+<li>Access to additional features only accessible through compile-time options</li>
+</ol>
+<p>
+Among many more.
+</p>
+</div>
+</div><div id="outline-container-org88364ae" class="outline-2">
+<h2 id="org88364ae"><span class="section-number-2">2.</span> Example Usage</h2>
+<div id="text-2" class="outline-text-2">
+<p>
+Here is an example config.scm file with parameters:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme"><span style="color: #a9f;">(</span><span style="color: #aa8da7;">use-modules</span> <span style="color: #959;">(</span>gnu parameters<span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+
+<span style="color: #a9f;">(</span>operating-system
+  <span style="color: #7078a2;">;; </span><span style="color: #505f89;">...</span>
+  <span style="color: #959;">(</span>parameters '<span style="color: #535;">(</span>x11 wayland! alsa<span style="color: #535;">)</span><span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+</pre>
+</div>
+<p>
+In this example, the user wants to build <i>all</i> the packages in the system with support for X11 and alsa, and without Wayland support. 
+Note that all parameter names are lowercase, and that <code>!</code> indicates the <i>negation</i> of a parameter.
+</p>
+
+<p>
+Another possible way of using parameters is through the command-line interface, for example
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">guix build emacs --with-parameter=<span style="color: #8e8eb8;">emacs</span>=<span style="color: #a0adee;">&quot;png!&quot;</span>
+</pre>
+</div>
+<p>
+This will build Emacs <b>without</b> PNG support.
+The user interface is very much subject to change, and I would love input from Guix users on the same.
+</p>
+</div>
+</div><div id="outline-container-orge3440c9" class="outline-2">
+<h2 id="orge3440c9"><span class="section-number-2">3.</span> Example Usage for Package Maintainers</h2>
+<div id="text-3" class="outline-text-2">
+<p>
+Package definitions <i>with</i> parameters will look like this:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme"><span style="color: #a9f;">(</span><span style="color: #aa8da7;">define-public</span> <span style="color: #8083be;">emacs</span>
+  <span style="color: #959;">(</span>package
+    <span style="color: #535;">(</span>parameters <span style="color: #639;">(</span><span style="color: #aa8da7;">and</span>
+      <span style="color: #636;">(</span>optional jit^ png^ alsa^<span style="color: #636;">)</span>
+      <span style="color: #636;">(</span>one-of motif gtk^ x11!*<span style="color: #636;">)</span><span style="color: #639;">)</span><span style="color: #535;">)</span>
+    <span style="color: #535;">(</span>parameter-transforms
+      <span style="color: #639;">(</span><span style="color: #636;">(</span>x11!<span style="color: #636;">)</span>
+       <span style="color: #636;">(</span>changes-to-be-made-to-the-package<span style="color: #636;">)</span><span style="color: #639;">)</span><span style="color: #535;">)</span><span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+</pre>
+</div>
+<p>
+The <code>^</code> indicates that inclusion of a certain parameter is <i>default</i>. This is very important as if parameters are not specified or if a package is a dependency of another package without parameters, the <i>default</i> version is used.
+<code>(optional ...)</code> is syntactic sugar for <code>(p-or ... #t)</code> and <code>(one-of ...)</code> translates to <code>(p-xor ...)</code>. Note that while <code>p-or</code> behaves like the regular <code>or</code> logic gate, it does <b>not</b> short circuit.
+The <code>(and ...)</code> within <code>(parameters ...)</code> <b>must</b> resolve to <code>#t</code>, otherwise the default version of the package will be used.
+When a <code>*</code> is added to a parameter, it means that a generic transform cannot be used- every build system has <i>standard</i> transforms for parameters, and if your package requires a non-standard transform when the given parameters is used this is what you use to specify that. In the <code>(package-transforms ...)</code> macro each of these non-standard transforms is specified. Package-transforms can also contain specific cases like <code>(and x11! alsa)</code> if the transforms for both do not compose.
+</p>
+
+<p>
+Alternatively, the following arguably simpler syntax may be employed:
+</p>
+<div class="org-src-container">
+<pre class="src src-scheme"><span style="color: #a9f;">(</span><span style="color: #aa8da7;">define-public</span> <span style="color: #8083be;">emacs</span>
+  <span style="color: #959;">(</span>package
+    <span style="color: #535;">(</span>let-parameters
+      <span style="color: #639;">(</span><span style="color: #aa8da7;">and</span>
+        <span style="color: #636;">(</span>optional jit^ png^ alsa^<span style="color: #636;">)</span>
+        <span style="color: #636;">(</span>one-of motif gtk^ x11!<span style="color: #636;">)</span><span style="color: #639;">)</span>
+      <span style="color: #639;">(</span>p-if <span style="color: #636;">(</span>not jit<span style="color: #636;">)</span>
+        <span style="color: #636;">[</span><span style="color: #639;">(</span>some-code-for-the-no-jit-version<span style="color: #639;">)</span><span style="color: #636;">]</span>
+        <span style="color: #636;">[</span><span style="color: #639;">(</span>same-code-for-the-jit-version<span style="color: #639;">)</span><span style="color: #636;">]</span><span style="color: #639;">)</span>
+      <span style="color: #7078a2;">;; </span><span style="color: #505f89;">more package definition code ...</span>
+      <span style="color: #639;">(</span>p-case
+        <span style="color: #636;">[</span><span style="color: #639;">(</span>motif gtk<span style="color: #639;">)</span>
+         <span style="color: #639;">(</span>code-for-motif-and-gtk-version<span style="color: #639;">)</span><span style="color: #636;">]</span>
+        <span style="color: #636;">[</span><span style="color: #639;">(</span>x11!<span style="color: #639;">)</span>
+         <span style="color: #639;">(</span>code-for-motif-version<span style="color: #639;">)</span><span style="color: #636;">]</span>
+        <span style="color: #636;">[</span><span style="color: #aa8da7;">else</span>
+         <span style="color: #639;">(</span>some-default-code<span style="color: #639;">)</span><span style="color: #636;">]</span><span style="color: #639;">)</span><span style="color: #535;">)</span><span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+</pre>
+</div>
+<p>
+This has the benefit of seamlessly being integrated into existing code. Not that the else clauses in <code>p-if</code> and <code>p-case</code> are optional. There will be a few more constructs like these ones, for example <code>p-cond</code>. I will be adding more based on community feedback.
+</p>
+</div>
+</div><div id="outline-container-orgde41dbd" class="outline-2">
+<h2 id="orgde41dbd"><span class="section-number-2">4.</span> What if a package record does not contain the parameter value?</h2>
+<div id="text-4" class="outline-text-2">
+<p>
+In the instance that parameter values are not specified, the package will be used in its default state by all of the packages depending on it. <i>In general,</i> parameters propogate to dependencies if a valid configuration can be acheived with them, and if this is not possible the default state of the package is used. This will help with the gradual adoption of package parameters, as not every package will have to specify parameters and at the same time the packages specifying parameters will be able to use them even if their dependencies do not have the given parameter.
+</p>
+
+
+<p>
+One awesome feature of this arrangement is that a user could have two packages with conflicting parameters but they would both work on the system thanks to Guix building both versions of dependencies. This would <b>not</b> work on imperative package managers with similar functionality. For example if a music player application depends on mpd built with pulseaudio while another depends on it built with jack, Guix will create two versions of mpd, one built with each so that both of these packages may coexist.
+</p>
+</div>
+</div><div id="outline-container-org7c7afb1" class="outline-2">
+<h2 id="org7c7afb1"><span class="section-number-2">5.</span> More on parameter symbols</h2>
+<div id="text-5" class="outline-text-2">
+<p>
+<i>Fairly generic</i> options such as x11, gcc or en<sub>us</sub> (locale) will be accepted as parameters, and all of them will have to be <i>lowercase</i> without exception. Parameters, along with their converses, will have pre-defined <i>standard transforms</i> for every build system they are valid for. Note that having too many parameters in a given package will lead to combinatorial explosion of states, and thus it is best to limit the number of parameters to a manageable amount. I will be attempting to add 10~20 such parameter symbols after finishing this project.
+</p>
+
+<p>
+Users will be able to specify per-user global package parameters by creating a file at <code>~/.config/guix/parameters.scm</code> containing the parameter symbols that all their packages will be built with. Syntax could also be created to allow for per-package fine-tuning of parameters in this file.
+</p>
+</div>
+</div><div id="outline-container-org5b04327" class="outline-2">
+<h2 id="org5b04327"><span class="section-number-2">6.</span> Conclusion</h2>
+<div id="text-6" class="outline-text-2">
+<p>
+Parameterized Packages have the potential to add more functionality to GNU Guix for all users, however they will require the <b>feedback</b> and support of the entire Guix community. I would immensely appreciate any kind of suggestions and comments in the new thread on Parameterized Packages which can be found in the mailing list, especially suggestions on what parameter symbols users would like to use.
+</p>
+
+<p>
+Happy Hacking!
+</p>
+</div>
+</div></div><footer class="text-center"><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>

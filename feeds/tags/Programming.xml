@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>(blog . (lispy . tech))</title><id>https://blog.lispy.tech/feeds/tags/Programming.xml</id><subtitle>Tag: Programming</subtitle><updated>2023-06-29T23:39:56Z</updated><link href="blog.lispy.tech/feeds/tags/Programming.xml" rel="self" /><link href="blog.lispy.tech" /><entry><title>The First Week of January 2023</title><id>https://blog.lispy.tech/the-first-week-of-january-2023.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-01-10T13:37:00Z</updated><link href="https://blog.lispy.tech/the-first-week-of-january-2023.html" rel="alternate" /><summary type="html">&lt;p&gt;
+I decided to start writing a blog to talk about my ventures in programming and system administration to document my progress and motivate me to do more. This entry covers what I did in the first week of January, 2023.
+&lt;/p&gt;&lt;div id=&quot;outline-container-orgf059d59&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgf059d59&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;1.&lt;/span&gt; Torus Wrapper&lt;/h2&gt;
+&lt;div id=&quot;text-1&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+One of the projects I poured a bunch of time into was &lt;a href=&quot;https://github.com/cel7t/TorusWrapper&quot;&gt;Torus Wrapper&lt;/a&gt;, which was an effort to wrap transparent PNGs into tiles that can be tiled to make tiling wallpapers, tiling game assets, et cetera. A high-level overview of how this is done is that the program takes in a transparent png, finds the &lt;b&gt;biggest&lt;/b&gt; rectangle &lt;i&gt;inside&lt;/i&gt; it and then wraps the parts not fitting in the rectangle atop it. Here's an example of a tile created with it:
+&lt;img src=&quot;../images/tile.png&quot; alt=&quot;tile.png&quot; /&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org8909361&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org8909361&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;2.&lt;/span&gt; &lt;i&gt;Lots&lt;/i&gt; of Websites&lt;/h2&gt;
+&lt;div id=&quot;text-2&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I worked on a &lt;i&gt;lot&lt;/i&gt; of websites during this break; &lt;a href=&quot;https://untyped.ml&quot;&gt;my personal site&lt;/a&gt;, &lt;a href=&quot;https://bits-sos.ml&quot;&gt;BITS SOS' site&lt;/a&gt; and the Journal Club's new website.
+I used static site generators to build BITS SOS and JC's sites, as they provide a simple way to theme huge websites; however, these are not free of hiccups.
+Themes often come configured wrong and can cause CSS and images to not load if the paths are not set right. Luckily, there were no other major problems setting up either of them with &lt;a href=&quot;https://gohugo.io&quot;&gt;HUGO&lt;/a&gt;.
+For my personal site, I wrote the main site in &lt;a href=&quot;https://clojurescript.org&quot;&gt;ClojureScript&lt;/a&gt; (with &lt;a href=&quot;https://github.com/reagent-project/reagent&quot;&gt;Reagent&lt;/a&gt;) and the blog site in &lt;a href=&quot;https://docs.racket-lang.org/frog/index.html&quot;&gt;Frog&lt;/a&gt;. The blog (this site) is based on &lt;a href=&quot;https://blog.racket-lang.org&quot;&gt;Racket lang's blog&lt;/a&gt;.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org9f9f156&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org9f9f156&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;3.&lt;/span&gt; Tiny Improvements to my R6RS Infix Calculator&lt;/h2&gt;
+&lt;div id=&quot;text-3&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I abstracted away a lot of the recursion in my &lt;a href=&quot;https://github.com/cel7t/R6RS-Calculator&quot;&gt;R6RS infix expression calculator&lt;/a&gt; by defining a new macro to handle functions that iterate over a carry-forwarded list and adding the Clojure thread-first macro (-&amp;gt;). I planned on implementing something called the &lt;i&gt;Nestedness Theorem&lt;/i&gt;, which is that &lt;i&gt;the rightmost open paren is always safe to evaluate&lt;/i&gt;. However, my current approach is more-or-less similar to this, hence I did not rewrite it. I also added additional error checking; the program now checks if parens are balanced.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org1ffadd2&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org1ffadd2&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;4.&lt;/span&gt; Adding a DDNS to my Home Server&lt;/h2&gt;
+&lt;div id=&quot;text-4&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I was previously connecting to my home server through a static IP, however I realized that my usage needs could be met with a dynamic IP using a dynamic DNS. I thus set up a DDNS on the server and bound its internal IP to ensure that I could boot into it after it rebooted. Home servers are excellent for maintaining private remote project repositories, hosting messenger bots or services like IRC bouncers and testing out dynamic websites.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</summary></entry></feed>
