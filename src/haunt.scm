@@ -40,5 +40,6 @@
                        (atom-feeds-by-tag)
                        about-page
                        (static-directory "css")
+                       (static-directory "js")
                        (static-directory "fonts")
                        (static-directory "images")))

@@ -70,7 +70,7 @@
               (meta (@ (charset "utf-8")))
               (title ,(string-append "(" (kebabify title) " . " (site-title site) ")"))
               (script (@ (type "module")
-                         (src "https://esm.run/seia")))
+                         (src "js/seia.js")))
               ,(stylesheet "reset")
               ,(stylesheet "fonts")
               ,(stylesheet "blog"))
@@ -82,7 +82,6 @@
                             (li ,(link "#:about" "/about.html"))
                             (li ,(link "#:posts" "/index.html"))))
                    ,body
-                   (s-e-i-a) 
                    (footer (@ (class "text-center"))
                            (p (@ (class "copyright"))
                               "© 2023 Sarthak Shah • Built with "
@@ -120,7 +119,8 @@
                                       ,tag)))
                             (assq-ref (post-metadata post) 'tags))))
              (div (@ (class "post"))
-                  ,(post-sxml post))))
+                  ,(post-sxml post))
+                   (s-e-i-a) ))
          #:collection-template
          (lambda (site title posts prefix)
            (define (post-uri post)
