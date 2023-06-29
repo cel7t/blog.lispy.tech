@@ -87,6 +87,10 @@
                            (p (@ (class "copyright"))
                               "© 2023 Sarthak Shah • Built with "
                               ,(link "Haunt" "https://dthompson.us/projects/haunt.html"))
+                           (link (@ (rel "webmention")
+                                    (href "https://webmention.io/blog.lispy.tech/webmention")))
+                           (link (@ (rel "pingback")
+                                    (href "https://webmention.io/blog.lispy.tech/xmlrpc")))
                            (link (@ (rel "me")
                                     (href "mailto:shahsarthakw@gmail.com")))
                            (p (@ (class "copyright"))
