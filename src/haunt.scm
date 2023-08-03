@@ -18,7 +18,7 @@
    `(div (@ (style "display:flex")) 
          (img (@ (src "images/suigintou-sicp.jpg") 
                  (style "object-fit:contain; align-self:flex-start; 
-                         width: 350px; padding-top: 20px; padding-bottom: 20px")))
+                         width: 250px; padding-top: 20px; padding-bottom: 20px")))
          (div (@ (style "flex: 1 1 auto; padding-left: 30px"))
               (h2 "Hello 👋")
               (p "My name is Sarthak (IPA: /s̪äːɾ.t̪ʰək/).")
