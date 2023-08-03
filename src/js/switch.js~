@@ -1,0 +1,14 @@
+// Switch for Light/Dark Mode
+
+const themeSwitch = document.getElementById("theme-switch");
+const theme = localStorage.getItem("theme");
+document.documentElement.setAttribute("theme", theme);
+themeSwitch.checked = (theme === "dark");
+
+function flipSwitch(e) {
+    localStorage.setItem("theme", e.target.checked ? "dark" : "light");
+    document.documentElement.setAttribute("theme", e.target.checked ? "dark" : "light");
+  document.getElementById("icon-path").setAttribute("fill", e.target.checked? "yellow" : "black");
+}
+
+themeSwitch.addEventListener("change", flipSwitch, false);

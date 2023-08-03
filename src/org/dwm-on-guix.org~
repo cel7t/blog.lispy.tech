@@ -55,9 +55,9 @@ If you want to add this to your system configuration, modify your ~config.scm~ l
 #+END_SRC
 And now, reconfigure the system with the following command:
 #+BEGIN_SRC bash
-  guix system reconfigure /path/to/config.scm -L /home/$USER/DWM_MODULE
+  guix system reconfigure /path/to/config.scm -L $HOME/DWM_MODULE
 #+END_SRC
-If you don't want to run the reconfigure command with ~-L~ every time, add ~/home/$USER/DWM_MODULE~ to ~GUIX_PACKAGE_PATH~.
+If you don't want to run the reconfigure command with ~-L~ every time, add ~$HOME/DWM_MODULE~ to ~GUIX_PACKAGE_PATH~.
 
 Here's a customary screencap:
 [[./images/dwm-screenshot.png]]

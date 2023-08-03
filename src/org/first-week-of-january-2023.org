@@ -2,6 +2,7 @@
 #+DATE: 2023-01-10 13:37
 #+AUTHOR:Sarthak Shah
 #+TAGS: Personal, Programming, Web
+#+OPTIONS: toc:nil num:nil
 #+HAUNT_BASE_DIR: /home/sixtyfour/Documents/Code/Guile/blog
 
 I decided to start writing a blog to talk about my ventures in programming and system administration to document my progress and motivate me to do more. This entry covers what I did in the first week of January, 2023.

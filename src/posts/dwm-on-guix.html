@@ -10,14 +10,14 @@ If like me you use a lot of patches with dwm, you probably use <a href="https://
 We want to start by making a directory for our dwm folder and build file.
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">mkdir DWM_MODULE
+<pre class="src src-bash"><span style="color: #00a692;">mkdir DWM_MODULE</span>
 </pre>
 </div>
 <p>
 Next, copy your dwm folder here.
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">cp -r /path/to/dwm DWM_MODULE/
+<pre class="src src-bash"><span style="color: #00a692;">cp -r /path/to/dwm DWM_MODULE/</span>
 </pre>
 </div>
 <p>
@@ -25,9 +25,9 @@ Now, this step is <b>very important</b>:
 run <code>make clean</code> once in the dwm folder, otherwise guix will run into a RUNPATH error during the build phase.
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #f78fe7;">cd</span> DWM_MODULE/dwm
-make clean
-<span style="color: #f78fe7;">cd</span> ..
+<pre class="src src-bash"><span style="color: #00a692; font-weight: bold;">cd</span><span style="color: #00a692;"> DWM_MODULE/dwm</span>
+<span style="color: #00a692;">make clean</span>
+<span style="color: #00a692; font-weight: bold;">cd</span><span style="color: #00a692;"> ..</span>
 </pre>
 </div>
 <p>
@@ -35,23 +35,23 @@ And finally, inside the <code>DWM_MODULE</code> directory create a file named <c
 Then put this in the file:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">define-module</span> <span style="color: #ff66ff;">(</span><span style="color: #6ae4b9;">USER-dwm</span><span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
-<span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">use-modules</span> <span style="color: #ff66ff;">(</span>gnu packages suckless<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>gnu packages xorg<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>gnu packages image<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>guix gexp<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>guix packages<span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">define-module</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">USER-dwm</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">use-modules</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">gnu packages suckless</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">gnu packages xorg</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">gnu packages image</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">guix gexp</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">guix packages</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 
-<span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">define-public</span> <span style="color: #feacd0;">USER-dwm</span>
-  <span style="color: #ff66ff;">(</span>package
-    <span style="color: #00eff0;">(</span>inherit dwm<span style="color: #00eff0;">)</span>
-    <span style="color: #00eff0;">(</span>name <span style="color: #79a8ff;">"USER-dwm"</span><span style="color: #00eff0;">)</span>
-    <span style="color: #00eff0;">(</span>inputs <span style="color: #ff6b55;">(</span>modify-inputs <span style="color: #efef00;">(</span>package-inputs dwm<span style="color: #efef00;">)</span>
-              <span style="color: #efef00;">(</span>append libxcb<span style="color: #efef00;">)</span>
-              <span style="color: #efef00;">(</span>append imlib2<span style="color: #efef00;">)</span><span style="color: #ff6b55;">)</span><span style="color: #00eff0;">)</span>
-    <span style="color: #00eff0;">(</span>source <span style="color: #ff6b55;">(</span>local-file <span style="color: #79a8ff;">"dwm"</span> <span style="color: #f78fe7;">#:recursive?</span> #t<span style="color: #ff6b55;">)</span><span style="color: #00eff0;">)</span><span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">define-public</span><span style="color: #e589e9;"> </span><span style="color: #e589e9;">USER-dwm</span>
+<span style="color: #e589e9;">  (</span><span style="color: #bc9afc;">package</span>
+<span style="color: #bc9afc;">    (</span><span style="color: #a3b3e0;">inherit dwm</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">name </span><span style="color: #d1d1d9d9f06f;">"USER-dwm"</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">inputs (</span><span style="color: #09ad99;">modify-inputs (</span><span style="color: #e7ade9;">package-inputs dwm</span><span style="color: #09ad99;">)</span>
+              <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">append libxcb</span><span style="color: #09ad99;">)</span>
+              <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">append imlib2</span><span style="color: #09ad99;">)</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">source (</span><span style="color: #09ad99;">local-file </span><span style="color: #8484d6d6cccc;">"dwm"</span> <span style="color: #09ad99; font-weight: bold;">#:recursive?</span><span style="color: #09ad99;"> #t</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 
-USER-dwm
+<span style="color: #00a692;">USER-dwm</span>
 </pre>
 </div>
 <p>
@@ -62,18 +62,18 @@ Running <code>guix package -f USER-dwm.scm</code> will now install your flexipat
 If you want to add this to your system configuration, modify your <code>config.scm</code> like this:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">use-modules</span> <span style="color: #ff66ff;">(</span>USER-dwm<span style="color: #ff66ff;">)</span> ...<span style="color: #ffffff;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">use-modules</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">USER-dwm</span><span style="color: #e589e9;">)</span> <span style="color: #e589e9;">...</span><span style="color: #00a692;">)</span>
 
-<span style="color: #ffffff;">(</span>operating-system
-  ...
-  <span style="color: #ff66ff;">(</span>packages <span style="color: #00eff0;">(</span>list USER-dwm ...<span style="color: #00eff0;">)</span><span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9;">operating-system</span>
+<span style="color: #e589e9;">  ...</span>
+<span style="color: #e589e9;">  (</span><span style="color: #bc9afc;">packages (</span><span style="color: #a3b3e0;">list USER-dwm ...</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 </pre>
 </div>
 <p>
 And now, reconfigure the system with the following command:
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">guix system reconfigure /path/to/config.scm -L $<span style="color: #00d3d0;">HOME</span>/DWM_MODULE
+<pre class="src src-bash"><span style="color: #00a692;">guix system reconfigure /path/to/config.scm -L $</span><span style="color: #00a692;">HOME</span><span style="color: #00a692;">/DWM_MODULE</span>
 </pre>
 </div>
 <p>

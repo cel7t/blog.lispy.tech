@@ -1,6 +1,7 @@
 #+TITLE:An Introduction to Parameterized Packages
 #+DATE: 2023-05-09 2:40
 #+TAGS: Guix, GSoC, Scheme
+#+OPTIONS: toc:nil num:nil
 #+HAUNT_BASE_DIR: /home/sixtyfour/Documents/Code/Guile/blog
 
 I will be working on bringing Parameterized Packages to [[https://guix.gnu.org][GNU Guix]] this summer as a part of the [[https://summerofcode.withgoogle.com/][Google Summer of Code]] program under the mentorship of Pjotr Prins and Gábor Boskovits.

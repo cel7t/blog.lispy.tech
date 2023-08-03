@@ -11,6 +11,17 @@
             static-page
             project-page))
 
+(define %mode-button
+  '(div (@ (class "modeBox"))
+        (input (@ (id "modeBox")
+                  (type "checkbox")))
+        (label (@ (for "modeBox"))
+               (img (@ (src "images/sun.svg")
+                       (style "margin: 0.2em")))
+               (img (@ (src "images/moon.svg")
+                       (style "margin: 0.2em")))
+               (span (@ (class "ball"))))))
+
 (define %cc-by-sa-link
   '(a (@ (href "https://creativecommons.org/licenses/by-sa/4.0/"))
       "Creative Commons Attribution Share-Alike 4.0 International"))
@@ -71,6 +82,8 @@
               (title ,(string-append "(" (kebabify title) " . " (site-title site) ")"))
               (script (@ (type "module")
                          (src "js/seia.js")))
+              (script "if (localStorage.theme) 
+                      document.documentElement.setAttribute('data-theme', localStorage.theme);")
               ,(stylesheet "reset")
               ,(stylesheet "fonts")
               ,(stylesheet "blog"))
@@ -80,9 +93,11 @@
                         (ul (li ,(link "(blog . (lispy . tech))" "/"))
                             (li (@ (class "fade-text")) " ")
                             (li ,(link "#:about" "/about.html"))
-                            (li ,(link "#:posts" "/index.html"))))
+                            (li ,(link "#:posts" "/index.html")))
+                        ,%mode-button)
                    ,body
                    (footer (@ (class "text-center"))
+                           (script (@ (src "js/switch.js")))
                            (p (@ (class "copyright"))
                               "© 2023 Sarthak Shah • Built with "
                               ,(link "Haunt" "https://dthompson.us/projects/haunt.html"))

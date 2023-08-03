@@ -1,16 +1,17 @@
-<!DOCTYPE html><head><meta charset="utf-8" /><title>(the-first-week-of-january-2023 . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul></div><h1 class="title">The First Week of January 2023</h1><div class="date">January 10, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Personal.xml">Personal</a></li><li>#:<a href="/feeds/tags/Programming.xml">Programming</a></li><li>#:<a href="/feeds/tags/Web.xml">Web</a></li></ul></div><div class="post"><p>
+<!DOCTYPE html><head><meta charset="utf-8" /><title>(the-first-week-of-january-2023 . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><script>if (localStorage.theme) 
+                      document.documentElement.setAttribute('data-theme', localStorage.theme);</script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul><div class="modeBox"><input id="modeBox" type="checkbox" /><label for="modeBox"><img src="images/sun.svg" style="margin: 0.2em" /><img src="images/moon.svg" style="margin: 0.2em" /><span class="ball"></span></label></div></div><h1 class="title">The First Week of January 2023</h1><div class="date">January 10, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Personal.xml">Personal</a></li><li>#:<a href="/feeds/tags/Programming.xml">Programming</a></li><li>#:<a href="/feeds/tags/Web.xml">Web</a></li></ul></div><div class="post"><p>
 I decided to start writing a blog to talk about my ventures in programming and system administration to document my progress and motivate me to do more. This entry covers what I did in the first week of January, 2023.
-</p><div id="outline-container-orgf059d59" class="outline-2">
-<h2 id="orgf059d59"><span class="section-number-2">1.</span> Torus Wrapper</h2>
-<div id="text-1" class="outline-text-2">
+</p><div id="outline-container-org9b2e3f1" class="outline-2">
+<h2 id="org9b2e3f1">Torus Wrapper</h2>
+<div id="text-org9b2e3f1" class="outline-text-2">
 <p>
 One of the projects I poured a bunch of time into was <a href="https://github.com/cel7t/TorusWrapper">Torus Wrapper</a>, which was an effort to wrap transparent PNGs into tiles that can be tiled to make tiling wallpapers, tiling game assets, et cetera. A high-level overview of how this is done is that the program takes in a transparent png, finds the <b>biggest</b> rectangle <i>inside</i> it and then wraps the parts not fitting in the rectangle atop it. Here's an example of a tile created with it:
 <img src="../images/tile.png" alt="tile.png" />
 </p>
 </div>
-</div><div id="outline-container-org8909361" class="outline-2">
-<h2 id="org8909361"><span class="section-number-2">2.</span> <i>Lots</i> of Websites</h2>
-<div id="text-2" class="outline-text-2">
+</div><div id="outline-container-org4728e6a" class="outline-2">
+<h2 id="org4728e6a"><i>Lots</i> of Websites</h2>
+<div id="text-org4728e6a" class="outline-text-2">
 <p>
 I worked on a <i>lot</i> of websites during this break; <a href="https://untyped.ml">my personal site</a>, <a href="https://bits-sos.ml">BITS SOS' site</a> and the Journal Club's new website.
 I used static site generators to build BITS SOS and JC's sites, as they provide a simple way to theme huge websites; however, these are not free of hiccups.
@@ -18,18 +19,18 @@ Themes often come configured wrong and can cause CSS and images to not load if t
 For my personal site, I wrote the main site in <a href="https://clojurescript.org">ClojureScript</a> (with <a href="https://github.com/reagent-project/reagent">Reagent</a>) and the blog site in <a href="https://docs.racket-lang.org/frog/index.html">Frog</a>. The blog (this site) is based on <a href="https://blog.racket-lang.org">Racket lang's blog</a>.
 </p>
 </div>
-</div><div id="outline-container-org9f9f156" class="outline-2">
-<h2 id="org9f9f156"><span class="section-number-2">3.</span> Tiny Improvements to my R6RS Infix Calculator</h2>
-<div id="text-3" class="outline-text-2">
+</div><div id="outline-container-orgb804b0e" class="outline-2">
+<h2 id="orgb804b0e">Tiny Improvements to my R6RS Infix Calculator</h2>
+<div id="text-orgb804b0e" class="outline-text-2">
 <p>
 I abstracted away a lot of the recursion in my <a href="https://github.com/cel7t/R6RS-Calculator">R6RS infix expression calculator</a> by defining a new macro to handle functions that iterate over a carry-forwarded list and adding the Clojure thread-first macro (-&gt;). I planned on implementing something called the <i>Nestedness Theorem</i>, which is that <i>the rightmost open paren is always safe to evaluate</i>. However, my current approach is more-or-less similar to this, hence I did not rewrite it. I also added additional error checking; the program now checks if parens are balanced.
 </p>
 </div>
-</div><div id="outline-container-org1ffadd2" class="outline-2">
-<h2 id="org1ffadd2"><span class="section-number-2">4.</span> Adding a DDNS to my Home Server</h2>
-<div id="text-4" class="outline-text-2">
+</div><div id="outline-container-org13e1126" class="outline-2">
+<h2 id="org13e1126">Adding a DDNS to my Home Server</h2>
+<div id="text-org13e1126" class="outline-text-2">
 <p>
 I was previously connecting to my home server through a static IP, however I realized that my usage needs could be met with a dynamic IP using a dynamic DNS. I thus set up a DDNS on the server and bound its internal IP to ensure that I could boot into it after it rebooted. Home servers are excellent for maintaining private remote project repositories, hosting messenger bots or services like IRC bouncers and testing out dynamic websites.
 </p>
 </div>
-</div></div><s-e-i-a></s-e-i-a><footer class="text-center"><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><link rel="webmention" href="https://webmention.io/blog.lispy.tech/webmention" /><link rel="pingback" href="https://webmention.io/blog.lispy.tech/xmlrpc" /><link rel="me" href="mailto:shahsarthakw@gmail.com" /><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>
+</div></div><s-e-i-a></s-e-i-a><footer class="text-center"><script src="js/switch.js"></script><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><link rel="webmention" href="https://webmention.io/blog.lispy.tech/webmention" /><link rel="pingback" href="https://webmention.io/blog.lispy.tech/xmlrpc" /><link rel="me" href="mailto:shahsarthakw@gmail.com" /><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>

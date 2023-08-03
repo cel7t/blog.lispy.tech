@@ -1,6 +1,41 @@
+@charset "UTF-8";
+
+:root {
+    --bgColor: #fbfbfb;
+    --fgColor: #040404;
+    --linkColor: #2076C1;
+    --linkHoverColor: #f3f3f3;
+    --visitedColor: #62749d;
+    --dateAndTagsColor: #666;
+    --fadeTextColor: #ddd;
+    --borderColor: #eee;
+    --transitionSpeed: 0s;
+}
+
+[data-theme="dark"] {
+  --bgColor: #1a1a1a;
+  --fgColor: #fefefe;
+  --linkColor: #029FFF;
+  --linkHoverColor: #0e0e0e;
+  --visitedColor: #A050CF;
+  --dateAndTagsColor: #aaa;
+  --fadeTextColor: #282828;
+  --borderColor: #181818;
+  --transitionSpeed: 0s;
+}
+
+* {
+    transition: background-color var(--transitionSpeed) ease-in,
+                color var(--transitionSpeed) ease-in,
+                border-top var(--transitionSpeed) ease-in,
+                border-left var(--transitionSpeed) ease-in,
+                border-right var(--transitionSpeed) ease-in,
+                border-bottom var(--transitionSpeed) ease-in;
+}
+
 body {
-    color: #000;
-    background-color: #fbfbfb;
+    color: var(--fgColor);
+    background-color: var(--bgColor);
     font-size: 24px;
     font-family: "Overpass", sans-serif;
     line-height: 140%;
@@ -25,17 +60,23 @@ h3 {
 }
 
 a {
-    color: #2076C1;
+    color: var(--linkColor);
     text-decoration: none;
+    transition: background-color 0s,
+                color 0s;
 }
 
 a:hover {
-    color: #505f89;
-    background-color: #f3f3f3;
+    color: var(--visitedColor);
+    background-color: var(--linkHoverColor);
+    transition: background-color 0s,
+                color 0s;
 }
 
 a:visited {
-    color: #505f89;
+    color: var(--visitedColor);
+    transition: background-color 0s,
+                color 0s;
 }
 
 pre {
@@ -55,12 +96,12 @@ pre code {
 
 p code, li code {
     font-family: "Inconsolata",monospace;
-    background-color: #eee;
+    background-color: var(--borderColor);
 }
 
 blockquote {
     padding-left: 2rem;
-    border-left: 5px solid #eee;
+    border-left: 5px solid var(--borderColor);
     font-style: italic;
 }
 
@@ -71,7 +112,7 @@ blockquote {
 /* Footer */
 
 footer {
-    border-top: 1px solid #ccc;
+    border-top: 1px solid var(--fadeTextColor);
     font-size: 80%;
 }
 
@@ -90,7 +131,7 @@ footer {
     padding-top: 1rem;
     padding-bottom: 1rem;
     margin-bottom: 3rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--borderColor);
 }
 
 .nav ul {
@@ -111,41 +152,60 @@ footer {
 
 .nav a {
     display: inline-block;
-    color: #000;
+    color: var(--fgColor);
 }
 
 .nav a:hover {
-    color: #000;
+    color: var(--fgColor);
 }
 
 .nav a:visited {
-    color: #000;
+    color: var(--fgColor);
 }
 
-@media (min-width: 1140px) {
-    .container {
-        margin-left: 14rem;
-        margin-right: 4rem;
-        max-width: 52rem;
-    }
+.modeBox {
+    float: right;
+    margin-right: 1em;
 }
 
-@media (min-width: 800px) and (max-width: 1140px) {
-    .container {
-        margin-left: 6rem;
-        margin-right: 4rem;
-        max-width: 52rem;
-    }
+.modeBox input[type=checkbox] {
+    display: none;
 }
 
-@media (max-width: 800px) {
-    .container {
-        margin: 1rem;
-    }
+.modeBox label {
+    background-color: var(--fgColor);
+    width: 2em;
+    height: 1.04em;
+    border-radius: 2em;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modeBox label .ball {
+    background-color: var(--bgColor);
+    width:  0.86em;
+    height: 0.86em;
+    position: absolute;
+    left: 0.09em;
+    top:  0.09em;
+    border-radius: 50%;
+    transition: transform var(--transitionSpeed) linear;
+}
+
+.modeBox input[type=checkbox]:checked + label .ball {
+    transform: translateX(0.96em);
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 52rem;
 }
 
 .fade-text {
-    color: #ddd;
+    color: var(--fadeTextColor);
 }
 
 /* Summaries */
@@ -167,12 +227,12 @@ footer {
 
 .date {
     margin-top: -1rem;
-    color: #666;
+    color: var(--dateAndTagsColor);
 }
 
 .tags {
     margin-top: -1rem;
-    color: #666;
+    color: var(--dateAndTagsColor);
     font-size: 80%;
 }
 

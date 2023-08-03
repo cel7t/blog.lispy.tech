@@ -1,9 +1,10 @@
-<!DOCTYPE html><head><meta charset="utf-8" /><title>(an-introduction-to-parameterized-packages . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul></div><h1 class="title">An Introduction to Parameterized Packages</h1><div class="date">May 09, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Guix.xml">Guix</a></li><li>#:<a href="/feeds/tags/GSoC.xml">GSoC</a></li><li>#:<a href="/feeds/tags/Scheme.xml">Scheme</a></li></ul></div><div class="post"><p>
+<!DOCTYPE html><head><meta charset="utf-8" /><title>(an-introduction-to-parameterized-packages . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><script>if (localStorage.theme) 
+                      document.documentElement.setAttribute('data-theme', localStorage.theme);</script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul><div class="modeBox"><input id="modeBox" type="checkbox" /><label for="modeBox"><img src="images/sun.svg" style="margin: 0.2em" /><img src="images/moon.svg" style="margin: 0.2em" /><span class="ball"></span></label></div></div><h1 class="title">An Introduction to Parameterized Packages</h1><div class="date">May 09, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Guix.xml">Guix</a></li><li>#:<a href="/feeds/tags/GSoC.xml">GSoC</a></li><li>#:<a href="/feeds/tags/Scheme.xml">Scheme</a></li></ul></div><div class="post"><p>
 I will be working on bringing Parameterized Packages to <a href="https://guix.gnu.org">GNU Guix</a> this summer as a part of the <a href="https://summerofcode.withgoogle.com/">Google Summer of Code</a> program under the mentorship of Pjotr Prins and Gábor Boskovits.
 This post will go over the basic ideas behind Parameterized Packages, their benefits and how I am planning on implementing them.
-</p><div id="outline-container-org1819726" class="outline-2">
-<h2 id="org1819726"><span class="section-number-2">1.</span> What are Parameterized Packages?</h2>
-<div id="text-1" class="outline-text-2">
+</p><div id="outline-container-orgd46badb" class="outline-2">
+<h2 id="orgd46badb">What are Parameterized Packages?</h2>
+<div id="text-orgd46badb" class="outline-text-2">
 <p>
 Parameterized packages will provide users with a simple way to configure many aspects of packages, à la Gentoo USE flags.
 </p>
@@ -29,18 +30,18 @@ Some of the benefits of Parameterized Packages are:
 Among many more.
 </p>
 </div>
-</div><div id="outline-container-org88364ae" class="outline-2">
-<h2 id="org88364ae"><span class="section-number-2">2.</span> Example Usage</h2>
-<div id="text-2" class="outline-text-2">
+</div><div id="outline-container-orgb275c0a" class="outline-2">
+<h2 id="orgb275c0a">Example Usage</h2>
+<div id="text-orgb275c0a" class="outline-text-2">
 <p>
 Here is an example config.scm file with parameters:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #a9f;">(</span><span style="color: #aa8da7;">use-modules</span> <span style="color: #959;">(</span>gnu parameters<span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">use-modules</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">gnu parameters</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 
-<span style="color: #a9f;">(</span>operating-system
-  <span style="color: #7078a2;">;; </span><span style="color: #505f89;">...</span>
-  <span style="color: #959;">(</span>parameters '<span style="color: #535;">(</span>x11 wayland! alsa<span style="color: #535;">)</span><span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9;">operating-system</span>
+<span style="color: #e589e9;">  </span><span style="color: #cf9f8f; font-style: italic;">;; </span><span style="color: #cf9f8f; font-style: italic;">...</span>
+  <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">parameters '(</span><span style="color: #a3b3e0;">x11 wayland! alsa</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 </pre>
 </div>
 <p>
@@ -52,7 +53,7 @@ Note that all parameter names are lowercase, and that <code>!</code> indicates t
 Another possible way of using parameters is through the command-line interface, for example
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">guix build emacs --with-parameter=<span style="color: #8e8eb8;">emacs</span>=<span style="color: #a0adee;">&quot;png!&quot;</span>
+<pre class="src src-bash"><span style="color: #00a692;">guix build emacs --with-parameter=</span><span style="color: #00a692;">emacs</span><span style="color: #00a692;">=</span><span style="color: #6a9fff;">&quot;png!&quot;</span>
 </pre>
 </div>
 <p>
@@ -60,21 +61,21 @@ This will build Emacs <b>without</b> PNG support.
 The user interface is very much subject to change, and I would love input from Guix users on the same.
 </p>
 </div>
-</div><div id="outline-container-orge3440c9" class="outline-2">
-<h2 id="orge3440c9"><span class="section-number-2">3.</span> Example Usage for Package Maintainers</h2>
-<div id="text-3" class="outline-text-2">
+</div><div id="outline-container-org66f51ab" class="outline-2">
+<h2 id="org66f51ab">Example Usage for Package Maintainers</h2>
+<div id="text-org66f51ab" class="outline-text-2">
 <p>
 Package definitions <i>with</i> parameters will look like this:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #a9f;">(</span><span style="color: #aa8da7;">define-public</span> <span style="color: #8083be;">emacs</span>
-  <span style="color: #959;">(</span>package
-    <span style="color: #535;">(</span>parameters <span style="color: #639;">(</span><span style="color: #aa8da7;">and</span>
-      <span style="color: #636;">(</span>optional jit^ png^ alsa^<span style="color: #636;">)</span>
-      <span style="color: #636;">(</span>one-of motif gtk^ x11!*<span style="color: #636;">)</span><span style="color: #639;">)</span><span style="color: #535;">)</span>
-    <span style="color: #535;">(</span>parameter-transforms
-      <span style="color: #639;">(</span><span style="color: #636;">(</span>x11!<span style="color: #636;">)</span>
-       <span style="color: #636;">(</span>changes-to-be-made-to-the-package<span style="color: #636;">)</span><span style="color: #639;">)</span><span style="color: #535;">)</span><span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">define-public</span><span style="color: #e589e9;"> </span><span style="color: #e589e9;">emacs</span>
+<span style="color: #e589e9;">  (</span><span style="color: #bc9afc;">package</span>
+<span style="color: #bc9afc;">    (</span><span style="color: #a3b3e0;">parameters (</span><span style="color: #09ad99; font-weight: bold;">and</span>
+<span style="color: #09ad99;">      (</span><span style="color: #e7ade9;">optional jit^ png^ alsa^</span><span style="color: #09ad99;">)</span>
+      <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">one-of motif gtk^ x11!*</span><span style="color: #09ad99;">)</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">parameter-transforms</span>
+<span style="color: #a3b3e0;">      (</span><span style="color: #09ad99;">(</span><span style="color: #e7ade9;">x11!</span><span style="color: #09ad99;">)</span>
+       <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">changes-to-be-made-to-the-package</span><span style="color: #09ad99;">)</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 </pre>
 </div>
 <p>
@@ -88,32 +89,32 @@ When a <code>*</code> is added to a parameter, it means that a generic transform
 Alternatively, the following arguably simpler syntax may be employed:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #a9f;">(</span><span style="color: #aa8da7;">define-public</span> <span style="color: #8083be;">emacs</span>
-  <span style="color: #959;">(</span>package
-    <span style="color: #535;">(</span>let-parameters
-      <span style="color: #639;">(</span><span style="color: #aa8da7;">and</span>
-        <span style="color: #636;">(</span>optional jit^ png^ alsa^<span style="color: #636;">)</span>
-        <span style="color: #636;">(</span>one-of motif gtk^ x11!<span style="color: #636;">)</span><span style="color: #639;">)</span>
-      <span style="color: #639;">(</span>p-if <span style="color: #636;">(</span>not jit<span style="color: #636;">)</span>
-        <span style="color: #636;">[</span><span style="color: #639;">(</span>some-code-for-the-no-jit-version<span style="color: #639;">)</span><span style="color: #636;">]</span>
-        <span style="color: #636;">[</span><span style="color: #639;">(</span>same-code-for-the-jit-version<span style="color: #639;">)</span><span style="color: #636;">]</span><span style="color: #639;">)</span>
-      <span style="color: #7078a2;">;; </span><span style="color: #505f89;">more package definition code ...</span>
-      <span style="color: #639;">(</span>p-case
-        <span style="color: #636;">[</span><span style="color: #639;">(</span>motif gtk<span style="color: #639;">)</span>
-         <span style="color: #639;">(</span>code-for-motif-and-gtk-version<span style="color: #639;">)</span><span style="color: #636;">]</span>
-        <span style="color: #636;">[</span><span style="color: #639;">(</span>x11!<span style="color: #639;">)</span>
-         <span style="color: #639;">(</span>code-for-motif-version<span style="color: #639;">)</span><span style="color: #636;">]</span>
-        <span style="color: #636;">[</span><span style="color: #aa8da7;">else</span>
-         <span style="color: #639;">(</span>some-default-code<span style="color: #639;">)</span><span style="color: #636;">]</span><span style="color: #639;">)</span><span style="color: #535;">)</span><span style="color: #959;">)</span><span style="color: #a9f;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">define-public</span><span style="color: #e589e9;"> </span><span style="color: #e589e9;">emacs</span>
+<span style="color: #e589e9;">  (</span><span style="color: #bc9afc;">package</span>
+<span style="color: #bc9afc;">    (</span><span style="color: #a3b3e0;">let-parameters</span>
+<span style="color: #a3b3e0;">      (</span><span style="color: #09ad99; font-weight: bold;">and</span>
+<span style="color: #09ad99;">        (</span><span style="color: #e7ade9;">optional jit^ png^ alsa^</span><span style="color: #09ad99;">)</span>
+        <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">one-of motif gtk^ x11!</span><span style="color: #09ad99;">)</span><span style="color: #a3b3e0;">)</span>
+      <span style="color: #a3b3e0;">(</span><span style="color: #09ad99;">p-if (</span><span style="color: #e7ade9;">not jit</span><span style="color: #09ad99;">)</span>
+        <span style="color: #09ad99;">[</span><span style="color: #e7ade9;">(</span><span style="color: #d6c3fa;">some-code-for-the-no-jit-version</span><span style="color: #e7ade9;">)</span><span style="color: #09ad99;">]</span>
+        <span style="color: #09ad99;">[</span><span style="color: #e7ade9;">(</span><span style="color: #d6c3fa;">same-code-for-the-jit-version</span><span style="color: #e7ade9;">)</span><span style="color: #09ad99;">]</span><span style="color: #a3b3e0;">)</span>
+      <span style="color: #cf9f8f; font-style: italic;">;; </span><span style="color: #cf9f8f; font-style: italic;">more package definition code ...</span>
+      <span style="color: #a3b3e0;">(</span><span style="color: #09ad99;">p-case</span>
+<span style="color: #09ad99;">        [</span><span style="color: #e7ade9;">(</span><span style="color: #d6c3fa;">motif gtk</span><span style="color: #e7ade9;">)</span>
+         <span style="color: #e7ade9;">(</span><span style="color: #d6c3fa;">code-for-motif-and-gtk-version</span><span style="color: #e7ade9;">)</span><span style="color: #09ad99;">]</span>
+        <span style="color: #09ad99;">[</span><span style="color: #e7ade9;">(</span><span style="color: #d6c3fa;">x11!</span><span style="color: #e7ade9;">)</span>
+         <span style="color: #e7ade9;">(</span><span style="color: #d6c3fa;">code-for-motif-version</span><span style="color: #e7ade9;">)</span><span style="color: #09ad99;">]</span>
+        <span style="color: #09ad99;">[</span><span style="color: #e7ade9; font-weight: bold;">else</span>
+<span style="color: #e7ade9;">         (</span><span style="color: #d6c3fa;">some-default-code</span><span style="color: #e7ade9;">)</span><span style="color: #09ad99;">]</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 </pre>
 </div>
 <p>
 This has the benefit of seamlessly being integrated into existing code. Not that the else clauses in <code>p-if</code> and <code>p-case</code> are optional. There will be a few more constructs like these ones, for example <code>p-cond</code>. I will be adding more based on community feedback.
 </p>
 </div>
-</div><div id="outline-container-orgde41dbd" class="outline-2">
-<h2 id="orgde41dbd"><span class="section-number-2">4.</span> What if a package record does not contain the parameter value?</h2>
-<div id="text-4" class="outline-text-2">
+</div><div id="outline-container-org48beb7f" class="outline-2">
+<h2 id="org48beb7f">What if a package record does not contain the parameter value?</h2>
+<div id="text-org48beb7f" class="outline-text-2">
 <p>
 In the instance that parameter values are not specified, the package will be used in its default state by all of the packages depending on it. <i>In general,</i> parameters propogate to dependencies if a valid configuration can be acheived with them, and if this is not possible the default state of the package is used. This will help with the gradual adoption of package parameters, as not every package will have to specify parameters and at the same time the packages specifying parameters will be able to use them even if their dependencies do not have the given parameter.
 </p>
@@ -123,9 +124,9 @@ In the instance that parameter values are not specified, the package will be use
 One awesome feature of this arrangement is that a user could have two packages with conflicting parameters but they would both work on the system thanks to Guix building both versions of dependencies. This would <b>not</b> work on imperative package managers with similar functionality. For example if a music player application depends on mpd built with pulseaudio while another depends on it built with jack, Guix will create two versions of mpd, one built with each so that both of these packages may coexist.
 </p>
 </div>
-</div><div id="outline-container-org7c7afb1" class="outline-2">
-<h2 id="org7c7afb1"><span class="section-number-2">5.</span> More on parameter symbols</h2>
-<div id="text-5" class="outline-text-2">
+</div><div id="outline-container-org50b8e07" class="outline-2">
+<h2 id="org50b8e07">More on parameter symbols</h2>
+<div id="text-org50b8e07" class="outline-text-2">
 <p>
 <i>Fairly generic</i> options such as x11, gcc or en<sub>us</sub> (locale) will be accepted as parameters, and all of them will have to be <i>lowercase</i> without exception. Parameters, along with their converses, will have pre-defined <i>standard transforms</i> for every build system they are valid for. Note that having too many parameters in a given package will lead to combinatorial explosion of states, and thus it is best to limit the number of parameters to a manageable amount. I will be attempting to add 10~20 such parameter symbols after finishing this project.
 </p>
@@ -134,9 +135,9 @@ One awesome feature of this arrangement is that a user could have two packages w
 Users will be able to specify per-user global package parameters by creating a file at <code>~/.config/guix/parameters.scm</code> containing the parameter symbols that all their packages will be built with. Syntax could also be created to allow for per-package fine-tuning of parameters in this file.
 </p>
 </div>
-</div><div id="outline-container-org5b04327" class="outline-2">
-<h2 id="org5b04327"><span class="section-number-2">6.</span> Conclusion</h2>
-<div id="text-6" class="outline-text-2">
+</div><div id="outline-container-org14bb042" class="outline-2">
+<h2 id="org14bb042">Conclusion</h2>
+<div id="text-org14bb042" class="outline-text-2">
 <p>
 Parameterized Packages have the potential to add more functionality to GNU Guix for all users, however they will require the <b>feedback</b> and support of the entire Guix community. I would immensely appreciate any kind of suggestions and comments in the new thread on Parameterized Packages which can be found in the mailing list, especially suggestions on what parameter symbols users would like to use.
 </p>
@@ -145,4 +146,4 @@ Parameterized Packages have the potential to add more functionality to GNU Guix 
 Happy Hacking!
 </p>
 </div>
-</div></div><s-e-i-a></s-e-i-a><footer class="text-center"><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><link rel="webmention" href="https://webmention.io/blog.lispy.tech/webmention" /><link rel="pingback" href="https://webmention.io/blog.lispy.tech/xmlrpc" /><link rel="me" href="mailto:shahsarthakw@gmail.com" /><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>
+</div></div><s-e-i-a></s-e-i-a><footer class="text-center"><script src="js/switch.js"></script><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><link rel="webmention" href="https://webmention.io/blog.lispy.tech/webmention" /><link rel="pingback" href="https://webmention.io/blog.lispy.tech/xmlrpc" /><link rel="me" href="mailto:shahsarthakw@gmail.com" /><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>

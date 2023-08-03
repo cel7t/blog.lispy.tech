@@ -5,18 +5,18 @@ tags: Personal, Programming, Web
 <p>
 I decided to start writing a blog to talk about my ventures in programming and system administration to document my progress and motivate me to do more. This entry covers what I did in the first week of January, 2023.
 </p>
-<div id="outline-container-orgf059d59" class="outline-2">
-<h2 id="orgf059d59"><span class="section-number-2">1.</span> Torus Wrapper</h2>
-<div class="outline-text-2" id="text-1">
+<div id="outline-container-org9b2e3f1" class="outline-2">
+<h2 id="org9b2e3f1">Torus Wrapper</h2>
+<div class="outline-text-2" id="text-org9b2e3f1">
 <p>
 One of the projects I poured a bunch of time into was <a href="https://github.com/cel7t/TorusWrapper">Torus Wrapper</a>, which was an effort to wrap transparent PNGs into tiles that can be tiled to make tiling wallpapers, tiling game assets, et cetera. A high-level overview of how this is done is that the program takes in a transparent png, finds the <b>biggest</b> rectangle <i>inside</i> it and then wraps the parts not fitting in the rectangle atop it. Here's an example of a tile created with it:
 <img src="../images/tile.png" alt="tile.png" />
 </p>
 </div>
 </div>
-<div id="outline-container-org8909361" class="outline-2">
-<h2 id="org8909361"><span class="section-number-2">2.</span> <i>Lots</i> of Websites</h2>
-<div class="outline-text-2" id="text-2">
+<div id="outline-container-org4728e6a" class="outline-2">
+<h2 id="org4728e6a"><i>Lots</i> of Websites</h2>
+<div class="outline-text-2" id="text-org4728e6a">
 <p>
 I worked on a <i>lot</i> of websites during this break; <a href="https://untyped.ml">my personal site</a>, <a href="https://bits-sos.ml">BITS SOS' site</a> and the Journal Club's new website.
 I used static site generators to build BITS SOS and JC's sites, as they provide a simple way to theme huge websites; however, these are not free of hiccups.
@@ -25,17 +25,17 @@ For my personal site, I wrote the main site in <a href="https://clojurescript.or
 </p>
 </div>
 </div>
-<div id="outline-container-org9f9f156" class="outline-2">
-<h2 id="org9f9f156"><span class="section-number-2">3.</span> Tiny Improvements to my R6RS Infix Calculator</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-orgb804b0e" class="outline-2">
+<h2 id="orgb804b0e">Tiny Improvements to my R6RS Infix Calculator</h2>
+<div class="outline-text-2" id="text-orgb804b0e">
 <p>
 I abstracted away a lot of the recursion in my <a href="https://github.com/cel7t/R6RS-Calculator">R6RS infix expression calculator</a> by defining a new macro to handle functions that iterate over a carry-forwarded list and adding the Clojure thread-first macro (-&gt;). I planned on implementing something called the <i>Nestedness Theorem</i>, which is that <i>the rightmost open paren is always safe to evaluate</i>. However, my current approach is more-or-less similar to this, hence I did not rewrite it. I also added additional error checking; the program now checks if parens are balanced.
 </p>
 </div>
 </div>
-<div id="outline-container-org1ffadd2" class="outline-2">
-<h2 id="org1ffadd2"><span class="section-number-2">4.</span> Adding a DDNS to my Home Server</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-org13e1126" class="outline-2">
+<h2 id="org13e1126">Adding a DDNS to my Home Server</h2>
+<div class="outline-text-2" id="text-org13e1126">
 <p>
 I was previously connecting to my home server through a static IP, however I realized that my usage needs could be met with a dynamic IP using a dynamic DNS. I thus set up a DDNS on the server and bound its internal IP to ensure that I could boot into it after it rebooted. Home servers are excellent for maintaining private remote project repositories, hosting messenger bots or services like IRC bouncers and testing out dynamic websites.
 </p>

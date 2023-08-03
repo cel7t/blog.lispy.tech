@@ -1,44 +1,45 @@
-<!DOCTYPE html><head><meta charset="utf-8" /><title>(running-a-patched-dwm-on-gnu-guix . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul></div><h1 class="title">Running a Patched DWM on GNU Guix</h1><div class="date">June 12, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Guix.xml">Guix</a></li><li>#:<a href="/feeds/tags/DWM.xml">DWM</a></li><li>#:<a href="/feeds/tags/Scheme.xml">Scheme</a></li><li>#:<a href="/feeds/tags/Tips.xml">Tips</a></li></ul></div><div class="post"><p>
+<!DOCTYPE html><head><meta charset="utf-8" /><title>(running-a-patched-dwm-on-gnu-guix . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><script>if (localStorage.theme) 
+                      document.documentElement.setAttribute('data-theme', localStorage.theme);</script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul><div class="modeBox"><input id="modeBox" type="checkbox" /><label for="modeBox"><img src="images/sun.svg" style="margin: 0.2em" /><img src="images/moon.svg" style="margin: 0.2em" /><span class="ball"></span></label></div></div><h1 class="title">Running a Patched DWM on GNU Guix</h1><div class="date">June 12, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Guix.xml">Guix</a></li><li>#:<a href="/feeds/tags/DWM.xml">DWM</a></li><li>#:<a href="/feeds/tags/Scheme.xml">Scheme</a></li><li>#:<a href="/feeds/tags/Tips.xml">Tips</a></li></ul></div><div class="post"><p>
 If like me you use a lot of patches with dwm, you probably use <a href="https://github.com/bakkeby/dwm-flexipatch">dwm-flexipatch</a> for configuring dwm. You probably also have an existing build of dwm with a lot of customizations in <code>config.def.h</code>. Research online might lead you to the conclusion that you need to set up a git repository and a guix channel with your dwm folder to make it work, but that's not necessary at all. In this post I'll go over how I got my dwm-flexipatch build to work on GNU Guix without any of that.
 </p><p>
 We want to start by making a directory for our dwm folder and build file.
 </p><div class="org-src-container">
-<pre class="src src-bash">mkdir DWM_MODULE
+<pre class="src src-bash"><span style="color: #00a692;">mkdir DWM_MODULE</span>
 </pre>
 </div><p>
 Next, copy your dwm folder here.
 </p><div class="org-src-container">
-<pre class="src src-bash">cp -r /path/to/dwm DWM_MODULE/
+<pre class="src src-bash"><span style="color: #00a692;">cp -r /path/to/dwm DWM_MODULE/</span>
 </pre>
 </div><p>
 Now, this step is <b>very important</b>:
 run <code>make clean</code> once in the dwm folder, otherwise guix will run into a RUNPATH error during the build phase.
 </p><div class="org-src-container">
-<pre class="src src-bash"><span style="color: #f78fe7;">cd</span> DWM_MODULE/dwm
-make clean
-<span style="color: #f78fe7;">cd</span> ..
+<pre class="src src-bash"><span style="color: #00a692; font-weight: bold;">cd</span><span style="color: #00a692;"> DWM_MODULE/dwm</span>
+<span style="color: #00a692;">make clean</span>
+<span style="color: #00a692; font-weight: bold;">cd</span><span style="color: #00a692;"> ..</span>
 </pre>
 </div><p>
 And finally, inside the <code>DWM_MODULE</code> directory create a file named <code>USER-dwm.scm</code>, where USER can be your username or anything else.
 Then put this in the file:
 </p><div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">define-module</span> <span style="color: #ff66ff;">(</span><span style="color: #6ae4b9;">USER-dwm</span><span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
-<span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">use-modules</span> <span style="color: #ff66ff;">(</span>gnu packages suckless<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>gnu packages xorg<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>gnu packages image<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>guix gexp<span style="color: #ff66ff;">)</span>
-             <span style="color: #ff66ff;">(</span>guix packages<span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">define-module</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">USER-dwm</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">use-modules</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">gnu packages suckless</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">gnu packages xorg</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">gnu packages image</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">guix gexp</span><span style="color: #e589e9;">)</span>
+             <span style="color: #e589e9;">(</span><span style="color: #bc9afc;">guix packages</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 
-<span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">define-public</span> <span style="color: #feacd0;">USER-dwm</span>
-  <span style="color: #ff66ff;">(</span>package
-    <span style="color: #00eff0;">(</span>inherit dwm<span style="color: #00eff0;">)</span>
-    <span style="color: #00eff0;">(</span>name <span style="color: #79a8ff;">&quot;USER-dwm&quot;</span><span style="color: #00eff0;">)</span>
-    <span style="color: #00eff0;">(</span>inputs <span style="color: #ff6b55;">(</span>modify-inputs <span style="color: #efef00;">(</span>package-inputs dwm<span style="color: #efef00;">)</span>
-              <span style="color: #efef00;">(</span>append libxcb<span style="color: #efef00;">)</span>
-              <span style="color: #efef00;">(</span>append imlib2<span style="color: #efef00;">)</span><span style="color: #ff6b55;">)</span><span style="color: #00eff0;">)</span>
-    <span style="color: #00eff0;">(</span>source <span style="color: #ff6b55;">(</span>local-file <span style="color: #79a8ff;">&quot;dwm&quot;</span> <span style="color: #f78fe7;">#:recursive?</span> #t<span style="color: #ff6b55;">)</span><span style="color: #00eff0;">)</span><span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">define-public</span><span style="color: #e589e9;"> </span><span style="color: #e589e9;">USER-dwm</span>
+<span style="color: #e589e9;">  (</span><span style="color: #bc9afc;">package</span>
+<span style="color: #bc9afc;">    (</span><span style="color: #a3b3e0;">inherit dwm</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">name </span><span style="color: #d1d1d9d9f06f;">&quot;USER-dwm&quot;</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">inputs (</span><span style="color: #09ad99;">modify-inputs (</span><span style="color: #e7ade9;">package-inputs dwm</span><span style="color: #09ad99;">)</span>
+              <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">append libxcb</span><span style="color: #09ad99;">)</span>
+              <span style="color: #09ad99;">(</span><span style="color: #e7ade9;">append imlib2</span><span style="color: #09ad99;">)</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span>
+    <span style="color: #bc9afc;">(</span><span style="color: #a3b3e0;">source (</span><span style="color: #09ad99;">local-file </span><span style="color: #8484d6d6cccc;">&quot;dwm&quot;</span> <span style="color: #09ad99; font-weight: bold;">#:recursive?</span><span style="color: #09ad99;"> #t</span><span style="color: #a3b3e0;">)</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 
-USER-dwm
+<span style="color: #00a692;">USER-dwm</span>
 </pre>
 </div><p>
 Here I have added <code>libxcb</code> and <code>imlib2</code> to inputs as I have patches requiring them.
@@ -47,20 +48,20 @@ The <code>source</code> expression searches for a folder named <code>dwm</code> 
 Running <code>guix package -f USER-dwm.scm</code> will now install your flexipatched dwm.
 If you want to add this to your system configuration, modify your <code>config.scm</code> like this:
 </p><div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #ffffff;">(</span><span style="color: #b6a0ff;">use-modules</span> <span style="color: #ff66ff;">(</span>USER-dwm<span style="color: #ff66ff;">)</span> ...<span style="color: #ffffff;">)</span>
+<pre class="src src-scheme"><span style="color: #00a692;">(</span><span style="color: #e589e9; font-weight: bold;">use-modules</span><span style="color: #e589e9;"> (</span><span style="color: #bc9afc;">USER-dwm</span><span style="color: #e589e9;">)</span> <span style="color: #e589e9;">...</span><span style="color: #00a692;">)</span>
 
-<span style="color: #ffffff;">(</span>operating-system
-  ...
-  <span style="color: #ff66ff;">(</span>packages <span style="color: #00eff0;">(</span>list USER-dwm ...<span style="color: #00eff0;">)</span><span style="color: #ff66ff;">)</span><span style="color: #ffffff;">)</span>
+<span style="color: #00a692;">(</span><span style="color: #e589e9;">operating-system</span>
+<span style="color: #e589e9;">  ...</span>
+<span style="color: #e589e9;">  (</span><span style="color: #bc9afc;">packages (</span><span style="color: #a3b3e0;">list USER-dwm ...</span><span style="color: #bc9afc;">)</span><span style="color: #e589e9;">)</span><span style="color: #00a692;">)</span>
 </pre>
 </div><p>
 And now, reconfigure the system with the following command:
 </p><div class="org-src-container">
-<pre class="src src-bash">guix system reconfigure /path/to/config.scm -L $<span style="color: #00d3d0;">HOME</span>/DWM_MODULE
+<pre class="src src-bash"><span style="color: #00a692;">guix system reconfigure /path/to/config.scm -L $</span><span style="color: #00a692;">HOME</span><span style="color: #00a692;">/DWM_MODULE</span>
 </pre>
 </div><p>
 If you don't want to run the reconfigure command with <code>-L</code> every time, add <code>$HOME/DWM_MODULE</code> to <code>GUIX_PACKAGE_PATH</code>.
 </p><p>
 Here's a customary screencap:
 <img src="../images/dwm-screenshot.png" alt="dwm-screenshot.png" />
-</p></div><s-e-i-a></s-e-i-a><footer class="text-center"><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><link rel="webmention" href="https://webmention.io/blog.lispy.tech/webmention" /><link rel="pingback" href="https://webmention.io/blog.lispy.tech/xmlrpc" /><link rel="me" href="mailto:shahsarthakw@gmail.com" /><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>
+</p></div><s-e-i-a></s-e-i-a><footer class="text-center"><script src="js/switch.js"></script><p class="copyright">© 2023 Sarthak Shah • Built with <a href="https://dthompson.us/projects/haunt.html">Haunt</a></p><link rel="webmention" href="https://webmention.io/blog.lispy.tech/webmention" /><link rel="pingback" href="https://webmention.io/blog.lispy.tech/xmlrpc" /><link rel="me" href="mailto:shahsarthakw@gmail.com" /><p class="copyright"><a class="cc-button" href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg" height="31" /></a><a class="cc-button" href="https://www.gnu.org/software/emacs/"><img src="images/made-with-emacs.png" /></a><a class="cc-button" href="http://www.catb.org/jargon/html/"><img src="images/glider.svg" height="31" /></a><a class="cc-button" href="https://github.com/cel7t/blog"><img src="images/get-the-source.png" height="31" /></a><a class="cc-button" href="https://gnu.org"><img src="images/gnubanner.gif" /></a></p></footer></div></body>
