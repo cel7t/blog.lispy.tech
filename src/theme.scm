@@ -50,7 +50,7 @@
 
 (define %git-button
 	'(a (@ (class "cc-button")
-         (href "https://github.com/cel7t/blog"))
+         (href "https://github.com/cel7t/blog.lispy.tech"))
       (img (@ (src "images/get-the-source.png")
               (height 31)))))
 
