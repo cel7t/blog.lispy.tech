@@ -1,10 +1,198 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>(blog . (lispy . tech))</title><id>https://blog.lispy.tech/feeds/tags/Guix.xml</id><subtitle>Tag: Guix</subtitle><updated>2023-08-03T13:33:28Z</updated><link href="blog.lispy.tech/feeds/tags/Guix.xml" rel="self" /><link href="blog.lispy.tech" /><entry><title>Parameterized Packages: The Second Update</title><id>https://blog.lispy.tech/parameterized-packages-the-second-update.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-08-03T13:37:00Z</updated><link href="https://blog.lispy.tech/parameterized-packages-the-second-update.html" rel="alternate" /><summary type="html">&lt;p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><title>(blog . (lispy . tech))</title><id>https://blog.lispy.tech/feeds/tags/Guix.xml</id><subtitle>Tag: Guix</subtitle><updated>2023-09-19T17:45:57Z</updated><link href="blog.lispy.tech/feeds/tags/Guix.xml" rel="self" /><link href="blog.lispy.tech" /><entry><title>Parameterized Packages: The Project Completion Update</title><id>https://blog.lispy.tech/parameterized-packages-the-project-completion-update.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-09-18T13:37:00Z</updated><link href="https://blog.lispy.tech/parameterized-packages-the-project-completion-update.html" rel="alternate" /><summary type="html">&lt;p&gt;
+This post is a small completion update for my &lt;a href=&quot;https://summerofcode.withgoogle.com/programs/2023/projects/heQYLzrz&quot;&gt;GSoC project&lt;/a&gt; on adding Parameterized Packages to &lt;a href=&quot;https://guix.gnu.org&quot;&gt;GNU Guix&lt;/a&gt;.
+You can find the source code for the same on the main &lt;a href=&quot;https://notabug.org/cel7t/guix-parameters&quot;&gt;notabug&lt;/a&gt; repository or on the &lt;a href=&quot;https://github.com/cel7t/guix-parameters/&quot;&gt;github&lt;/a&gt; mirror.
+This post is broken into two parts; the first is a simple overview of the uses of parameters and the second answers some commonly asked questions.
+&lt;/p&gt;&lt;div id=&quot;outline-container-org4f2354a&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org4f2354a&quot;&gt;What is Package Parameterization?&lt;/h2&gt;
+&lt;div id=&quot;text-org4f2354a&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+In its current state, Package Parameterization makes it possible to add compile-time options to any Guix package, regardless of whether it was defined with support for a given compile-time option or not. This makes it a very powerful tool for hackers seeking to extend their packages in unorthodox and interesting ways. &lt;b&gt;But that's not all!&lt;/b&gt; Parameters can be used to make any kind of changes to package definitions conditionally, making them very useful substitutes for unimplemented &lt;a href=&quot;https://guix.gnu.org/manual/en/html_node/Package-Transformation-Options.html&quot;&gt;package transformation options&lt;/a&gt; in a lot of cases.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org4580751&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org4580751&quot;&gt;What are compile-time options?&lt;/h3&gt;
+&lt;div id=&quot;text-org4580751&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+Compile-time options are package features that can be selected only when a package is being compiled from source. Most binary-based GNU/Linux distributions pick these options for the users, often selecting options that the user might not need while leaving out some options that they might really need. These become especially relevant in the context of High-Performance Computing and computing on alternate ISAs, where greater flexibility with compile-time options is greatly needed.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org1514732&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org1514732&quot;&gt;What makes Package Parameterization special?&lt;/h2&gt;
+&lt;div id=&quot;text-org1514732&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+The strength of package parameterization lies in the fact that users will now be able to create &lt;i&gt;generic compile-time options&lt;/i&gt; that they will be able to apply to any number of packages they like. It's almost akin to being able to create custom package transformation options, with the caveat that only an enumerated set of options will be available for choosing.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org52f002a&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org52f002a&quot;&gt;Generic Compile-time Options&lt;/h3&gt;
+&lt;div id=&quot;text-org52f002a&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+The compile-time options created by parameters will be &lt;i&gt;generic&lt;/i&gt; if the author chooses to write a &lt;i&gt;global parameter&lt;/i&gt; for a given parameterization. This means that if, for example, I write a global parameter that enables text-to-speech support, it will work on &lt;i&gt;any&lt;/i&gt; package that satisfies this parameter's predicate.
+The predicate is a user-defined function that returns &lt;code&gt;#t&lt;/code&gt; or &lt;code&gt;#f&lt;/code&gt; after checking a number of things about the package passed to it like the package's build system, inputs or arguments among other things. This helps prevent the usage of parameters on packages that they are not compatible with.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org224174c&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org224174c&quot;&gt;What does this look like in action?&lt;/h2&gt;
+&lt;div id=&quot;text-org224174c&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I have demonstrated this in great detail in &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-the-second-update.html&quot;&gt;this&lt;/a&gt; post, for a quick example please head to the section where I've parameterized a bunch of variants of Emacs (&amp;quot;What does using parameters look like?&amp;quot;).
+All of the examples in the post work and you can try them out by applying the &lt;a href=&quot;https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch&quot;&gt;parameterization patch&lt;/a&gt; to a local copy of Guix.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org6c7eb3b&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org6c7eb3b&quot;&gt;Reasons for trying Package Parameters&lt;/h2&gt;
+&lt;div id=&quot;text-org6c7eb3b&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+In no particular order, here are some good reasons why you should try using Package Parameters
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-orgbd9bad7&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;orgbd9bad7&quot;&gt;1. Speeding up packages that you use very often&lt;/h3&gt;
+&lt;div id=&quot;text-orgbd9bad7&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+To maintain stability and ensure that packages work across a wide variety of devices, Guix usually does not build packages with a lot of compile-time speed optimizations. However, with parameterization it is possible to speed up packages that you use very often for a much smoother and faster computing experience.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org3e807ca&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org3e807ca&quot;&gt;2. Easily creating and accessing multiple variants for packages&lt;/h3&gt;
+&lt;div id=&quot;text-org3e807ca&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+Parameters make it easy to succinctly write packages with multiple variants and switch between them with the &lt;code&gt;--with-parameter&lt;/code&gt; transform.
+It is also possible to take an existing package and add a number of variants to it, like in the Emacs example mentioned in the previous heading.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org4075578&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org4075578&quot;&gt;3. Applying compile-time customizations to a number of packages&lt;/h3&gt;
+&lt;div id=&quot;text-org4075578&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+Using global parameters, it's possible to have common parameterized options across a huge number of packages. This makes it easy to use parameterized variants of packages without having to rewrite each of them with the compile-time option you want to use.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org79fa117&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org79fa117&quot;&gt;4. Learning more about your packages&lt;/h3&gt;
+&lt;div id=&quot;text-org79fa117&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+This last reason is a bit opinionated, but I think that you get to learn a lot more about how the packages you're using work when you tweak them like this. It makes you mindful of all the packages that you are using, and sometimes even helps you discover new things about them that you otherwise wouldn't know about!
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgfe400fd&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgfe400fd&quot;&gt;Answers to some commonly asked questions&lt;/h2&gt;
+&lt;div id=&quot;text-orgfe400fd&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org4f7127a&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org4f7127a&quot;&gt;Changes in the Syntax&lt;/h3&gt;
+&lt;div id=&quot;text-org4f7127a&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+The main point of confusion so far has been the &lt;i&gt;syntax&lt;/i&gt; for package parameterization, which has gone through a couple of changes over time.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-orgb402d68&quot; class=&quot;outline-4&quot;&gt;
+&lt;h4 id=&quot;orgb402d68&quot;&gt;The Parameter List&lt;/h4&gt;
+&lt;div id=&quot;text-orgb402d68&quot; class=&quot;outline-text-4&quot;&gt;
+&lt;p&gt;
+The parameter list is a fundamental component of this project.
+At any place that accepts a list of parameters, the user passes a parameter list.
+Parameter lists are lists of the form &lt;code&gt;((parameter value) (parameter-2 value-2) ...)&lt;/code&gt;
+The first value in the cell is the symbol of the parameter, and the second value in the cell is the value of the parameter.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org3f15cf4&quot; class=&quot;outline-4&quot;&gt;
+&lt;h4 id=&quot;org3f15cf4&quot;&gt;Negation and &lt;code&gt;!&lt;/code&gt;&lt;/h4&gt;
+&lt;div id=&quot;text-org3f15cf4&quot; class=&quot;outline-text-4&quot;&gt;
+&lt;p&gt;
+Previously, we were using &lt;code&gt;!&lt;/code&gt; to denote the negation of a parameter.
+&lt;b&gt;This has been removed in newer versions&lt;/b&gt;.
+The rationale behind this removal is that &lt;code&gt;!&lt;/code&gt; does not clearly denote negation, and having arbitrary restrictions behind what kind of symbols are allowed and what kind are not would again cause confusion.
+Instead, we now use &lt;code&gt;#:off&lt;/code&gt; to denote the &lt;i&gt;negative&lt;/i&gt; value for any given parameter.
+&lt;/p&gt;
+&lt;div class=&quot;org-src-container&quot;&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;old style&lt;/span&gt;
+&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;parameter-if (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;a val&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #6f9e77;&quot;&gt;b!&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #c6a6b3;&quot;&gt;do-thing&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
+
+&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;new style&lt;/span&gt;
+&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;parameter-if (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;a val&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;b &lt;/span&gt;&lt;span style=&quot;color: #d4878a; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #c6a6b3;&quot;&gt;do-thing&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org20295e3&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org20295e3&quot;&gt;Handling of Global Parameters&lt;/h3&gt;
+&lt;div id=&quot;text-org20295e3&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+This topic is still under debate, but for now I have opted to use a &lt;i&gt;separate namespace&lt;/i&gt; for global parameters. I'm accomplishing this with the help of a global hash-table.
+This is for two main reasons:
+&lt;/p&gt;
+&lt;ol class=&quot;org-ol&quot;&gt;
+&lt;li&gt;We can guarantee that global parameters are unique by adding checks for uniqueness in the global parameter definition macro&lt;/li&gt;
+&lt;li&gt;Parameter names can stay small inside the various parameter lists in the parameter-spec&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;
+Furthermore, a lot of the existing processing functions work on unique symbols denoting the parameters and not the parameters themselves, so a massive rewrite would be necessary if we want to pass them parameters instead.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org622e155&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org622e155&quot;&gt;Support for setting Global Parameter Values&lt;/h3&gt;
+&lt;div id=&quot;text-org622e155&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+Due to the very alpha state of parameterization, this has not yet been implemented. However parameters are a package transformation option and can be used just like any other package transformation option, so it's possible to create manifest files with parameterization for the packages a user is using.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org4b10309&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org4b10309&quot;&gt;Documentation and Tests?&lt;/h3&gt;
+&lt;div id=&quot;text-org4b10309&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+I have not written texinfo documentation or unit tests for Package Parameterization yet as they're expected to change considerably in the process of being merged into master.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-org76e8185&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org76e8185&quot;&gt;When will Parameters be merged to master?&lt;/h3&gt;
+&lt;div id=&quot;text-org76e8185&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+While Package Parameterization itself works great, among other things a host of tools for writing parameterized packages more easily and measuring the complexity of parameterized packages are necessary before this project is merged to master. In the meantime, I would really appreciate feedback and bug reports on the current parameterized packages patch. It can be added to a source install of Guix with a &lt;a href=&quot;https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch&quot;&gt;simple patch&lt;/a&gt; that does not affect any other component of Guix. Please raise issues on the &lt;a href=&quot;https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch&quot;&gt;notabug repository&lt;/a&gt; or send me an &lt;a href=&quot;mailto:shahsarthakw@gmail.com&quot;&gt;email&lt;/a&gt; if you encounter any issues with this patch, it would greatly help with development.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;outline-container-orgf59c54d&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;orgf59c54d&quot;&gt;Installing the patch&lt;/h3&gt;
+&lt;div id=&quot;text-orgf59c54d&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+To install the patch, you will need to build a git copy of Guix. You can find instructions to do the same &lt;a href=&quot;https://guix.gnu.org/manual/en/html_node/Building-from-Git.html&quot;&gt;here&lt;/a&gt;.
+After building Guix from git, copy the patch into the directory and run &lt;code&gt;git apply parameterization.patch&lt;/code&gt; to apply it to the source.
+Using &lt;code&gt;./pre-inst-env&lt;/code&gt; (see &lt;a href=&quot;https://guix.gnu.org/manual/en/html_node/Running-Guix-Before-It-Is-Installed.html&quot;&gt;Running Guix Before It Is Installed&lt;/a&gt;) now should give you access to parameters.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org15edf7b&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org15edf7b&quot;&gt;Thanks&lt;/h2&gt;
+&lt;div id=&quot;text-org15edf7b&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;p&gt;
+I owe a great deal of credit for this project to my mentors Pjotr Prins and Gabor Boskovits as their guidance was instrumental to its completion. I would also like to thank Ludovic Courtes, Arun Isaac and Efraim Flashner for their feedback and suggestions, which shaped this project into something much more beautiful than what I had originally envisioned. I also learned a lot about writing good Scheme code in the process, and I'm very thankful to Arun Isaac in particular for his detailed and insightful explanations about good practices for writing Scheme code. I also really appreciate the Guix community's enthusiastic and helpful comments on this project, which motivated me to keep working on it.
+&lt;/p&gt;
+
+&lt;p&gt;
+Thank you and Happy Hacking!
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</summary></entry><entry><title>Parameterized Packages: The Second Update</title><id>https://blog.lispy.tech/parameterized-packages-the-second-update.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-08-03T13:37:00Z</updated><link href="https://blog.lispy.tech/parameterized-packages-the-second-update.html" rel="alternate" /><summary type="html">&lt;p&gt;
 This is the third entry in my series of blog posts about adding Parameterized Packages to &lt;a href=&quot;https://guix.gnu.org/&quot;&gt;GNU Guix&lt;/a&gt; for my &lt;a href=&quot;https://summerofcode.withgoogle.com/programs/2023/projects/heQYLzrz&quot;&gt;Google Summer of Code project&lt;/a&gt;. Parameterization here refers to making it possible for packages to be built with &lt;i&gt;compile-time options&lt;/i&gt;, and I have gone over the reasons and benefits for doing so in detail in the &lt;a href=&quot;https://blog.lispy.tech/an-introduction-to-parameterized-packages.html&quot;&gt;first post about Parameterized Packages&lt;/a&gt;.
 &lt;/p&gt;&lt;p&gt;
 In the &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-an-update.html&quot;&gt;last update&lt;/a&gt; I talked about implementing support for &lt;i&gt;boolean&lt;/i&gt;, &lt;i&gt;non-negative&lt;/i&gt; parameters. In this update, I've implemented negation, enumeration and a few other features that will make parameters considerably more powerful!
-&lt;/p&gt;&lt;div id=&quot;outline-container-org98f6e15&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org98f6e15&quot;&gt;What's New&lt;/h2&gt;
-&lt;div id=&quot;text-org98f6e15&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/p&gt;&lt;div id=&quot;outline-container-org5766ce6&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org5766ce6&quot;&gt;What's New&lt;/h2&gt;
+&lt;div id=&quot;text-org5766ce6&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 A brief summary of additions is
 &lt;/p&gt;
@@ -15,10 +203,9 @@ A brief summary of additions is
 &lt;li&gt;Enumerated Types&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
-
-&lt;div id=&quot;outline-container-org6fe7056&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;org6fe7056&quot;&gt;Parametric Variants&lt;/h3&gt;
-&lt;div id=&quot;text-org6fe7056&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org3825d94&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org3825d94&quot;&gt;Parametric Variants&lt;/h3&gt;
+&lt;div id=&quot;text-org3825d94&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
 To make global parameters useful, it is necessary to be able to change the contents of a package in ways that &lt;a href=&quot;https://guix.gnu.org/manual/devel/en/html_node/Package-Transformation-Options.html&quot;&gt;Package Transformations&lt;/a&gt; might not be able to by themselves. Additionally, users might find themselves in situations where they wish to perform different operations for different values of an enumerated type.
 &lt;/p&gt;
@@ -32,52 +219,50 @@ For a better understanding of them, please look at any of the examples using the
 &lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-
-&lt;div id=&quot;outline-container-org89ddfb6&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;org89ddfb6&quot;&gt;Parameter Dependencies&lt;/h3&gt;
-&lt;div id=&quot;text-org89ddfb6&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org450fd04&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org450fd04&quot;&gt;Parameter Dependencies&lt;/h3&gt;
+&lt;div id=&quot;text-org450fd04&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
 It's possible that enabling a parameter might require enabling another parameter or a package.
 For such situations, I've added a new &lt;code&gt;dependencies&lt;/code&gt; field to the parameter record that lets users specify parameters or packages a given parameter depends on. You can also fine-tune values for the parameter and the parameters in dependencies.
 &lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-
-&lt;div id=&quot;outline-container-orgff42b9d&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orgff42b9d&quot;&gt;Negation and Enumeration&lt;/h3&gt;
-&lt;div id=&quot;text-orgff42b9d&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org4042377&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org4042377&quot;&gt;Negation and Enumeration&lt;/h3&gt;
+&lt;div id=&quot;text-org4042377&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-orgfe694f6&quot; class=&quot;outline-4&quot;&gt;
-&lt;h4 id=&quot;orgfe694f6&quot;&gt;Enumeration&lt;/h4&gt;
-&lt;div id=&quot;text-orgfe694f6&quot; class=&quot;outline-text-4&quot;&gt;
+&lt;div id=&quot;outline-container-org7edbe2c&quot; class=&quot;outline-4&quot;&gt;
+&lt;h4 id=&quot;org7edbe2c&quot;&gt;Enumeration&lt;/h4&gt;
+&lt;div id=&quot;text-org7edbe2c&quot; class=&quot;outline-text-4&quot;&gt;
 &lt;p&gt;
 In the previous version, parameters could only be in two states: &lt;code&gt;on&lt;/code&gt; and &lt;code&gt;off&lt;/code&gt;.
 This version makes it possible for parameters to take &lt;b&gt;multiple states&lt;/b&gt;, as long as the user specifies all the possible states.
 This has a huge number of uses- for example, here's a parameter type for locales:
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0; font-weight: bold;&quot;&gt;define&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;locale-parameter-type&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;parameter-type&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;name 'locale-type&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;accepted-values&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;    '(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;ca_ES cs_CZ da_DK de_DE&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            el_GR en_AU en_CA en_GB&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            en_US es_AR es_CL es_ES&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            es_MX fi_FI fr_BE fr_CA&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            fr_CH fr_FR ga_IE it_IT&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            ja_JP ko_KR nb_NO nl_NL&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            pl_PL pt_PT ro_RO ru_RU&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            sv_SE tr_TR uk_UA vi_VN&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            zh_CN&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;negation #f&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;default 'en_US&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;description &lt;/span&gt;&lt;span style=&quot;color: #d5d4e1e1f0f0;&quot;&gt;&amp;quot;Type for Locales&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3; font-weight: bold;&quot;&gt;define&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;locale-parameter-type&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;parameter-type&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;name 'locale-type&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;accepted-values&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;    '(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;ca_ES cs_CZ da_DK de_DE&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            el_GR en_AU en_CA en_GB&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            en_US es_AR es_CL es_ES&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            es_MX fi_FI fr_BE fr_CA&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            fr_CH fr_FR ga_IE it_IT&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            ja_JP ko_KR nb_NO nl_NL&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            pl_PL pt_PT ro_RO ru_RU&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            sv_SE tr_TR uk_UA vi_VN&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;            zh_CN&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;negation #f&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;default 'en_US&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;description &lt;/span&gt;&lt;span style=&quot;color: #ea69c3c3c544;&quot;&gt;&amp;quot;Type for Locales&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;ul class=&quot;org-ul&quot;&gt;
-&lt;li&gt;&lt;a id=&quot;org2ed9519&quot;&gt;&lt;/a&gt;Explanation&lt;br /&gt;
-&lt;div id=&quot;text-org2ed9519&quot; class=&quot;outline-text-5&quot;&gt;
+&lt;li&gt;&lt;a id=&quot;org17af5f1&quot;&gt;&lt;/a&gt;Explanation&lt;br /&gt;
+&lt;div id=&quot;text-org17af5f1&quot; class=&quot;outline-text-5&quot;&gt;
 &lt;p&gt;
 &lt;code&gt;parameter-type&lt;/code&gt; is the record type for parameter types.
 Please note that &lt;b&gt;parameter types&lt;/b&gt; are different from &lt;b&gt;parameters&lt;/b&gt;.
@@ -96,7 +281,7 @@ By default this is the first element of &lt;code&gt;accepted-values&lt;/code&gt;
 Users can negate a parameter in a parameter list by using the &lt;code&gt;#:off&lt;/code&gt; keyword:
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;list ... (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;parameter-name &lt;/span&gt;&lt;span style=&quot;color: #7f98fb; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #43bfb0;&quot;&gt;...&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;list ... (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;parameter-name &lt;/span&gt;&lt;span style=&quot;color: #6f9e77; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #c6a6b3;&quot;&gt;...&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;
@@ -111,29 +296,29 @@ In our example, it is set to &lt;code&gt;'en_US&lt;/code&gt;.&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-org2e3127f&quot; class=&quot;outline-4&quot;&gt;
-&lt;h4 id=&quot;org2e3127f&quot;&gt;Negation&lt;/h4&gt;
-&lt;div id=&quot;text-org2e3127f&quot; class=&quot;outline-text-4&quot;&gt;
+&lt;div id=&quot;outline-container-orgf9cde02&quot; class=&quot;outline-4&quot;&gt;
+&lt;h4 id=&quot;orgf9cde02&quot;&gt;Negation&lt;/h4&gt;
+&lt;div id=&quot;text-orgf9cde02&quot; class=&quot;outline-text-4&quot;&gt;
 &lt;p&gt;
 &lt;i&gt;Negation&lt;/i&gt; refers to being able to specify the opposite value for a parameter.
 If it is set to anything but &lt;code&gt;#f&lt;/code&gt; for a given &lt;code&gt;parameter-type&lt;/code&gt; record, any &lt;code&gt;package&lt;/code&gt; record belonging to that &lt;code&gt;parameter-type&lt;/code&gt; takes on that value when set to the special keyword &lt;code&gt;#:off&lt;/code&gt;.
 Here's an example that uses it to run the &lt;code&gt;without-tests&lt;/code&gt; transform on a package whenever the &lt;code&gt;boolean&lt;/code&gt; parameter &lt;code&gt;tests&lt;/code&gt; is set to &lt;code&gt;#:off&lt;/code&gt;.
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;define-global-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;name 'tests&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;variants&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;parameter-variant-match&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #62baaf; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #62baaf; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;without-tests &lt;/span&gt;&lt;span style=&quot;color: #a7b7f7; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;description &lt;/span&gt;&lt;span style=&quot;color: #d5d4e1e1f0f0;&quot;&gt;&amp;quot;Toggle for tests&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;predicate #t&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;define-global-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;name 'tests&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;without-tests &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;description &lt;/span&gt;&lt;span style=&quot;color: #ea69c3c3c544;&quot;&gt;&amp;quot;Toggle for tests&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;predicate #t&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;ul class=&quot;org-ul&quot;&gt;
-&lt;li&gt;&lt;a id=&quot;org1df2fcd&quot;&gt;&lt;/a&gt;Explanation&lt;br /&gt;
-&lt;div id=&quot;text-org1df2fcd&quot; class=&quot;outline-text-5&quot;&gt;
+&lt;li&gt;&lt;a id=&quot;org7cea65f&quot;&gt;&lt;/a&gt;Explanation&lt;br /&gt;
+&lt;div id=&quot;text-org7cea65f&quot; class=&quot;outline-text-5&quot;&gt;
 &lt;p&gt;
 &lt;code&gt;define-global-parameter&lt;/code&gt; is a macro that takes a parameter record and makes it global.
 This means that it can be referred to in any parameter definition, and that its &lt;code&gt;name&lt;/code&gt; is guaranteed to be unique among all global parameters.
@@ -160,18 +345,19 @@ Users can also specify the build system the value should match, as seen in the &
 This is not all there is to the magic of &lt;code&gt;parameter-variant-match&lt;/code&gt;;
 to make parameterization more useful, it lets users get the package name, the package and the value of the parameter the statement matched against.
 These are accessed through &lt;a href=&quot;https://www.gnu.org/software/guile/manual/html_node/Keywords.html&quot;&gt;keywords&lt;/a&gt;, such as the &lt;code&gt;#:package-name&lt;/code&gt; keyword in this argument.
-Have a look at the &lt;code&gt;gcc-oflag&lt;/code&gt; and &lt;code&gt;static-lib&lt;/code&gt; parameters in &lt;a href=&quot;#orgf735ed6&quot;&gt;Bonus Examples&lt;/a&gt; to learn more!&lt;/li&gt;
+Have a look at the &lt;code&gt;gcc-oflag&lt;/code&gt; and &lt;code&gt;static-lib&lt;/code&gt; parameters in &lt;a href=&quot;#org6ceb6ea&quot;&gt;Bonus Examples&lt;/a&gt; to learn more!&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;predicate&lt;/code&gt; is set to &lt;code&gt;#f&lt;/code&gt; by default.
 &lt;code&gt;#f&lt;/code&gt; means that the given parameter can only be used when its been mentioned in a package's &lt;code&gt;parameter-spec&lt;/code&gt;.
 Setting this to &lt;code&gt;#t&lt;/code&gt; means that a &lt;i&gt;global&lt;/i&gt; parameter can be applied to packages that do not have it in their spec. &lt;b&gt;This is extremely dangerous and should only be used for extremely generic parameters&lt;/b&gt;.
 Otherwise, the user may set this to any lambda that takes a &lt;code&gt;package&lt;/code&gt; record as its argument and returns &lt;code&gt;#t&lt;/code&gt; or &lt;code&gt;#f&lt;/code&gt;. The global parameter will be applied if this lambda returns &lt;code&gt;#t&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;
 &lt;code&gt;dependencies&lt;/code&gt; is a list of parameters and packages that a given parameter depends on. The list is punctuated by keywords to indicate parameter and package dependencies, with &lt;code&gt;#:parameter&lt;/code&gt; and &lt;code&gt;#:package&lt;/code&gt; respectively. If no keywords are given, the arguments are assumed to be parameters.
+&lt;b&gt;Package dependencies have not been implemented yet.&lt;/b&gt;
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;dependencies&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt;`(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb; font-weight: bold;&quot;&gt;#:parameter&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt; a b ...&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  &lt;/span&gt;&lt;span style=&quot;color: #7f98fb; font-weight: bold;&quot;&gt;#:package&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt; git ,(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;package (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #e5e4dadafdfd;&quot;&gt;&amp;quot;some-package&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #abc3e1;&quot;&gt;...&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #7f98fb;&quot;&gt;...&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;dependencies&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt;`(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77; font-weight: bold;&quot;&gt;#:parameter&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt; a b ...&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  &lt;/span&gt;&lt;span style=&quot;color: #6f9e77; font-weight: bold;&quot;&gt;#:package&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt; git ,(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;package (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #e867d958cf4e;&quot;&gt;&amp;quot;some-package&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #d4878a;&quot;&gt;...&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #6f9e77;&quot;&gt;...&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;description&lt;/code&gt; is a simple description of the parameter.&lt;/li&gt;
@@ -181,128 +367,141 @@ Otherwise, the user may set this to any lambda that takes a &lt;code&gt;package&
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-orge86d775&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;orge86d775&quot;&gt;What does using parameters look like?&lt;/h2&gt;
-&lt;div id=&quot;text-orge86d775&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org91caaaf&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org91caaaf&quot;&gt;What does using parameters look like?&lt;/h2&gt;
+&lt;div id=&quot;text-org91caaaf&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 Here is an example use-case for parameterization, which packages Emacs' &lt;code&gt;next&lt;/code&gt;, &lt;code&gt;pgtk&lt;/code&gt;, &lt;code&gt;xwidgets&lt;/code&gt;, &lt;code&gt;wide-int&lt;/code&gt; and &lt;code&gt;no-x&lt;/code&gt; variants in one package and also makes it possible to mix and match compatible variants.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-orge9485a2&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orge9485a2&quot;&gt;Usage&lt;/h3&gt;
-&lt;div id=&quot;text-orge9485a2&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-orgcc96939&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;orgcc96939&quot;&gt;Usage&lt;/h3&gt;
+&lt;div id=&quot;text-orgcc96939&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
 The usage format for parameters is the same as that for other package transforms- you specify them through the CLI. In the future, it will also be possible to have a global set of transforms.
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-bash&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;guix install emacs-parameterized &lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;\&lt;/span&gt;
-&lt;span style=&quot;color: #af8aff;&quot;&gt;     --with-parameter=emacs-parameterized=&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;pgtk&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;=on &lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;\&lt;/span&gt;
-&lt;span style=&quot;color: #af8aff;&quot;&gt;     --with-parameter=emacs-parameterized=tree-sitter=on &lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;\&lt;/span&gt;
+&lt;pre class=&quot;src src-bash&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;guix install emacs-parameterized &lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;\&lt;/span&gt;
+&lt;span style=&quot;color: #7a94df;&quot;&gt;     --with-parameter=emacs-parameterized=&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;pgtk&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;=on &lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;\&lt;/span&gt;
+&lt;span style=&quot;color: #7a94df;&quot;&gt;     --with-parameter=emacs-parameterized=tree-sitter=on &lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;\&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-orga0da083&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orga0da083&quot;&gt;Underlying Code&lt;/h3&gt;
-&lt;div id=&quot;text-orga0da083&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-orgf6e509d&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;orgf6e509d&quot;&gt;Underlying Code&lt;/h3&gt;
+&lt;div id=&quot;text-orgf6e509d&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;p&gt;
+&lt;b&gt;EDIT 9/18/2023:&lt;/b&gt; as the &lt;code&gt;package&lt;/code&gt; record's &lt;code&gt;source&lt;/code&gt; field is not thunked, I'm instead using a &lt;code&gt;#:lambda&lt;/code&gt; inside the &lt;code&gt;next&lt;/code&gt; package parameter to change it.
+&lt;/p&gt;
+
 &lt;p&gt;
 Under the hood, this is what the implementation looks like.
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;package-with-parameters&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt; [&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;parameter-spec&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;local&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;list&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;       (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-parameter (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;name 'next&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-       &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-parameter (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;name 'tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                          &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;dependencies '(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-       &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;name 'pgtk&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;variants&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;parameter-variant-match&lt;/span&gt;
-&lt;span style=&quot;color: #cad7e6;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;with-configure-flag&lt;/span&gt;
-&lt;span style=&quot;color: #7db8b1;&quot;&gt;                          &lt;/span&gt;&lt;span style=&quot;color: #7db8b1; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #bebedc5bd8d8;&quot;&gt;&amp;quot;=--with-pgtk&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;dependencies '(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;tree-sitter x11&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-       &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;name 'xwidgets&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;variants&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;parameter-variant-match&lt;/span&gt;
-&lt;span style=&quot;color: #cad7e6;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;with-configure-flag&lt;/span&gt;
-&lt;span style=&quot;color: #7db8b1;&quot;&gt;                          &lt;/span&gt;&lt;span style=&quot;color: #7db8b1; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #bebedc5bd8d8;&quot;&gt;&amp;quot;=--with-xwidgets&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-       &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;name 'wide-int&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;variants&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;parameter-variant-match&lt;/span&gt;
-&lt;span style=&quot;color: #cad7e6;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;with-configure-flag&lt;/span&gt;
-&lt;span style=&quot;color: #7db8b1;&quot;&gt;                          &lt;/span&gt;&lt;span style=&quot;color: #7db8b1; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #bebedc5bd8d8;&quot;&gt;&amp;quot;=--with-wide-int&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-  &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;one-of '(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;_ (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #a7b7f7; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #62baaf;&quot;&gt;pgtk&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-            &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;_ (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #a7b7f7; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #62baaf;&quot;&gt;xwidgets&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;]&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;inherit emacs&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #bfbfcc4bfdfd;&quot;&gt;&amp;quot;emacs-parameterized&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;source&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter-if&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;   'next&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;origin&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;inherit (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;package-source emacs&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;method git-fetch&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;uri (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;git-reference&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;url &lt;/span&gt;&lt;span style=&quot;color: #e564ebebf372;&quot;&gt;&amp;quot;https://git.savannah.gnu.org/git/emacs.git/&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;
-          &lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;commit (&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;string-append &lt;/span&gt;&lt;span style=&quot;color: #f372ee6dfdfd;&quot;&gt;&amp;quot;emacs-&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #e6dcfb;&quot;&gt;version&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;file-name (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;git-file-name name version&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;patches&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;search-patches&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot;color: #d3d3dbdbfbfb;&quot;&gt;&amp;quot;emacs-exec-path.patch&amp;quot;&lt;/span&gt;
-      &lt;span style=&quot;color: #d3d3dbdbfbfb;&quot;&gt;&amp;quot;emacs-fix-scheme-indent-function.patch&amp;quot;&lt;/span&gt;
-      &lt;span style=&quot;color: #d3d3dbdbfbfb;&quot;&gt;&amp;quot;emacs-native-comp-driver-options.patch&amp;quot;&lt;/span&gt;
-      &lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;parameter-if 'pgtk&lt;/span&gt;
-&lt;span style=&quot;color: #cad7e6;&quot;&gt;                    &lt;/span&gt;&lt;span style=&quot;color: #e564ebebf372;&quot;&gt;&amp;quot;emacs-pgtk-super-key-fix.patch&amp;quot;&lt;/span&gt;
-                    &lt;span style=&quot;color: #cad7e6;&quot;&gt;nil&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;sha256&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;base32&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot;color: #d3d3dbdbfbfb;&quot;&gt;&amp;quot;09jm1q5pvd1dc0xq5rhn66v1j235zlr72kwv5i27xigvi9nfqkv1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;origin&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;inherit (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;package-source emacs&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;arguments&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;substitute-keyword-arguments (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;package-arguments emacs&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;parameter-match&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;     [&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #cad7e6; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #62baaf;&quot;&gt;'(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:configure-flags&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; flags #~'()&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;
-         &lt;span style=&quot;color: #cad7e6;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;delete &lt;/span&gt;&lt;span style=&quot;color: #f372ee6dfdfd;&quot;&gt;&amp;quot;--with-cairo&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #e6dcfb;&quot;&gt;#$flags&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:modules&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; _&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;%emacs-modules build-system&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:phases&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; phases&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;
-         &lt;span style=&quot;color: #cad7e6;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;modify-phases #$phases&lt;/span&gt;
-&lt;span style=&quot;color: #e6dcfb;&quot;&gt;             (&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;delete 'restore-emacs-pdmp&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;
-             &lt;span style=&quot;color: #e6dcfb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;delete 'strip-double-wrap&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;]&lt;/span&gt;
-     &lt;span style=&quot;color: #cbb5fb;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7; font-weight: bold;&quot;&gt;#:all&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt; xwidgets (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;pgtk &lt;/span&gt;&lt;span style=&quot;color: #cad7e6; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #62baaf;&quot;&gt;'(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:configure-flags&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; flags #~'()&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;
-         &lt;span style=&quot;color: #cad7e6;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;cons &lt;/span&gt;&lt;span style=&quot;color: #f372ee6dfdfd;&quot;&gt;&amp;quot;--with-xwidgets&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #e6dcfb;&quot;&gt;#$flags&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:modules&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; _&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;%emacs-modules build-system&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #a7b7f7;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:phases&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt; phases&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;
-         &lt;span style=&quot;color: #cad7e6;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;modify-phases #$phases&lt;/span&gt;
-&lt;span style=&quot;color: #e6dcfb;&quot;&gt;             (&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;delete 'restore-emacs-pdmp&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;
-             &lt;span style=&quot;color: #e6dcfb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;delete 'strip-double-wrap&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;inputs&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter-modify-inputs&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;   [&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;next&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;prepend sqlite&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;]&lt;/span&gt;
-   &lt;span style=&quot;color: #abc3e1;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;prepend tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;]&lt;/span&gt;
-   &lt;span style=&quot;color: #abc3e1;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;xwidgets&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;prepend gsettings-desktop-schemas&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;                        webkitgtk-with-libsoup2&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;]&lt;/span&gt;
-   &lt;span style=&quot;color: #abc3e1;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #a7b7f7; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;delete &lt;/span&gt;&lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libx11&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;gtk+&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libxft&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libtiff&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;giflib&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libjpeg&amp;quot;&lt;/span&gt;
-            &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;imagemagick&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libpng&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;librsvg&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libxpm&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libice&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libsm&amp;quot;&lt;/span&gt;
-            &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;cairo&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;pango&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;harfbuzz&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;libotf&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;m17n-lib&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;dbus&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;package-with-parameters&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt; [&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;parameter-spec&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;local&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;list&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-parameter &lt;/span&gt;
+&lt;span style=&quot;color: #bbcde3;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;name 'next&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #6eb0eb;&quot;&gt;       (&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;_&lt;/span&gt;
+&lt;span style=&quot;color: #3cae42;&quot;&gt;         &lt;/span&gt;&lt;span style=&quot;color: #3cae42; font-weight: bold;&quot;&gt;#:lambda&lt;/span&gt;
+&lt;span style=&quot;color: #3cae42;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6; font-weight: bold;&quot;&gt;lambda&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;pkg&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;)&lt;/span&gt;
+           &lt;span style=&quot;color: #ebb4b6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;package&lt;/span&gt;
+&lt;span style=&quot;color: #d69b21;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #a0c1cb;&quot;&gt;inherit pkg&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #d69b21;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a0c1cb;&quot;&gt;version &lt;/span&gt;&lt;span style=&quot;color: #d04fe0e0e5e4;&quot;&gt;&amp;quot;29.0.92&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #d69b21;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a0c1cb;&quot;&gt;source&lt;/span&gt;
+&lt;span style=&quot;color: #a0c1cb;&quot;&gt;             (&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;origin&lt;/span&gt;
+&lt;span style=&quot;color: #d6dbe9;&quot;&gt;              (&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;inherit (&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;package-source pkg&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #d6dbe9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;method git-fetch&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #d6dbe9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;uri&lt;/span&gt;
+&lt;span style=&quot;color: #ebebeb;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;git-reference&lt;/span&gt;
+&lt;span style=&quot;color: #adadad;&quot;&gt;                (&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;url &lt;/span&gt;&lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;https://git.savannah.gnu.org/git/emacs.git/&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;)&lt;/span&gt;
+                &lt;span style=&quot;color: #adadad;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;commit (&lt;/span&gt;&lt;span style=&quot;color: #eae9e8;&quot;&gt;string-append &lt;/span&gt;&lt;span style=&quot;color: #f574f4f3f473;&quot;&gt;&amp;quot;emacs-&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #eae9e8;&quot;&gt;version&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #d6dbe9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;file-name&lt;/span&gt;
+&lt;span style=&quot;color: #ebebeb;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;git-file-name (&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;package-name pkg&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #adadad;&quot;&gt;version&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #d6dbe9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;patches&lt;/span&gt;
+&lt;span style=&quot;color: #ebebeb;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;parameter-if &lt;/span&gt;&lt;span style=&quot;color: #adadad; font-weight: bold;&quot;&gt;#:package&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt; pkg (&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;pgtk&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;)&lt;/span&gt;
+                             &lt;span style=&quot;color: #adadad;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;search-patches&lt;/span&gt;
+&lt;span style=&quot;color: #e4d9d9;&quot;&gt;                              &lt;/span&gt;&lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-exec-path.patch&amp;quot;&lt;/span&gt;
+                              &lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-fix-scheme-indent-function.patch&amp;quot;&lt;/span&gt;
+                              &lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-native-comp-driver-options.patch&amp;quot;&lt;/span&gt;
+                              &lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-pgtk-super-key-fix.patch&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;)&lt;/span&gt;
+                             &lt;span style=&quot;color: #adadad;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e4d9d9;&quot;&gt;search-patches&lt;/span&gt;
+&lt;span style=&quot;color: #e4d9d9;&quot;&gt;                              &lt;/span&gt;&lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-exec-path.patch&amp;quot;&lt;/span&gt;
+                              &lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-fix-scheme-indent-function.patch&amp;quot;&lt;/span&gt;
+                              &lt;span style=&quot;color: #f271ecececec;&quot;&gt;&amp;quot;emacs-native-comp-driver-options.patch&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;)&lt;/span&gt;
+              &lt;span style=&quot;color: #d6dbe9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;sha256&lt;/span&gt;
+&lt;span style=&quot;color: #ebebeb;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #adadad;&quot;&gt;base32&lt;/span&gt;
+&lt;span style=&quot;color: #adadad;&quot;&gt;         &lt;/span&gt;&lt;span style=&quot;color: #d6d6d6d6d6d6;&quot;&gt;&amp;quot;1h3p325859svcy43iv7wr27dp68049j9d44jq5akcynqdkxz4jjn&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #ebebeb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a0c1cb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-parameter (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;name 'tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                        &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;dependencies '(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;next&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #bbcde3;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;name 'pgtk&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #6eb0eb;&quot;&gt;       (&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #3cae42; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;with-configure-flag&lt;/span&gt;
+&lt;span style=&quot;color: #ebb4b6;&quot;&gt;                        &lt;/span&gt;&lt;span style=&quot;color: #ebb4b6; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #f5f4da59db5a;&quot;&gt;&amp;quot;=--with-pgtk&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;dependencies '(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;tree-sitter x11&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #bbcde3;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;name 'xwidgets&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #6eb0eb;&quot;&gt;       (&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #3cae42; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;with-configure-flag&lt;/span&gt;
+&lt;span style=&quot;color: #ebb4b6;&quot;&gt;                        &lt;/span&gt;&lt;span style=&quot;color: #ebb4b6; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #f5f4da59db5a;&quot;&gt;&amp;quot;=--with-xwidgets&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+     &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #bbcde3;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;name 'wide-int&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #6eb0eb;&quot;&gt;       (&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #3cae42; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;with-configure-flag&lt;/span&gt;
+&lt;span style=&quot;color: #ebb4b6;&quot;&gt;                        &lt;/span&gt;&lt;span style=&quot;color: #ebb4b6; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #f5f4da59db5a;&quot;&gt;&amp;quot;=--with-wide-int&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+  &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;one-of '(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;_ (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #bbcde3;&quot;&gt;pgtk&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;_ (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #bbcde3;&quot;&gt;xwidgets&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;]&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;inherit emacs&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #b7b7cf4ebbbb;&quot;&gt;&amp;quot;emacs-parameterized&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;arguments&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-substitute-keyword-arguments &lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;package-arguments emacs&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #d0b29e;&quot;&gt;'(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4; font-weight: bold;&quot;&gt;#:configure-flags&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt; flags #~'()&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;
+       &lt;span style=&quot;color: #6eb0eb;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;delete &lt;/span&gt;&lt;span style=&quot;color: #eb6ad3d3e261;&quot;&gt;&amp;quot;--with-cairo&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #d6a7c4;&quot;&gt;#$flags&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4; font-weight: bold;&quot;&gt;#:modules&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt; _&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;%emacs-modules build-system&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4; font-weight: bold;&quot;&gt;#:phases&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt; phases&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;
+       &lt;span style=&quot;color: #6eb0eb;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;modify-phases #$phases&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;                        (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;delete 'restore-emacs-pdmp&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;
+                        &lt;span style=&quot;color: #d6a7c4;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;delete 'strip-double-wrap&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;]&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;#:all&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;xwidgets on&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;pgtk &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #d0b29e;&quot;&gt;'(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4; font-weight: bold;&quot;&gt;#:configure-flags&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt; flags #~'()&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;
+       &lt;span style=&quot;color: #6eb0eb;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;cons &lt;/span&gt;&lt;span style=&quot;color: #eb6ad3d3e261;&quot;&gt;&amp;quot;--with-xwidgets&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #d6a7c4;&quot;&gt;#$flags&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4; font-weight: bold;&quot;&gt;#:modules&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt; _&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;%emacs-modules build-system&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4; font-weight: bold;&quot;&gt;#:phases&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt; phases&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;
+       &lt;span style=&quot;color: #6eb0eb;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;modify-phases #$phases&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;                        (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;delete 'restore-emacs-pdmp&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;
+                        &lt;span style=&quot;color: #d6a7c4;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;delete 'strip-double-wrap&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;inputs&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-modify-inputs&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;   [&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;next&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;prepend sqlite&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;]&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;prepend tree-sitter&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;]&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;xwidgets&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;prepend gsettings-desktop-schemas&lt;/span&gt;
+&lt;span style=&quot;color: #bbcde3;&quot;&gt;                        webkitgtk-with-libsoup2&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;]&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;x11 &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;delete &lt;/span&gt;&lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libx11&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;gtk+&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libxft&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libtiff&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;giflib&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libjpeg&amp;quot;&lt;/span&gt;
+            &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;imagemagick&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libpng&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;librsvg&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libxpm&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libice&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libsm&amp;quot;&lt;/span&gt;
+            &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;cairo&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;pango&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;harfbuzz&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;libotf&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;m17n-lib&amp;quot;&lt;/span&gt; &lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;dbus&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-
-&lt;div id=&quot;outline-container-orgeba6ac6&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orgeba6ac6&quot;&gt;Step-by-step Explanation&lt;/h3&gt;
-&lt;div id=&quot;text-orgeba6ac6&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org01c4f8b&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org01c4f8b&quot;&gt;Step-by-step Explanation&lt;/h3&gt;
+&lt;div id=&quot;text-org01c4f8b&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;ol class=&quot;org-ol&quot;&gt;
-&lt;li&gt;&lt;code&gt;package-with-parameters&lt;/code&gt;
+&lt;li&gt;&lt;code&gt;package-with-parameters&lt;/code&gt;:
 This macro takes a &lt;code&gt;parameter-spec&lt;/code&gt; as its first argument and applies the parameter specification to the package in its body. The &lt;i&gt;default parameters&lt;/i&gt; are then activated within the package.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parameter-spec&lt;/code&gt;
+&lt;li&gt;&lt;code&gt;parameter-spec&lt;/code&gt;:
 This record type contains all of the logic necessary to declare and resolve parameters for a package. This normally goes inside the &lt;code&gt;properties&lt;/code&gt; field of the &lt;code&gt;package&lt;/code&gt; record.
 In the previous post, it was necessary to put this record inside the properties, but now &lt;code&gt;package-with-parameters&lt;/code&gt; handles that for us.
 The parameter specification record contains various fields, all of which are optional.
@@ -310,82 +509,89 @@ I have gone over the fields in detail in the &lt;a href=&quot;https://blog.lispy
 The only big change is that &lt;code&gt;one-of&lt;/code&gt; now has a functionality wherein if you start a list within it with &lt;code&gt;_&lt;/code&gt;, you can have a case where none of the values in it are positive. Otherwise, it throws an error as one and only one value is expected to be positive.
 Also notice the usage of &lt;code&gt;#:off&lt;/code&gt; to indicate negation.
 We have also not declared &lt;code&gt;x11&lt;/code&gt;, which will hence be treated as a global parameter. In general global parameters must either have their &lt;code&gt;predicate&lt;/code&gt; set to something that returns &lt;code&gt;#t&lt;/code&gt; or be present &lt;i&gt;anywhere&lt;/i&gt; in the &lt;code&gt;parameter-spec&lt;/code&gt; to be applicable. Users are advised to put them in the &lt;code&gt;optional&lt;/code&gt; field, as it was created with this use case in mind.&lt;/li&gt;
-&lt;li&gt;package body
+&lt;li&gt;local parameter &lt;code&gt;next&lt;/code&gt;:
+The local parameter &lt;code&gt;next&lt;/code&gt; has an interesting &lt;code&gt;#:lambda&lt;/code&gt; statement inside it. This statement takes the current &lt;code&gt;package&lt;/code&gt; record as an argument and returns a new &lt;code&gt;package&lt;/code&gt; record, which is then used in its place. This is an extremely powerful method for changing otherwise unchangeable options, such as the ones here; because the &lt;code&gt;version&lt;/code&gt; and &lt;code&gt;source&lt;/code&gt; fields are not thunked, this is the only way of modifying them. The &lt;code&gt;#:lambda&lt;/code&gt;'s functions can be passed 0, 1 or 2 arguments. In the case that it asks for 1 argument, the current &lt;code&gt;package&lt;/code&gt; record is passed. If it asks for 2, the current &lt;code&gt;package&lt;/code&gt; record along with the given parameter's value are passed. In all cases, the function is expected to return a &lt;code&gt;package&lt;/code&gt; record that will then be taken as the new current &lt;code&gt;package&lt;/code&gt; record.&lt;/li&gt;
+&lt;li&gt;package body:
 Within the package body, we have the usual fields you would expect.
 &lt;code&gt;(inherit emacs)&lt;/code&gt; signifies that this package inherits all of emacs' base fields, and the rest of the fields are overrides of that.
 Please note that the &lt;code&gt;name&lt;/code&gt; field cannot be influenced by parameters as it is not &lt;code&gt;thunked&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parameter-match&lt;/code&gt;
+&lt;li&gt;&lt;code&gt;parameter-match&lt;/code&gt;:
+&lt;b&gt;note: this has been substituted by parameter-substitute-keyword-arguments in the latest edit&lt;/b&gt;
 This is an extremely useful macro that matches &lt;i&gt;all&lt;/i&gt; the parameter lists that has any positive parameters. It is also possible to require all the parameters in a list to be positive by using &lt;code&gt;#:all&lt;/code&gt;. Please keep in mind that it does not short-circuit by default like &lt;code&gt;cond&lt;/code&gt;. It will keep matching parameters until all the lists have been combed through. A short-circuiting version exists in the form of &lt;code&gt;parameter-match-case&lt;/code&gt;. I've gone over the functionality offered by this macro in detail in the &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-an-update.html&quot;&gt;previous blog post&lt;/a&gt;, however it has one small improvement:
 all conditionals now support checking if a parameter is set to a particular value instead of just checking if it is positive or not. This is very useful for enumerated types, where you might for example want to disable some features if and only if a parameter is set to the second positive value. To illustrate this, if you wanted to check whether a parameter &lt;code&gt;y&lt;/code&gt; is set to &lt;code&gt;v1&lt;/code&gt; or if the parameter list &lt;code&gt;z&lt;/code&gt; is &lt;i&gt;non-negative&lt;/i&gt;, the list would be &lt;code&gt;((y v1) z)&lt;/code&gt;.
 You can also use this to check for the default or negative value, with &lt;code&gt;(parameter-name #:default)&lt;/code&gt; and &lt;code&gt;(parameter-name #:off)&lt;/code&gt; respectively. &lt;code&gt;_&lt;/code&gt; is a similar special symbol which matches all &lt;i&gt;non-negative&lt;/i&gt; values, but it is not necessary to use it since the parameter name by itself, say &lt;code&gt;parameter-name&lt;/code&gt; is the same as &lt;code&gt;(parameter-name _)&lt;/code&gt;.
 We can see this in the &lt;code&gt;((y v1) z)&lt;/code&gt; example above, where &lt;code&gt;z&lt;/code&gt; is matching all non-negative values of &lt;code&gt;z&lt;/code&gt; even though we did not specify it as &lt;code&gt;(z _)&lt;/code&gt;.
 You can also use this in all of the fields in &lt;code&gt;parameter-spec&lt;/code&gt; that require you to specify parameters. The parameter value list syntax is the same everywhere.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parameter-substitute-keyword-arguments&lt;/code&gt; and &lt;code&gt;parameter-modify-inputs&lt;/code&gt;:
+As explained in the previous blog post, because &lt;code&gt;modify-inputs&lt;/code&gt; is a macro, we cannot use &lt;code&gt;parameter-match&lt;/code&gt; within it. To counter this, I have written &lt;code&gt;parameter-modify-inputs&lt;/code&gt; that behaves a lot like if &lt;code&gt;modify-inputs&lt;/code&gt; had a &lt;code&gt;parameter-match&lt;/code&gt; macro within it. I have similarly written &lt;code&gt;parameter-substitute-keyword-arguments&lt;/code&gt; for another commonly used macro called &lt;code&gt;substitute-keyword-arguments&lt;/code&gt;.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;
 I have gone over the rest of the conditionals in the  &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-an-update.html&quot;&gt;previous blog post&lt;/a&gt; too, they remain more or less the same with the exception that we use &lt;code&gt;#:all&lt;/code&gt; inside lists instead of &lt;code&gt;all&lt;/code&gt; like last time. This is to make it obvious at a glance that &lt;code&gt;#:all&lt;/code&gt; is not a parameter like the rest of the list.
 &lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-orgf735ed6&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;orgf735ed6&quot;&gt;Bonus Examples&lt;/h2&gt;
-&lt;div id=&quot;text-orgf735ed6&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org6ceb6ea&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org6ceb6ea&quot;&gt;Bonus Examples&lt;/h2&gt;
+&lt;div id=&quot;text-org6ceb6ea&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 Here are some bonus examples for enumerated parameters:
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-org63fbd80&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;org63fbd80&quot;&gt;GCC Optimization Flags&lt;/h3&gt;
-&lt;div id=&quot;text-org63fbd80&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org5cca620&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org5cca620&quot;&gt;GCC Optimization Flags&lt;/h3&gt;
+&lt;div id=&quot;text-org5cca620&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
 &lt;code&gt;gcc&lt;/code&gt; has a set of &lt;a href=&quot;https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html&quot;&gt;optimization flags&lt;/a&gt; that can be used to make programs faster or smaller at the expense of stability.
 This is a very basic attempt at adding that functionality to the &lt;code&gt;gnu-build-system&lt;/code&gt; through the &lt;code&gt;CFLAGS&lt;/code&gt; make-flag.
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;name 'gcc-oflag&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;type&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter-type&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;name '_&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;accepted-values '(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;-O0 -O1 -O2 -O3 -Os -Ofast -Og -Oz&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-   &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;negation #f&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;variants&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter-variant-match&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #cbb5fb; font-weight: bold;&quot;&gt;#:build-system&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt; gnu-build-system&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot;color: #cbb5fb; font-weight: bold;&quot;&gt;#:lambda&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package/inherit &lt;/span&gt;&lt;span style=&quot;color: #62baaf; font-weight: bold;&quot;&gt;#:package&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;arguments&lt;/span&gt;
-&lt;span style=&quot;color: #a7b7f7;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;substitute-keyword-arguments&lt;/span&gt;
-&lt;span style=&quot;color: #cad7e6;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;package-arguments &lt;/span&gt;&lt;span style=&quot;color: #e6dcfb; font-weight: bold;&quot;&gt;#:package&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;
-          &lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7db8b1; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt; flags #~'()&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;
-           &lt;span style=&quot;color: #e6dcfb;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;append&lt;/span&gt;
-&lt;span style=&quot;color: #7db8b1;&quot;&gt;              #$flags&lt;/span&gt;
-&lt;span style=&quot;color: #7db8b1;&quot;&gt;              (&lt;/span&gt;&lt;span style=&quot;color: #cbd4f7;&quot;&gt;list (&lt;/span&gt;&lt;span style=&quot;color: #e5eaf0;&quot;&gt;string-append &lt;/span&gt;&lt;span style=&quot;color: #f2f2f574f877;&quot;&gt;&amp;quot;CFLAGS=&amp;quot;&lt;/span&gt;
-                                   &lt;span style=&quot;color: #e5eaf0; font-weight: bold;&quot;&gt;#:parameter-value&lt;/span&gt;&lt;span style=&quot;color: #cbd4f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;name 'gcc-oflag&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;type&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-type&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;name '_&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;accepted-values '(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;-O0 -O1 -O2 -O3 -Os -Ofast -Og -Oz&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #d4878a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;negation #f&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #d0b29e; font-weight: bold;&quot;&gt;#:build-system&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt; gnu-build-system&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;      &lt;/span&gt;&lt;span style=&quot;color: #d0b29e; font-weight: bold;&quot;&gt;#:lambda&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;lambda&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;pkg parameter-value&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+        &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;package&lt;/span&gt;
+&lt;span style=&quot;color: #6eb0eb;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;inherit pkg&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;
+         &lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;arguments&lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;substitute-keyword-arguments&lt;/span&gt;
+&lt;span style=&quot;color: #3cae42;&quot;&gt;           (&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;package-arguments package&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;
+           &lt;span style=&quot;color: #3cae42;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d69b21; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt; flags #~'()&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #ebb4b6;&quot;&gt;#~(&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;append&lt;/span&gt;
+&lt;span style=&quot;color: #d69b21;&quot;&gt;               #$flags&lt;/span&gt;
+&lt;span style=&quot;color: #d69b21;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #a0c1cb;&quot;&gt;list (&lt;/span&gt;&lt;span style=&quot;color: #d6dbe9;&quot;&gt;string-append &lt;/span&gt;&lt;span style=&quot;color: #eb6aededf4f3;&quot;&gt;&amp;quot;CFLAGS=&amp;quot;&lt;/span&gt;
+                                    &lt;span style=&quot;color: #d6dbe9;&quot;&gt;parameter-value&lt;/span&gt;&lt;span style=&quot;color: #a0c1cb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-org262ac0e&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;org262ac0e&quot;&gt;Static Libraries&lt;/h3&gt;
-&lt;div id=&quot;text-org262ac0e&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org87ee5e9&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org87ee5e9&quot;&gt;Static Libraries&lt;/h3&gt;
+&lt;div id=&quot;text-org87ee5e9&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
 In &lt;a href=&quot;https://hpc.guix.info/&quot;&gt;High-Performance Computing&lt;/a&gt;, it's often necessary to produce static builds of packages to share them with others. This parameter is a basic attempt at making it possible to do so with any given library.
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;name 'static-lib&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
- &lt;span style=&quot;color: #43bfb0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;variants&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter-variant-match&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #cbb5fb; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;with-configure-flag &lt;/span&gt;&lt;span style=&quot;color: #62baaf; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;=--disable-shared&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;with-configure-flag &lt;/span&gt;&lt;span style=&quot;color: #62baaf; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;=--enable-static&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;name 'static-lib&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+ &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;_ &lt;/span&gt;&lt;span style=&quot;color: #d0b29e; font-weight: bold;&quot;&gt;#:transform&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;with-configure-flag &lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;=--disable-shared&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+      &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;with-configure-flag &lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;=--enable-static&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-orge9a5231&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orge9a5231&quot;&gt;Sneak Peak: A RESTful API for Parameterization&lt;/h3&gt;
-&lt;div id=&quot;text-orge9a5231&quot; class=&quot;outline-text-3&quot;&gt;
+&lt;div id=&quot;outline-container-org579a516&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org579a516&quot;&gt;Sneak Peak: A RESTful API for Parameterization&lt;/h3&gt;
+&lt;div id=&quot;text-org579a516&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
 I recently made a &lt;a href=&quot;https://emacs.ch/@cel7t/110695688332787396&quot;&gt;post on Mastodon&lt;/a&gt; that claimed that the real advantage of Guix is that it's extensible with &lt;a href=&quot;https://www.gnu.org/software/guile/&quot;&gt;Guile Scheme&lt;/a&gt;. To back up this claim, once parameters have been merged to trunk I'll be writing a set of tutorials on hacking Guix with Guile Scheme.
 One of these planned tutorials is going to be about writing a &lt;b&gt;RESTful API&lt;/b&gt; using Guile that'll allow users to request a package with specific parameters.
@@ -412,9 +618,9 @@ Content-Length: 194
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-orgbe0c253&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;orgbe0c253&quot;&gt;Future work&lt;/h2&gt;
-&lt;div id=&quot;text-orgbe0c253&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org31a552e&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org31a552e&quot;&gt;Future work&lt;/h2&gt;
+&lt;div id=&quot;text-org31a552e&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 Here I have demonstrated a basic DSL that is more-or-less just S-expressions. There is however scope for making it a lot more convenient to use parameters, and thus there are plans on building a convenience syntax on top of this simple one.
 One example is using &lt;code&gt;~parameter-name&lt;/code&gt; to indicate the negation of a parameter. However, syntax like this may not be obvious to everyone at a glance, which is why we have decided to make a convenience DSL with these features only after heavy deliberation and discussion.
@@ -424,9 +630,9 @@ One example is using &lt;code&gt;~parameter-name&lt;/code&gt; to indicate the ne
 The next few updates will focus on the UI for Parameterization. The primary goals for the UI are to make it easy to discover parameterization options, tell what type a parameter is and to figure out parameter combinations that work for a given package.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org10fbf42&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org10fbf42&quot;&gt;Closing Thoughts&lt;/h2&gt;
-&lt;div id=&quot;text-org10fbf42&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org97c2394&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org97c2394&quot;&gt;Closing Thoughts&lt;/h2&gt;
+&lt;div id=&quot;text-org97c2394&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 As can be seen with the Parameterized Emacs example in this post, parameterization will make it possible to join a large number of variations of packages and &lt;b&gt;reduce&lt;/b&gt; the amount of code requiring maintenance. One of the aims of this project is to also create procedures that test parameter combinations and measure the combinatorial complexity brought about by parameterization, which should make testing parameteric variants easy too.
 &lt;/p&gt;
@@ -445,8 +651,8 @@ Stay tuned for updates, and happy hacking!
 &lt;/div&gt;
 &lt;/div&gt;</summary></entry><entry><title>Parameterized Packages: An Update</title><id>https://blog.lispy.tech/parameterized-packages-an-update.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-06-22T13:40:00Z</updated><link href="https://blog.lispy.tech/parameterized-packages-an-update.html" rel="alternate" /><summary type="html">&lt;p&gt;
 I started work on adding &lt;a href=&quot;https://guix.gnu.org/blog/2023/parameterized-packages-for-gnu-guix/&quot;&gt;Parameterized Packages&lt;/a&gt; to GNU Guix 3 weeks ago, and this post is a short status update on the things I've done so far.
-&lt;/p&gt;&lt;div id=&quot;outline-container-org48bf534&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org48bf534&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;1.&lt;/span&gt; Summary of additions&lt;/h2&gt;
+&lt;/p&gt;&lt;div id=&quot;outline-container-orgf4517e7&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgf4517e7&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;1.&lt;/span&gt; Summary of additions&lt;/h2&gt;
 &lt;div id=&quot;text-1&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 I have written
@@ -474,59 +680,53 @@ Next I wrote a macro &lt;code&gt;package-with-parameters&lt;/code&gt; that retur
 Lastly, I wrote a modified &lt;code&gt;modify-inputs&lt;/code&gt; macro that accepts parameters as conditions for the traditional modify inputs actions.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org5ef8c42&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org5ef8c42&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;2.&lt;/span&gt; Illustrative example&lt;/h2&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgb8edb35&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgb8edb35&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;2.&lt;/span&gt; Illustrative example&lt;/h2&gt;
 &lt;div id=&quot;text-2&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
+&lt;b&gt;EDIT 9/18/2023:&lt;/b&gt; The example has been updated to match the latest syntax.
 The following code builds Guile from the git source.
 Please keep in mind that the syntax is still heavily subject to change, however the underlying mechanisms will remain consistent.
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;  &lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0; font-weight: bold;&quot;&gt;define-public&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;guile-parameterized&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;package-with-parameters&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;inherit guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-     &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #d5d4e1e1f0f0;&quot;&gt;&amp;quot;guile-parameterized&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-     &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;properties&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;       `(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;,(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;parameter-spec-property&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;local (&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;list&lt;/span&gt;
-&lt;span style=&quot;color: #cad7e6;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #e6dcfb;&quot;&gt;           (&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #bebedc5bd8d8;&quot;&gt;&amp;quot;git&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;
-           &lt;span style=&quot;color: #e6dcfb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;transforms&lt;/span&gt;
-&lt;span style=&quot;color: #7db8b1;&quot;&gt;             (&lt;/span&gt;&lt;span style=&quot;color: #cbd4f7;&quot;&gt;build-system/transform-match&lt;/span&gt;
-&lt;span style=&quot;color: #cbd4f7;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #e5eaf0;&quot;&gt;_ -&amp;gt;&lt;/span&gt;
-&lt;span style=&quot;color: #e5eaf0;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #ffffff;&quot;&gt;with-git-url .&lt;/span&gt;
-&lt;span style=&quot;color: #ffffffffffff;&quot;&gt;&amp;quot;guile-parameterized=https://git.savannah.gnu.org/git/guile.git&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #e5eaf0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbd4f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7db8b1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;defaults '(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;git&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;use-transforms '(&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e6dcfb;&quot;&gt;git . #t&lt;/span&gt;&lt;span style=&quot;color: #cad7e6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-     &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;inputs (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;parameter/modify-inputs (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-inputs guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-              &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;'git (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append autoconf&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                    &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append automake&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                    &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append libtool&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                    &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append gnu-gettext&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                    &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append flex&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                    &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append gperf&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-                    &lt;span style=&quot;color: #62baaf;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;append texinfo&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-     &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;arguments (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;parameter/if 'git&lt;/span&gt;
-&lt;span style=&quot;color: #62baaf;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;list &lt;/span&gt;&lt;span style=&quot;color: #a7b7f7; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt; #~'(&lt;/span&gt;&lt;span style=&quot;color: #e564ebebf372;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;
-              &lt;span style=&quot;color: #62baaf;&quot;&gt;'()&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;
-            &lt;span style=&quot;color: #cbb5fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;package-arguments guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3; font-weight: bold;&quot;&gt;define-public&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;guile-parameterized&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;package-with-parameters&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;   (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-spec&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;local&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;list&lt;/span&gt;
+&lt;span style=&quot;color: #bbcde3;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #6eb0eb;&quot;&gt;          (&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #eb6ad3d3e261;&quot;&gt;&amp;quot;git&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;
+          &lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;variant &lt;/span&gt;
+&lt;span style=&quot;color: #d6a7c4;&quot;&gt;           (&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #3cae42;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;_ (&lt;/span&gt;&lt;span style=&quot;color: #d69b21;&quot;&gt;with-git-url &lt;/span&gt;&lt;span style=&quot;color: #d69b21; font-weight: bold;&quot;&gt;#:package-name&lt;/span&gt;
+&lt;span style=&quot;color: #d69b21;&quot;&gt;                             &lt;/span&gt;&lt;span style=&quot;color: #eb6acdcd9090;&quot;&gt;&amp;quot;https://git.savannah.gnu.org/git/guile.git&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #ebb4b6;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #3cae42;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #d4878a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;defaults '(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;git off&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;inherit guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #ea69c3c3c544;&quot;&gt;&amp;quot;guile-parameterized&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;inputs (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;parameter-modify-inputs (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-inputs guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+                                    &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;git on&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append autoconf&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append automake&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append libtool&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append gnu-gettext&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append flex&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append gperf&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;append texinfo&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+   &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;arguments (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;append&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;               (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;parameter-if (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6a7c4;&quot;&gt;git on&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                             &lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;list &lt;/span&gt;&lt;span style=&quot;color: #6eb0eb; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt; #~'(&lt;/span&gt;&lt;span style=&quot;color: #eb6ad3d3e261;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;
+                             &lt;span style=&quot;color: #bbcde3;&quot;&gt;'()&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;
+               &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;package-arguments guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;
-The &lt;code&gt;package-with-parameters&lt;/code&gt; macro takes in a package definition and gets the default parameter alist from it, and applies transformations according to it.
+The &lt;code&gt;package-with-parameters&lt;/code&gt; macro takes in a &lt;code&gt;parameter-spec&lt;/code&gt; and a &lt;code&gt;package&lt;/code&gt; definition and gets the default parameter alist from it, and applies transformations according to it.
 Here we're defining a version of guile that inherits guile code and adds a &lt;code&gt;parameter-spec&lt;/code&gt; property.
-The &lt;code&gt;parameter-spec-property&lt;/code&gt; takes a &lt;code&gt;parameter-spec&lt;/code&gt; definition and returns it in the property format expected by the &lt;code&gt;package&lt;/code&gt; record.
 Inside the &lt;code&gt;parameter-spec&lt;/code&gt; definition, we start by defining &lt;code&gt;local&lt;/code&gt; parameters. These parameters are only available to the package, and override any global parameters with the same name.
 This overriding feature will make parameter specifications resilient to globalization of previously local parameters, and also make it possible to globally declare what local parameters you'd like to access across packages.
 The name field of the parameter record accepts both strings and symbols, but when referring to a parameter in other fields one must use a symbol.
-The transforms field of the parameter record takes a hash-table of build systems mapped to a sequence of transforms.
-I have written a handy macro called &lt;code&gt;build-system/transform-match&lt;/code&gt; that takes in a list of lists of the form &lt;code&gt;(build-systems -&amp;gt; transforms ...)&lt;/code&gt; and returns the expected value to the parameter.
-You can use a &lt;code&gt;_&lt;/code&gt; to match all build systems, provide one build system or provide a list of build systems. Having &lt;code&gt;_&lt;/code&gt; is particularly useful for &lt;i&gt;local&lt;/i&gt; definitions as their transforms obviously apply to their package's build system.
+The variants field is explained in further detail in the &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-the-second-update.html&quot;&gt;next blog post&lt;/a&gt;.
 The transforms follow the usual cons cell syntax used when &lt;a href=&quot;https://guix.gnu.org/manual/en/html_node/Defining-Package-Variants.html&quot;&gt;defining package variants&lt;/a&gt;.
 Next we have the &lt;code&gt;defaults&lt;/code&gt; field, which takes a list of parameters which are expected to be switched on by default.
-Lastly, we have the &lt;code&gt;use-transforms&lt;/code&gt; field which takes an alist of the form &lt;code&gt;(parameter . transform)&lt;/code&gt; where if the transform is &lt;code&gt;#t&lt;/code&gt;, the parameter's default transform is used, and otherwise the transform defined there is used. This can save time when writing local parameters as you can define them just by putting a string or symbol with their name in the &lt;code&gt;local&lt;/code&gt; field's list.
-It is important to note that transforms for a given parameter will only be used if the &lt;code&gt;use-transforms&lt;/code&gt; alist contains it.
 Some fields of the parameter-spec record omitted from this example are:
 &lt;/p&gt;
 &lt;ul class=&quot;org-ul&quot;&gt;
@@ -539,97 +739,80 @@ Some fields of the parameter-spec record omitted from this example are:
 &lt;p&gt;
 These all come together to make it possible to define an arbitrary combination of parameters in arbitrary states and test them against the parameter-spec to see if they work and apply them if they do.
 The &lt;code&gt;package-with-parameters&lt;/code&gt; macro is proof of this working, it calculates transforms pertaining to default values and applies them to the &lt;code&gt;package&lt;/code&gt; record defined inside it based on the contents of the &lt;code&gt;parameter-spec&lt;/code&gt;.
-If you are just using parameters for conditionals within the package record and have no use for transforms, you do not need to use &lt;code&gt;package-with-parameters&lt;/code&gt;.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org09a2789&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org09a2789&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;3.&lt;/span&gt; Parametric Conditionals&lt;/h2&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org32da485&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org32da485&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;3.&lt;/span&gt; Parametric Conditionals&lt;/h2&gt;
 &lt;div id=&quot;text-3&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 I have written a number of conditional macros that check if a given parameter is set to on in the &lt;code&gt;parameter-alist&lt;/code&gt; and update the &lt;code&gt;package&lt;/code&gt; record appropriately.
-&lt;code&gt;parameter/if&lt;/code&gt; and &lt;code&gt;parameter/modify-inputs&lt;/code&gt; have been used in the example above, and below is an explanation of how they work:
+&lt;code&gt;parameter-if&lt;/code&gt; and &lt;code&gt;parameter-modify-inputs&lt;/code&gt; have been used in the example above, and below is an explanation of how they work:
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&quot;outline-container-orgaef4bb8&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orgaef4bb8&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.1.&lt;/span&gt; parameter/if&lt;/h3&gt;
+&lt;div id=&quot;outline-container-org8842226&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org8842226&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.1.&lt;/span&gt; parameter-if&lt;/h3&gt;
 &lt;div id=&quot;text-3-1&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
-&lt;code&gt;parameter/if&lt;/code&gt; takes a parameter or a list of parameters and checks if any of them are on.
+&lt;code&gt;parameter-if&lt;/code&gt; takes a parameter or a list of parameters and checks if any of them are on.
 If they are, it returns the first expression, but if all of them are off, it returns either nothing or the second expression. It behaves similarly to Guile's &lt;code&gt;if&lt;/code&gt; macro.
 It is being used in this snippet from the &lt;code&gt;guile-parameterized&lt;/code&gt; example:
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
 &lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;inside package definition&lt;/span&gt;
-&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;arguments (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;append&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter/if 'git&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;                          (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;list &lt;/span&gt;&lt;span style=&quot;color: #cbb5fb; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt; #~'(&lt;/span&gt;&lt;span style=&quot;color: #b130dd5cd7d7;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                          &lt;span style=&quot;color: #abc3e1;&quot;&gt;'()&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-            &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;package-arguments guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;arguments (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;append&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-if (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;git on&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+                          &lt;span style=&quot;color: #d4878a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;list &lt;/span&gt;&lt;span style=&quot;color: #d0b29e; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt; #~'(&lt;/span&gt;&lt;span style=&quot;color: #dddde6e6f1f1;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+                          &lt;span style=&quot;color: #d4878a;&quot;&gt;'()&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;package-arguments guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;
-Here, the arguments field is given a list formed by appending &lt;code&gt;#:make-flags&lt;/code&gt; with the value &lt;code&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/code&gt; if the parameter &lt;code&gt;git&lt;/code&gt; is switched on, or appending an empty list &lt;code&gt;'()&lt;/code&gt; otherwise.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&quot;outline-container-org9104194&quot; class=&quot;outline-4&quot;&gt;
-&lt;h4 id=&quot;org9104194&quot;&gt;&lt;span class=&quot;section-number-4&quot;&gt;3.1.1.&lt;/span&gt; parameter/if-all&lt;/h4&gt;
-&lt;div id=&quot;text-3-1-1&quot; class=&quot;outline-text-4&quot;&gt;
-&lt;p&gt;
-&lt;code&gt;parameter/if-all&lt;/code&gt; is similar to &lt;code&gt;parameter/if&lt;/code&gt;, but unlike it it requires all parameters in the list to be switched on.
+Here, the arguments field is given a list formed by appending &lt;code&gt;#:make-flags&lt;/code&gt; with the value &lt;code&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/code&gt; if the parameter &lt;code&gt;git&lt;/code&gt; is set to &lt;code&gt;on&lt;/code&gt;, or appending an empty list &lt;code&gt;'()&lt;/code&gt; otherwise.
 &lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&quot;outline-container-org13535bf&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;org13535bf&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.2.&lt;/span&gt; parameter/match&lt;/h3&gt;
+&lt;div id=&quot;outline-container-org8a1a196&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;org8a1a196&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.2.&lt;/span&gt; parameter-match&lt;/h3&gt;
 &lt;div id=&quot;text-3-2&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
-&lt;code&gt;parameter/match&lt;/code&gt; is somewhat similar to Guile's &lt;code&gt;cond&lt;/code&gt;, but also very different.
+&lt;code&gt;parameter-match&lt;/code&gt; is somewhat similar to Guile's &lt;code&gt;cond&lt;/code&gt;, but also very different.
 It takes in a set of lists of the form &lt;code&gt;((parameters ...) clauses ...)&lt;/code&gt;, wherein if any in the list of parameters is set to on, the clauses are executed. This behavior is not short-circuiting, and the other lists are checked once one is evaluated regardless of the result.
-A list may be prefixed with &lt;code&gt;all&lt;/code&gt; if all parameters are required to be switched on.
-Alternatively, a &lt;code&gt;_&lt;/code&gt; can be used to match any and all parameters.
-For example, the &lt;code&gt;parameter/if&lt;/code&gt; example above can be rewritten with &lt;code&gt;parameter/match&lt;/code&gt; like this:
+A list may be prefixed with &lt;code&gt;#:all&lt;/code&gt; if all parameters are required to be switched on.
+Also, a &lt;code&gt;_&lt;/code&gt; can be used to always match.
+For example, the &lt;code&gt;parameter-if&lt;/code&gt; example above can be rewritten with &lt;code&gt;parameter-match&lt;/code&gt; like this:
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;arguments (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;append&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;parameter/match&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;             (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;'git (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;list &lt;/span&gt;&lt;span style=&quot;color: #62baaf; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt; #~'(&lt;/span&gt;&lt;span style=&quot;color: #d3d3dbdbfbfb;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-             &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;_ '()&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-            &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;package-arguments guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;arguments (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;append&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;            (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;parameter-match&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;             (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;git on&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #d0b29e;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;list &lt;/span&gt;&lt;span style=&quot;color: #bbcde3; font-weight: bold;&quot;&gt;#:make-flags&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt; #~'(&lt;/span&gt;&lt;span style=&quot;color: #b736d857f5f4;&quot;&gt;&amp;quot;VERBOSE=1&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;
+             &lt;span style=&quot;color: #d4878a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;_ '()&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+            &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;package-arguments guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&quot;outline-container-orgba61bc3&quot; class=&quot;outline-4&quot;&gt;
-&lt;h4 id=&quot;orgba61bc3&quot;&gt;&lt;span class=&quot;section-number-4&quot;&gt;3.2.1.&lt;/span&gt; parameter/match variants&lt;/h4&gt;
-&lt;div id=&quot;text-3-2-1&quot; class=&quot;outline-text-4&quot;&gt;
-&lt;ul class=&quot;org-ul&quot;&gt;
-&lt;li&gt;&lt;code&gt;parameter/match-case&lt;/code&gt; is the same as &lt;code&gt;parameter/match&lt;/code&gt;, but it short-circuits when a matching list is found&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parameter/match-any&lt;/code&gt; a variant of &lt;code&gt;parameter/match&lt;/code&gt; where &lt;code&gt;all&lt;/code&gt; cannot be used&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parameter/match-all&lt;/code&gt; a variant of &lt;code&gt;parameter/match&lt;/code&gt; where &lt;code&gt;all&lt;/code&gt; is the default and only method for evaluating parameters&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;parameter/match-case-all&lt;/code&gt; is a variant of &lt;code&gt;parameter/match-case&lt;/code&gt; requiring all parameters to be switched on.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;
+&lt;code&gt;parameter-match&lt;/code&gt; has a variant called &lt;code&gt;parameter-match-case&lt;/code&gt; which is the same as &lt;code&gt;parameter/match&lt;/code&gt;, but it short-circuits when a matching list is found.
+&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&quot;outline-container-orgd3cbed4&quot; class=&quot;outline-3&quot;&gt;
-&lt;h3 id=&quot;orgd3cbed4&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.3.&lt;/span&gt; parameter/modify-inputs&lt;/h3&gt;
+&lt;div id=&quot;outline-container-orgd201f2a&quot; class=&quot;outline-3&quot;&gt;
+&lt;h3 id=&quot;orgd201f2a&quot;&gt;&lt;span class=&quot;section-number-3&quot;&gt;3.3.&lt;/span&gt; parameter/modify-inputs&lt;/h3&gt;
 &lt;div id=&quot;text-3-3&quot; class=&quot;outline-text-3&quot;&gt;
 &lt;p&gt;
-The &lt;code&gt;modify-inputs&lt;/code&gt; macro is used very frequently when defining package variants, but due to it being a macro we cannot use &lt;code&gt;parameter/match&lt;/code&gt; inside it to pick arguments.
-Because of this, I have defined a new macro called &lt;code&gt;parameter/modify-inputs&lt;/code&gt; that takes in a list of parameters and a corresponding list of arguments to &lt;code&gt;modify-inputs&lt;/code&gt; that can be used instead of it.
-&lt;code&gt;_&lt;/code&gt; can be used to always execute the clauses, and &lt;code&gt;all&lt;/code&gt; may be used to require all parameters to be on.
+The &lt;code&gt;modify-inputs&lt;/code&gt; macro is used very frequently when defining package variants, but due to it being a macro we cannot use &lt;code&gt;parameter-match&lt;/code&gt; inside it to pick arguments.
+To this end, I have defined a new macro called &lt;code&gt;parameter-modify-inputs&lt;/code&gt; that takes in a list of parameters and a corresponding list of arguments to &lt;code&gt;modify-inputs&lt;/code&gt; that can be used instead of it.
+&lt;code&gt;_&lt;/code&gt; can be used to always execute the clauses, and &lt;code&gt;#:all&lt;/code&gt; may be used to require all parameters to be positive.
 In the example package above, it has been used like this:
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
 &lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f7f; font-style: italic;&quot;&gt;inside the package definition&lt;/span&gt;
-&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;inputs (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;parameter/modify-inputs (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;package-inputs guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-            &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;'git (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append autoconf&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                  &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append automake&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                  &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append libtool&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                  &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append gnu-gettext&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                  &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append flex&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                  &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append gperf&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;
-                  &lt;span style=&quot;color: #abc3e1;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;append texinfo&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;)&lt;/span&gt;
+&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;parameter-modify-inputs (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;package-inputs guile-3.0&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;
+                                    &lt;span style=&quot;color: #c6a6b3;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;git on&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append autoconf&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append automake&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append libtool&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append gnu-gettext&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append flex&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append gperf&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+                                     &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;append texinfo&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;
@@ -637,35 +820,40 @@ Here, if the parameter &lt;code&gt;git&lt;/code&gt; is switched on, &lt;code&gt;
 &lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-orga6e70f7&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;orga6e70f7&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;4.&lt;/span&gt; Global Parameters&lt;/h2&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org865aa74&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org865aa74&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;4.&lt;/span&gt; Global Parameters&lt;/h2&gt;
 &lt;div id=&quot;text-4&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 The handling of global parameters is an important topic that needs more discussion.
 Right now, the idea is to require all global parameters to be defined in one file and to access them through a hash-table called &lt;code&gt;%global-parameters&lt;/code&gt;.
+This is to ensure that global parameter symbols are both short and unique.
 To make the process of adding values to this hash-table easier, I've written a macro called &lt;code&gt;define-global-parameter&lt;/code&gt; that takes a parameter definition and makes it global.
 For example, if I wanted to define a global parameter that disables tests for &lt;code&gt;guile-3.0&lt;/code&gt;, I can do it like this:
 &lt;/p&gt;
 &lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #af8aff;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;define-global-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #43bfb0;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;package-parameter&lt;/span&gt;
-&lt;span style=&quot;color: #7f98fb;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #d5d4e1e1f0f0;&quot;&gt;&amp;quot;guile-3.0-tests!&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;description &lt;/span&gt;&lt;span style=&quot;color: #d5d4e1e1f0f0;&quot;&gt;&amp;quot;Disables tests for Guile 3.0&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #7f98fb;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;transforms&lt;/span&gt;
-&lt;span style=&quot;color: #abc3e1;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;build-system/transforms&lt;/span&gt;
-&lt;span style=&quot;color: #cbb5fb;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;_ -&amp;gt; (&lt;/span&gt;&lt;span style=&quot;color: #a7b7f7;&quot;&gt;without-tests . &lt;/span&gt;&lt;span style=&quot;color: #d3d3dbdbfbfb;&quot;&gt;&amp;quot;guile-3.0&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #62baaf;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #cbb5fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #abc3e1;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7f98fb;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #43bfb0;&quot;&gt;)&lt;/span&gt;
+&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;define-global-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #c6a6b3;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;package-parameter&lt;/span&gt;
+&lt;span style=&quot;color: #6f9e77;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;name &lt;/span&gt;&lt;span style=&quot;color: #ea69c3c3c544;&quot;&gt;&amp;quot;guile-3.0-tests!&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;description &lt;/span&gt;&lt;span style=&quot;color: #ea69c3c3c544;&quot;&gt;&amp;quot;Disables tests for Guile 3.0&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;
+    &lt;span style=&quot;color: #6f9e77;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;variants&lt;/span&gt;
+&lt;span style=&quot;color: #d4878a;&quot;&gt;     (&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;parameter-variant-match&lt;/span&gt;
+&lt;span style=&quot;color: #d0b29e;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;_ (&lt;/span&gt;&lt;span style=&quot;color: #6eb0eb;&quot;&gt;without-tests . &lt;/span&gt;&lt;span style=&quot;color: #b736d857f5f4;&quot;&gt;&amp;quot;guile-3.0&amp;quot;&lt;/span&gt;&lt;span style=&quot;color: #bbcde3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d0b29e;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #d4878a;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6f9e77;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #c6a6b3;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #7a94df;&quot;&gt;)&lt;/span&gt;
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;p&gt;
 Now any package that uses this global transform will have &lt;code&gt;guile-3.0&lt;/code&gt;'s tests disabled.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org52fea3a&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org52fea3a&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;5.&lt;/span&gt; Results&lt;/h2&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org95401e1&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org95401e1&quot;&gt;&lt;span class=&quot;section-number-2&quot;&gt;5.&lt;/span&gt; Results&lt;/h2&gt;
 &lt;div id=&quot;text-5&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 It is now possible to define a package with parameters and change the parameter-alist to use the parameters.
 Next, I'll be working on parsing negated and enumerated parameters, along with adding support for modify-inputs and package-rewriting in the parameter record itself.
+&lt;/p&gt;
+
+&lt;p&gt;
+EDIT: This work has been done, and can be seen in the &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-the-second-update.html&quot;&gt;next blog post&lt;/a&gt;.
 &lt;/p&gt;
 
 &lt;p&gt;
@@ -740,9 +928,9 @@ Here's a customary screencap:
 &lt;/p&gt;</summary></entry><entry><title>An Introduction to Parameterized Packages</title><id>https://blog.lispy.tech/an-introduction-to-parameterized-packages.html</id><author><name>Sarthak Shah</name><email>shahsarthakw@gmail.com</email></author><updated>2023-05-09T02:40:00Z</updated><link href="https://blog.lispy.tech/an-introduction-to-parameterized-packages.html" rel="alternate" /><summary type="html">&lt;p&gt;
 I will be working on bringing Parameterized Packages to &lt;a href=&quot;https://guix.gnu.org&quot;&gt;GNU Guix&lt;/a&gt; this summer as a part of the &lt;a href=&quot;https://summerofcode.withgoogle.com/&quot;&gt;Google Summer of Code&lt;/a&gt; program under the mentorship of Pjotr Prins and Gábor Boskovits.
 This post will go over the basic ideas behind Parameterized Packages, their benefits and how I am planning on implementing them.
-&lt;/p&gt;&lt;div id=&quot;outline-container-orgd46badb&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;orgd46badb&quot;&gt;What are Parameterized Packages?&lt;/h2&gt;
-&lt;div id=&quot;text-orgd46badb&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/p&gt;&lt;div id=&quot;outline-container-org4f88bad&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org4f88bad&quot;&gt;What are Parameterized Packages?&lt;/h2&gt;
+&lt;div id=&quot;text-org4f88bad&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 Parameterized packages will provide users with a simple way to configure many aspects of packages, à la Gentoo USE flags.
 &lt;/p&gt;
@@ -768,91 +956,19 @@ Some of the benefits of Parameterized Packages are:
 Among many more.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-orgb275c0a&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;orgb275c0a&quot;&gt;Example Usage&lt;/h2&gt;
-&lt;div id=&quot;text-orgb275c0a&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgb15b0f5&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgb15b0f5&quot;&gt;Example Usage&lt;/h2&gt;
+&lt;div id=&quot;text-orgb15b0f5&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
-Here is an example config.scm file with parameters:
-&lt;/p&gt;
-&lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e589e9; font-weight: bold;&quot;&gt;use-modules&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt; (&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;gnu parameters&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
-
-&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;operating-system&lt;/span&gt;
-&lt;span style=&quot;color: #e589e9;&quot;&gt;  &lt;/span&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;...&lt;/span&gt;
-  &lt;span style=&quot;color: #e589e9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;parameters '(&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;x11 wayland! alsa&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;
-In this example, the user wants to build &lt;i&gt;all&lt;/i&gt; the packages in the system with support for X11 and alsa, and without Wayland support. 
-Note that all parameter names are lowercase, and that &lt;code&gt;!&lt;/code&gt; indicates the &lt;i&gt;negation&lt;/i&gt; of a parameter.
-&lt;/p&gt;
-
-&lt;p&gt;
-Another possible way of using parameters is through the command-line interface, for example
-&lt;/p&gt;
-&lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-bash&quot;&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;guix build emacs --with-parameter=&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;emacs&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #6a9fff;&quot;&gt;&amp;quot;png!&amp;quot;&lt;/span&gt;
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;
-This will build Emacs &lt;b&gt;without&lt;/b&gt; PNG support.
-The user interface is very much subject to change, and I would love input from Guix users on the same.
+(Edited - 15th Sep 2023)
+To avoid confusion, I have removed the example from this section.
+Owing to community feedback, the syntax for parameterization has changed a lot from the original draft.
+To see a concrete example of parameters in action, please see the &lt;a href=&quot;https://blog.lispy.tech/parameterized-packages-the-second-update.html&quot;&gt;second update&lt;/a&gt;.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org66f51ab&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org66f51ab&quot;&gt;Example Usage for Package Maintainers&lt;/h2&gt;
-&lt;div id=&quot;text-org66f51ab&quot; class=&quot;outline-text-2&quot;&gt;
-&lt;p&gt;
-Package definitions &lt;i&gt;with&lt;/i&gt; parameters will look like this:
-&lt;/p&gt;
-&lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e589e9; font-weight: bold;&quot;&gt;define-public&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;emacs&lt;/span&gt;
-&lt;span style=&quot;color: #e589e9;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;package&lt;/span&gt;
-&lt;span style=&quot;color: #bc9afc;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;parameters (&lt;/span&gt;&lt;span style=&quot;color: #09ad99; font-weight: bold;&quot;&gt;and&lt;/span&gt;
-&lt;span style=&quot;color: #09ad99;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;optional jit^ png^ alsa^&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #09ad99;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;one-of motif gtk^ x11!*&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;)&lt;/span&gt;
-    &lt;span style=&quot;color: #bc9afc;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;parameter-transforms&lt;/span&gt;
-&lt;span style=&quot;color: #a3b3e0;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;x11!&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;
-       &lt;span style=&quot;color: #09ad99;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;changes-to-be-made-to-the-package&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;
-The &lt;code&gt;^&lt;/code&gt; indicates that inclusion of a certain parameter is &lt;i&gt;default&lt;/i&gt;. This is very important as if parameters are not specified or if a package is a dependency of another package without parameters, the &lt;i&gt;default&lt;/i&gt; version is used.
-&lt;code&gt;(optional ...)&lt;/code&gt; is syntactic sugar for &lt;code&gt;(p-or ... #t)&lt;/code&gt; and &lt;code&gt;(one-of ...)&lt;/code&gt; translates to &lt;code&gt;(p-xor ...)&lt;/code&gt;. Note that while &lt;code&gt;p-or&lt;/code&gt; behaves like the regular &lt;code&gt;or&lt;/code&gt; logic gate, it does &lt;b&gt;not&lt;/b&gt; short circuit.
-The &lt;code&gt;(and ...)&lt;/code&gt; within &lt;code&gt;(parameters ...)&lt;/code&gt; &lt;b&gt;must&lt;/b&gt; resolve to &lt;code&gt;#t&lt;/code&gt;, otherwise the default version of the package will be used.
-When a &lt;code&gt;*&lt;/code&gt; is added to a parameter, it means that a generic transform cannot be used- every build system has &lt;i&gt;standard&lt;/i&gt; transforms for parameters, and if your package requires a non-standard transform when the given parameters is used this is what you use to specify that. In the &lt;code&gt;(package-transforms ...)&lt;/code&gt; macro each of these non-standard transforms is specified. Package-transforms can also contain specific cases like &lt;code&gt;(and x11! alsa)&lt;/code&gt; if the transforms for both do not compose.
-&lt;/p&gt;
-
-&lt;p&gt;
-Alternatively, the following arguably simpler syntax may be employed:
-&lt;/p&gt;
-&lt;div class=&quot;org-src-container&quot;&gt;
-&lt;pre class=&quot;src src-scheme&quot;&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e589e9; font-weight: bold;&quot;&gt;define-public&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt; &lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;emacs&lt;/span&gt;
-&lt;span style=&quot;color: #e589e9;&quot;&gt;  (&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;package&lt;/span&gt;
-&lt;span style=&quot;color: #bc9afc;&quot;&gt;    (&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;let-parameters&lt;/span&gt;
-&lt;span style=&quot;color: #a3b3e0;&quot;&gt;      (&lt;/span&gt;&lt;span style=&quot;color: #09ad99; font-weight: bold;&quot;&gt;and&lt;/span&gt;
-&lt;span style=&quot;color: #09ad99;&quot;&gt;        (&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;optional jit^ png^ alsa^&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #09ad99;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;one-of motif gtk^ x11!&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #a3b3e0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;p-if (&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;not jit&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;)&lt;/span&gt;
-        &lt;span style=&quot;color: #09ad99;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;some-code-for-the-no-jit-version&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;]&lt;/span&gt;
-        &lt;span style=&quot;color: #09ad99;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;same-code-for-the-jit-version&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;)&lt;/span&gt;
-      &lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;;; &lt;/span&gt;&lt;span style=&quot;color: #cf9f8f; font-style: italic;&quot;&gt;more package definition code ...&lt;/span&gt;
-      &lt;span style=&quot;color: #a3b3e0;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;p-case&lt;/span&gt;
-&lt;span style=&quot;color: #09ad99;&quot;&gt;        [&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;motif gtk&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;
-         &lt;span style=&quot;color: #e7ade9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;code-for-motif-and-gtk-version&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;]&lt;/span&gt;
-        &lt;span style=&quot;color: #09ad99;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;x11!&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;
-         &lt;span style=&quot;color: #e7ade9;&quot;&gt;(&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;code-for-motif-version&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;]&lt;/span&gt;
-        &lt;span style=&quot;color: #09ad99;&quot;&gt;[&lt;/span&gt;&lt;span style=&quot;color: #e7ade9; font-weight: bold;&quot;&gt;else&lt;/span&gt;
-&lt;span style=&quot;color: #e7ade9;&quot;&gt;         (&lt;/span&gt;&lt;span style=&quot;color: #d6c3fa;&quot;&gt;some-default-code&lt;/span&gt;&lt;span style=&quot;color: #e7ade9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #09ad99;&quot;&gt;]&lt;/span&gt;&lt;span style=&quot;color: #a3b3e0;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #bc9afc;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #e589e9;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot;color: #00a692;&quot;&gt;)&lt;/span&gt;
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;
-This has the benefit of seamlessly being integrated into existing code. Not that the else clauses in &lt;code&gt;p-if&lt;/code&gt; and &lt;code&gt;p-case&lt;/code&gt; are optional. There will be a few more constructs like these ones, for example &lt;code&gt;p-cond&lt;/code&gt;. I will be adding more based on community feedback.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org48beb7f&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org48beb7f&quot;&gt;What if a package record does not contain the parameter value?&lt;/h2&gt;
-&lt;div id=&quot;text-org48beb7f&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgb1eb1cc&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgb1eb1cc&quot;&gt;What if a package record does not contain the parameter value?&lt;/h2&gt;
+&lt;div id=&quot;text-orgb1eb1cc&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 In the instance that parameter values are not specified, the package will be used in its default state by all of the packages depending on it. &lt;i&gt;In general,&lt;/i&gt; parameters propogate to dependencies if a valid configuration can be acheived with them, and if this is not possible the default state of the package is used. This will help with the gradual adoption of package parameters, as not every package will have to specify parameters and at the same time the packages specifying parameters will be able to use them even if their dependencies do not have the given parameter.
 &lt;/p&gt;
@@ -862,20 +978,17 @@ In the instance that parameter values are not specified, the package will be use
 One awesome feature of this arrangement is that a user could have two packages with conflicting parameters but they would both work on the system thanks to Guix building both versions of dependencies. This would &lt;b&gt;not&lt;/b&gt; work on imperative package managers with similar functionality. For example if a music player application depends on mpd built with pulseaudio while another depends on it built with jack, Guix will create two versions of mpd, one built with each so that both of these packages may coexist.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org50b8e07&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org50b8e07&quot;&gt;More on parameter symbols&lt;/h2&gt;
-&lt;div id=&quot;text-org50b8e07&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-orgbab4505&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;orgbab4505&quot;&gt;More on parameter symbols&lt;/h2&gt;
+&lt;div id=&quot;text-orgbab4505&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
-&lt;i&gt;Fairly generic&lt;/i&gt; options such as x11, gcc or en&lt;sub&gt;us&lt;/sub&gt; (locale) will be accepted as parameters, and all of them will have to be &lt;i&gt;lowercase&lt;/i&gt; without exception. Parameters, along with their converses, will have pre-defined &lt;i&gt;standard transforms&lt;/i&gt; for every build system they are valid for. Note that having too many parameters in a given package will lead to combinatorial explosion of states, and thus it is best to limit the number of parameters to a manageable amount. I will be attempting to add 10~20 such parameter symbols after finishing this project.
-&lt;/p&gt;
-
-&lt;p&gt;
-Users will be able to specify per-user global package parameters by creating a file at &lt;code&gt;~/.config/guix/parameters.scm&lt;/code&gt; containing the parameter symbols that all their packages will be built with. Syntax could also be created to allow for per-package fine-tuning of parameters in this file.
+&lt;i&gt;Fairly generic&lt;/i&gt; options such as x11, gcc-oflag or locale will be accepted as global parameters. Most global parameters will have pre-defined &lt;i&gt;standard transforms&lt;/i&gt; for every build system they are valid for. Note that having too many parameters in a given package's definition will lead to combinatorial explosion of states, and thus it is best to limit the number of parameters to a manageable amount.
+I will be attempting to add 10~20 global parameters after finishing this project.
 &lt;/p&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;div id=&quot;outline-container-org14bb042&quot; class=&quot;outline-2&quot;&gt;
-&lt;h2 id=&quot;org14bb042&quot;&gt;Conclusion&lt;/h2&gt;
-&lt;div id=&quot;text-org14bb042&quot; class=&quot;outline-text-2&quot;&gt;
+&lt;/div&gt;&lt;div id=&quot;outline-container-org1b88c5f&quot; class=&quot;outline-2&quot;&gt;
+&lt;h2 id=&quot;org1b88c5f&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div id=&quot;text-org1b88c5f&quot; class=&quot;outline-text-2&quot;&gt;
 &lt;p&gt;
 Parameterized Packages have the potential to add more functionality to GNU Guix for all users, however they will require the &lt;b&gt;feedback&lt;/b&gt; and support of the entire Guix community. I would immensely appreciate any kind of suggestions and comments in the new thread on Parameterized Packages which can be found in the mailing list, especially suggestions on what parameter symbols users would like to use.
 &lt;/p&gt;

@@ -21,52 +21,46 @@ I then ported the previously written parsers to these newly made records, and al
 Next I wrote a macro ~package-with-parameters~ that returns a package definition with the default parameter transforms applied. This means that if by default my package uses two parameters ~a~ and ~b~, the macro will return the package with both their parameter transforms applied to it.
 Lastly, I wrote a modified ~modify-inputs~ macro that accepts parameters as conditions for the traditional modify inputs actions.
 * Illustrative example
+*EDIT 9/18/2023:* The example has been updated to match the latest syntax.
 The following code builds Guile from the git source.
 Please keep in mind that the syntax is still heavily subject to change, however the underlying mechanisms will remain consistent.
 #+BEGIN_SRC scheme
   (define-public guile-parameterized
-         (package-with-parameters
+    (package-with-parameters
+     (parameter-spec
+      (local
+          (list
+           (package-parameter
+            (name "git")
+            (variant 
+             (parameter-variant-match
+              (_ (with-git-url #:package-name
+                               "https://git.savannah.gnu.org/git/guile.git")))))))
+      (defaults '((git off))))
      (inherit guile-3.0)
      (name "guile-parameterized")
-     (properties
-       `(,(parameter-spec-property
-      (local (list
-         (package-parameter
-           (name "git")
-           (transforms
-             (build-system/transform-match
-               (_ ->
-            (with-git-url .
-"guile-parameterized=https://git.savannah.gnu.org/git/guile.git")))))))
-      (defaults '(git))
-      (use-transforms '((git . #t))))))
-     (inputs (parameter/modify-inputs (package-inputs guile-3.0)
-              ('git (append autoconf)
-                    (append automake)
-                    (append libtool)
-                    (append gnu-gettext)
-                    (append flex)
-                    (append gperf)
-                    (append texinfo))))
+     (inputs (parameter-modify-inputs (package-inputs guile-3.0)
+                                      (((git on)) (append autoconf)
+                                       (append automake)
+                                       (append libtool)
+                                       (append gnu-gettext)
+                                       (append flex)
+                                       (append gperf)
+                                       (append texinfo))))
      (arguments (append
-            (parameter/if 'git
-        (list #:make-flags #~'("VERBOSE=1"))
-              '())
-            (package-arguments guile-3.0)))))
+                 (parameter-if ((git on))
+                               (list #:make-flags #~'("VERBOSE=1"))
+                               '())
+                 (package-arguments guile-3.0)))))
 #+END_SRC
-The ~package-with-parameters~ macro takes in a package definition and gets the default parameter alist from it, and applies transformations according to it.
+The ~package-with-parameters~ macro takes in a ~parameter-spec~ and a ~package~ definition and gets the default parameter alist from it, and applies transformations according to it.
 Here we're defining a version of guile that inherits guile code and adds a ~parameter-spec~ property.
-The ~parameter-spec-property~ takes a ~parameter-spec~ definition and returns it in the property format expected by the ~package~ record.
 Inside the ~parameter-spec~ definition, we start by defining ~local~ parameters. These parameters are only available to the package, and override any global parameters with the same name.
 This overriding feature will make parameter specifications resilient to globalization of previously local parameters, and also make it possible to globally declare what local parameters you'd like to access across packages.
 The name field of the parameter record accepts both strings and symbols, but when referring to a parameter in other fields one must use a symbol.
-The transforms field of the parameter record takes a hash-table of build systems mapped to a sequence of transforms.
-I have written a handy macro called ~build-system/transform-match~ that takes in a list of lists of the form ~(build-systems -> transforms ...)~ and returns the expected value to the parameter.
-You can use a ~_~ to match all build systems, provide one build system or provide a list of build systems. Having ~_~ is particularly useful for /local/ definitions as their transforms obviously apply to their package's build system.
+The variants field is explained in further detail in the [[https://blog.lispy.tech/parameterized-packages-the-second-update.html][next blog post]].
 The transforms follow the usual cons cell syntax used when [[https://guix.gnu.org/manual/en/html_node/Defining-Package-Variants.html][defining package variants]].
 Next we have the ~defaults~ field, which takes a list of parameters which are expected to be switched on by default.
-Lastly, we have the ~use-transforms~ field which takes an alist of the form ~(parameter . transform)~ where if the transform is ~#t~, the parameter's default transform is used, and otherwise the transform defined there is used. This can save time when writing local parameters as you can define them just by putting a string or symbol with their name in the ~local~ field's list.
-It is important to note that transforms for a given parameter will only be used if the ~use-transforms~ alist contains it.
 Some fields of the parameter-spec record omitted from this example are:
 - ~optional~, for declaring global parameters that can optionally be used
 - ~one-of~, which is a list of lists of parameters of which only one can be used per list
@@ -75,63 +69,57 @@ Some fields of the parameter-spec record omitted from this example are:
 - ~parameter-alist~, (not meant to be modified by the user) contains the final list of active parameters and their values, on or off.
 These all come together to make it possible to define an arbitrary combination of parameters in arbitrary states and test them against the parameter-spec to see if they work and apply them if they do.
 The ~package-with-parameters~ macro is proof of this working, it calculates transforms pertaining to default values and applies them to the ~package~ record defined inside it based on the contents of the ~parameter-spec~.
-If you are just using parameters for conditionals within the package record and have no use for transforms, you do not need to use ~package-with-parameters~.
 * Parametric Conditionals
 I have written a number of conditional macros that check if a given parameter is set to on in the ~parameter-alist~ and update the ~package~ record appropriately.
-~parameter/if~ and ~parameter/modify-inputs~ have been used in the example above, and below is an explanation of how they work:
-** parameter/if
-~parameter/if~ takes a parameter or a list of parameters and checks if any of them are on.
+~parameter-if~ and ~parameter-modify-inputs~ have been used in the example above, and below is an explanation of how they work:
+** parameter-if
+~parameter-if~ takes a parameter or a list of parameters and checks if any of them are on.
 If they are, it returns the first expression, but if all of them are off, it returns either nothing or the second expression. It behaves similarly to Guile's ~if~ macro.
 It is being used in this snippet from the ~guile-parameterized~ example:
 #+BEGIN_SRC scheme
   ;; inside package definition
   (arguments (append
-              (parameter/if 'git
+              (parameter-if ((git on))
                             (list #:make-flags #~'("VERBOSE=1"))
                             '())
               (package-arguments guile-3.0)))
 #+END_SRC
-Here, the arguments field is given a list formed by appending ~#:make-flags~ with the value ~"VERBOSE=1"~ if the parameter ~git~ is switched on, or appending an empty list ~'()~ otherwise.
-*** parameter/if-all
-~parameter/if-all~ is similar to ~parameter/if~, but unlike it it requires all parameters in the list to be switched on.
-** parameter/match
-~parameter/match~ is somewhat similar to Guile's ~cond~, but also very different.
+Here, the arguments field is given a list formed by appending ~#:make-flags~ with the value ~"VERBOSE=1"~ if the parameter ~git~ is set to ~on~, or appending an empty list ~'()~ otherwise.
+** parameter-match
+~parameter-match~ is somewhat similar to Guile's ~cond~, but also very different.
 It takes in a set of lists of the form ~((parameters ...) clauses ...)~, wherein if any in the list of parameters is set to on, the clauses are executed. This behavior is not short-circuiting, and the other lists are checked once one is evaluated regardless of the result.
-A list may be prefixed with ~all~ if all parameters are required to be switched on.
-Alternatively, a ~_~ can be used to match any and all parameters.
-For example, the ~parameter/if~ example above can be rewritten with ~parameter/match~ like this:
+A list may be prefixed with ~#:all~ if all parameters are required to be switched on.
+Also, a ~_~ can be used to always match.
+For example, the ~parameter-if~ example above can be rewritten with ~parameter-match~ like this:
 #+BEGIN_SRC scheme
   (arguments (append
-              (parameter/match
-               ('git (list #:make-flags #~'("VERBOSE=1")))
+              (parameter-match
+               (((git on)) (list #:make-flags #~'("VERBOSE=1")))
                (_ '()))
               (package-arguments guile-3.0)))
 #+END_SRC
-*** parameter/match variants
-- ~parameter/match-case~ is the same as ~parameter/match~, but it short-circuits when a matching list is found
-- ~parameter/match-any~ a variant of ~parameter/match~ where ~all~ cannot be used
-- ~parameter/match-all~ a variant of ~parameter/match~ where ~all~ is the default and only method for evaluating parameters
-- ~parameter/match-case-all~ is a variant of ~parameter/match-case~ requiring all parameters to be switched on.
+~parameter-match~ has a variant called ~parameter-match-case~ which is the same as ~parameter/match~, but it short-circuits when a matching list is found.
 ** parameter/modify-inputs
-The ~modify-inputs~ macro is used very frequently when defining package variants, but due to it being a macro we cannot use ~parameter/match~ inside it to pick arguments.
-Because of this, I have defined a new macro called ~parameter/modify-inputs~ that takes in a list of parameters and a corresponding list of arguments to ~modify-inputs~ that can be used instead of it.
-~_~ can be used to always execute the clauses, and ~all~ may be used to require all parameters to be on.
+The ~modify-inputs~ macro is used very frequently when defining package variants, but due to it being a macro we cannot use ~parameter-match~ inside it to pick arguments.
+To this end, I have defined a new macro called ~parameter-modify-inputs~ that takes in a list of parameters and a corresponding list of arguments to ~modify-inputs~ that can be used instead of it.
+~_~ can be used to always execute the clauses, and ~#:all~ may be used to require all parameters to be positive.
 In the example package above, it has been used like this:
 #+BEGIN_SRC scheme
   ;; inside the package definition
-  (inputs (parameter/modify-inputs (package-inputs guile-3.0)
-              ('git (append autoconf)
-                    (append automake)
-                    (append libtool)
-                    (append gnu-gettext)
-                    (append flex)
-                    (append gperf)
-                    (append texinfo))))
+  (parameter-modify-inputs (package-inputs guile-3.0)
+                                      (((git on)) (append autoconf)
+                                       (append automake)
+                                       (append libtool)
+                                       (append gnu-gettext)
+                                       (append flex)
+                                       (append gperf)
+                                       (append texinfo)))
 #+END_SRC
 Here, if the parameter ~git~ is switched on, ~autoconf~, ~automake~, ~libtool~, ~gnu-gettext~, ~flex~, ~gperf~ and ~texinfo~ are added to the package's inputs. This is quite useful as these inputs are required for building guile from its git source.
 * Global Parameters
 The handling of global parameters is an important topic that needs more discussion.
 Right now, the idea is to require all global parameters to be defined in one file and to access them through a hash-table called ~%global-parameters~.
+This is to ensure that global parameter symbols are both short and unique.
 To make the process of adding values to this hash-table easier, I've written a macro called ~define-global-parameter~ that takes a parameter definition and makes it global.
 For example, if I wanted to define a global parameter that disables tests for ~guile-3.0~, I can do it like this:
 #+BEGIN_SRC scheme
@@ -139,13 +127,15 @@ For example, if I wanted to define a global parameter that disables tests for ~g
     (package-parameter
       (name "guile-3.0-tests!")
       (description "Disables tests for Guile 3.0")
-      (transforms
-       (build-system/transforms
-        (_ -> (without-tests . "guile-3.0")))))
+      (variants
+       (parameter-variant-match
+        (_ (without-tests . "guile-3.0"))))))
 #+END_SRC
 Now any package that uses this global transform will have ~guile-3.0~'s tests disabled.
 * Results
 It is now possible to define a package with parameters and change the parameter-alist to use the parameters.
 Next, I'll be working on parsing negated and enumerated parameters, along with adding support for modify-inputs and package-rewriting in the parameter record itself.
+
+EDIT: This work has been done, and can be seen in the [[https://blog.lispy.tech/parameterized-packages-the-second-update.html][next blog post]].
 
 Stay tuned for updates, and happy hacking!

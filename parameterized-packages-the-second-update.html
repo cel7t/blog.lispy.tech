@@ -3,9 +3,9 @@
 This is the third entry in my series of blog posts about adding Parameterized Packages to <a href="https://guix.gnu.org/">GNU Guix</a> for my <a href="https://summerofcode.withgoogle.com/programs/2023/projects/heQYLzrz">Google Summer of Code project</a>. Parameterization here refers to making it possible for packages to be built with <i>compile-time options</i>, and I have gone over the reasons and benefits for doing so in detail in the <a href="https://blog.lispy.tech/an-introduction-to-parameterized-packages.html">first post about Parameterized Packages</a>.
 </p><p>
 In the <a href="https://blog.lispy.tech/parameterized-packages-an-update.html">last update</a> I talked about implementing support for <i>boolean</i>, <i>non-negative</i> parameters. In this update, I've implemented negation, enumeration and a few other features that will make parameters considerably more powerful!
-</p><div id="outline-container-org98f6e15" class="outline-2">
-<h2 id="org98f6e15">What's New</h2>
-<div id="text-org98f6e15" class="outline-text-2">
+</p><div id="outline-container-org5766ce6" class="outline-2">
+<h2 id="org5766ce6">What's New</h2>
+<div id="text-org5766ce6" class="outline-text-2">
 <p>
 A brief summary of additions is
 </p>
@@ -16,10 +16,9 @@ A brief summary of additions is
 <li>Enumerated Types</li>
 </ul>
 </div>
-
-<div id="outline-container-org6fe7056" class="outline-3">
-<h3 id="org6fe7056">Parametric Variants</h3>
-<div id="text-org6fe7056" class="outline-text-3">
+<div id="outline-container-org3825d94" class="outline-3">
+<h3 id="org3825d94">Parametric Variants</h3>
+<div id="text-org3825d94" class="outline-text-3">
 <p>
 To make global parameters useful, it is necessary to be able to change the contents of a package in ways that <a href="https://guix.gnu.org/manual/devel/en/html_node/Package-Transformation-Options.html">Package Transformations</a> might not be able to by themselves. Additionally, users might find themselves in situations where they wish to perform different operations for different values of an enumerated type.
 </p>
@@ -33,52 +32,50 @@ For a better understanding of them, please look at any of the examples using the
 </p>
 </div>
 </div>
-
-<div id="outline-container-org89ddfb6" class="outline-3">
-<h3 id="org89ddfb6">Parameter Dependencies</h3>
-<div id="text-org89ddfb6" class="outline-text-3">
+<div id="outline-container-org450fd04" class="outline-3">
+<h3 id="org450fd04">Parameter Dependencies</h3>
+<div id="text-org450fd04" class="outline-text-3">
 <p>
 It's possible that enabling a parameter might require enabling another parameter or a package.
 For such situations, I've added a new <code>dependencies</code> field to the parameter record that lets users specify parameters or packages a given parameter depends on. You can also fine-tune values for the parameter and the parameters in dependencies.
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgff42b9d" class="outline-3">
-<h3 id="orgff42b9d">Negation and Enumeration</h3>
-<div id="text-orgff42b9d" class="outline-text-3">
+<div id="outline-container-org4042377" class="outline-3">
+<h3 id="org4042377">Negation and Enumeration</h3>
+<div id="text-org4042377" class="outline-text-3">
 </div>
-<div id="outline-container-orgfe694f6" class="outline-4">
-<h4 id="orgfe694f6">Enumeration</h4>
-<div id="text-orgfe694f6" class="outline-text-4">
+<div id="outline-container-org7edbe2c" class="outline-4">
+<h4 id="org7edbe2c">Enumeration</h4>
+<div id="text-org7edbe2c" class="outline-text-4">
 <p>
 In the previous version, parameters could only be in two states: <code>on</code> and <code>off</code>.
 This version makes it possible for parameters to take <b>multiple states</b>, as long as the user specifies all the possible states.
 This has a huge number of uses- for example, here's a parameter type for locales:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0; font-weight: bold;">define</span><span style="color: #43bfb0;"> </span><span style="color: #43bfb0;">locale-parameter-type</span>
-<span style="color: #43bfb0;">  (</span><span style="color: #7f98fb;">parameter-type</span>
-<span style="color: #7f98fb;">   (</span><span style="color: #abc3e1;">name 'locale-type</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">accepted-values</span>
-<span style="color: #abc3e1;">    '(</span><span style="color: #cbb5fb;">ca_ES cs_CZ da_DK de_DE</span>
-<span style="color: #cbb5fb;">            el_GR en_AU en_CA en_GB</span>
-<span style="color: #cbb5fb;">            en_US es_AR es_CL es_ES</span>
-<span style="color: #cbb5fb;">            es_MX fi_FI fr_BE fr_CA</span>
-<span style="color: #cbb5fb;">            fr_CH fr_FR ga_IE it_IT</span>
-<span style="color: #cbb5fb;">            ja_JP ko_KR nb_NO nl_NL</span>
-<span style="color: #cbb5fb;">            pl_PL pt_PT ro_RO ru_RU</span>
-<span style="color: #cbb5fb;">            sv_SE tr_TR uk_UA vi_VN</span>
-<span style="color: #cbb5fb;">            zh_CN</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">negation #f</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">default 'en_US</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">description </span><span style="color: #d5d4e1e1f0f0;">&quot;Type for Locales&quot;</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3; font-weight: bold;">define</span><span style="color: #c6a6b3;"> </span><span style="color: #c6a6b3;">locale-parameter-type</span>
+<span style="color: #c6a6b3;">  (</span><span style="color: #6f9e77;">parameter-type</span>
+<span style="color: #6f9e77;">   (</span><span style="color: #d4878a;">name 'locale-type</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">accepted-values</span>
+<span style="color: #d4878a;">    '(</span><span style="color: #d0b29e;">ca_ES cs_CZ da_DK de_DE</span>
+<span style="color: #d0b29e;">            el_GR en_AU en_CA en_GB</span>
+<span style="color: #d0b29e;">            en_US es_AR es_CL es_ES</span>
+<span style="color: #d0b29e;">            es_MX fi_FI fr_BE fr_CA</span>
+<span style="color: #d0b29e;">            fr_CH fr_FR ga_IE it_IT</span>
+<span style="color: #d0b29e;">            ja_JP ko_KR nb_NO nl_NL</span>
+<span style="color: #d0b29e;">            pl_PL pt_PT ro_RO ru_RU</span>
+<span style="color: #d0b29e;">            sv_SE tr_TR uk_UA vi_VN</span>
+<span style="color: #d0b29e;">            zh_CN</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">negation #f</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">default 'en_US</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">description </span><span style="color: #ea69c3c3c544;">&quot;Type for Locales&quot;</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 </div>
 <ul class="org-ul">
-<li><a id="org2ed9519"></a>Explanation<br />
-<div id="text-org2ed9519" class="outline-text-5">
+<li><a id="org17af5f1"></a>Explanation<br />
+<div id="text-org17af5f1" class="outline-text-5">
 <p>
 <code>parameter-type</code> is the record type for parameter types.
 Please note that <b>parameter types</b> are different from <b>parameters</b>.
@@ -97,7 +94,7 @@ By default this is the first element of <code>accepted-values</code>, and if it 
 Users can negate a parameter in a parameter list by using the <code>#:off</code> keyword:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">list ... (</span><span style="color: #7f98fb;">parameter-name </span><span style="color: #7f98fb; font-weight: bold;">#:off</span><span style="color: #43bfb0;">)</span> <span style="color: #43bfb0;">...</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">list ... (</span><span style="color: #6f9e77;">parameter-name </span><span style="color: #6f9e77; font-weight: bold;">#:off</span><span style="color: #c6a6b3;">)</span> <span style="color: #c6a6b3;">...</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 <p>
@@ -112,29 +109,29 @@ In our example, it is set to <code>'en_US</code>.</li>
 </li>
 </ul>
 </div>
-<div id="outline-container-org2e3127f" class="outline-4">
-<h4 id="org2e3127f">Negation</h4>
-<div id="text-org2e3127f" class="outline-text-4">
+<div id="outline-container-orgf9cde02" class="outline-4">
+<h4 id="orgf9cde02">Negation</h4>
+<div id="text-orgf9cde02" class="outline-text-4">
 <p>
 <i>Negation</i> refers to being able to specify the opposite value for a parameter.
 If it is set to anything but <code>#f</code> for a given <code>parameter-type</code> record, any <code>package</code> record belonging to that <code>parameter-type</code> takes on that value when set to the special keyword <code>#:off</code>.
 Here's an example that uses it to run the <code>without-tests</code> transform on a package whenever the <code>boolean</code> parameter <code>tests</code> is set to <code>#:off</code>.
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">define-global-parameter</span>
-<span style="color: #43bfb0;">  (</span><span style="color: #7f98fb;">package-parameter</span>
-<span style="color: #7f98fb;">   (</span><span style="color: #abc3e1;">name 'tests</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">variants</span>
-<span style="color: #abc3e1;">    (</span><span style="color: #cbb5fb;">parameter-variant-match</span>
-<span style="color: #cbb5fb;">     (</span><span style="color: #62baaf; font-weight: bold;">#:off</span><span style="color: #62baaf;"> </span><span style="color: #62baaf; font-weight: bold;">#:transform</span><span style="color: #62baaf;"> (</span><span style="color: #a7b7f7;">without-tests </span><span style="color: #a7b7f7; font-weight: bold;">#:package-name</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">description </span><span style="color: #d5d4e1e1f0f0;">&quot;Toggle for tests&quot;</span><span style="color: #7f98fb;">)</span>
-   <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">predicate #t</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">define-global-parameter</span>
+<span style="color: #c6a6b3;">  (</span><span style="color: #6f9e77;">package-parameter</span>
+<span style="color: #6f9e77;">   (</span><span style="color: #d4878a;">name 'tests</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">variants</span>
+<span style="color: #d4878a;">    (</span><span style="color: #d0b29e;">parameter-variant-match</span>
+<span style="color: #d0b29e;">     (</span><span style="color: #bbcde3; font-weight: bold;">#:off</span><span style="color: #bbcde3;"> </span><span style="color: #bbcde3; font-weight: bold;">#:transform</span><span style="color: #bbcde3;"> (</span><span style="color: #6eb0eb;">without-tests </span><span style="color: #6eb0eb; font-weight: bold;">#:package-name</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">description </span><span style="color: #ea69c3c3c544;">&quot;Toggle for tests&quot;</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">predicate #t</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 </div>
 <ul class="org-ul">
-<li><a id="org1df2fcd"></a>Explanation<br />
-<div id="text-org1df2fcd" class="outline-text-5">
+<li><a id="org7cea65f"></a>Explanation<br />
+<div id="text-org7cea65f" class="outline-text-5">
 <p>
 <code>define-global-parameter</code> is a macro that takes a parameter record and makes it global.
 This means that it can be referred to in any parameter definition, and that its <code>name</code> is guaranteed to be unique among all global parameters.
@@ -161,18 +158,19 @@ Users can also specify the build system the value should match, as seen in the <
 This is not all there is to the magic of <code>parameter-variant-match</code>;
 to make parameterization more useful, it lets users get the package name, the package and the value of the parameter the statement matched against.
 These are accessed through <a href="https://www.gnu.org/software/guile/manual/html_node/Keywords.html">keywords</a>, such as the <code>#:package-name</code> keyword in this argument.
-Have a look at the <code>gcc-oflag</code> and <code>static-lib</code> parameters in <a href="#orgf735ed6">Bonus Examples</a> to learn more!</li>
+Have a look at the <code>gcc-oflag</code> and <code>static-lib</code> parameters in <a href="#org6ceb6ea">Bonus Examples</a> to learn more!</li>
 <li><code>predicate</code> is set to <code>#f</code> by default.
 <code>#f</code> means that the given parameter can only be used when its been mentioned in a package's <code>parameter-spec</code>.
 Setting this to <code>#t</code> means that a <i>global</i> parameter can be applied to packages that do not have it in their spec. <b>This is extremely dangerous and should only be used for extremely generic parameters</b>.
 Otherwise, the user may set this to any lambda that takes a <code>package</code> record as its argument and returns <code>#t</code> or <code>#f</code>. The global parameter will be applied if this lambda returns <code>#t</code>.</li>
 <li><p>
 <code>dependencies</code> is a list of parameters and packages that a given parameter depends on. The list is punctuated by keywords to indicate parameter and package dependencies, with <code>#:parameter</code> and <code>#:package</code> respectively. If no keywords are given, the arguments are assumed to be parameters.
+<b>Package dependencies have not been implemented yet.</b>
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">dependencies</span>
-<span style="color: #43bfb0;">`(</span><span style="color: #7f98fb; font-weight: bold;">#:parameter</span><span style="color: #7f98fb;"> a b ...</span>
-<span style="color: #7f98fb;">  </span><span style="color: #7f98fb; font-weight: bold;">#:package</span><span style="color: #7f98fb;"> git ,(</span><span style="color: #abc3e1;">package (</span><span style="color: #cbb5fb;">name </span><span style="color: #e5e4dadafdfd;">&quot;some-package&quot;</span><span style="color: #abc3e1;">)</span> <span style="color: #abc3e1;">...</span><span style="color: #7f98fb;">)</span> <span style="color: #7f98fb;">...</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">dependencies</span>
+<span style="color: #c6a6b3;">`(</span><span style="color: #6f9e77; font-weight: bold;">#:parameter</span><span style="color: #6f9e77;"> a b ...</span>
+<span style="color: #6f9e77;">  </span><span style="color: #6f9e77; font-weight: bold;">#:package</span><span style="color: #6f9e77;"> git ,(</span><span style="color: #d4878a;">package (</span><span style="color: #d0b29e;">name </span><span style="color: #e867d958cf4e;">&quot;some-package&quot;</span><span style="color: #d4878a;">)</span> <span style="color: #d4878a;">...</span><span style="color: #6f9e77;">)</span> <span style="color: #6f9e77;">...</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div></li>
 <li><code>description</code> is a simple description of the parameter.</li>
@@ -182,128 +180,141 @@ Otherwise, the user may set this to any lambda that takes a <code>package</code>
 </ul>
 </div>
 </div>
-</div><div id="outline-container-orge86d775" class="outline-2">
-<h2 id="orge86d775">What does using parameters look like?</h2>
-<div id="text-orge86d775" class="outline-text-2">
+</div><div id="outline-container-org91caaaf" class="outline-2">
+<h2 id="org91caaaf">What does using parameters look like?</h2>
+<div id="text-org91caaaf" class="outline-text-2">
 <p>
 Here is an example use-case for parameterization, which packages Emacs' <code>next</code>, <code>pgtk</code>, <code>xwidgets</code>, <code>wide-int</code> and <code>no-x</code> variants in one package and also makes it possible to mix and match compatible variants.
 </p>
 </div>
-<div id="outline-container-orge9485a2" class="outline-3">
-<h3 id="orge9485a2">Usage</h3>
-<div id="text-orge9485a2" class="outline-text-3">
+<div id="outline-container-orgcc96939" class="outline-3">
+<h3 id="orgcc96939">Usage</h3>
+<div id="text-orgcc96939" class="outline-text-3">
 <p>
 The usage format for parameters is the same as that for other package transforms- you specify them through the CLI. In the future, it will also be possible to have a global set of transforms.
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #af8aff;">guix install emacs-parameterized </span><span style="color: #af8aff;">\</span>
-<span style="color: #af8aff;">     --with-parameter=emacs-parameterized=</span><span style="color: #af8aff;">pgtk</span><span style="color: #af8aff;">=on </span><span style="color: #af8aff;">\</span>
-<span style="color: #af8aff;">     --with-parameter=emacs-parameterized=tree-sitter=on </span><span style="color: #af8aff;">\</span>
+<pre class="src src-bash"><span style="color: #7a94df;">guix install emacs-parameterized </span><span style="color: #7a94df;">\</span>
+<span style="color: #7a94df;">     --with-parameter=emacs-parameterized=</span><span style="color: #7a94df;">pgtk</span><span style="color: #7a94df;">=on </span><span style="color: #7a94df;">\</span>
+<span style="color: #7a94df;">     --with-parameter=emacs-parameterized=tree-sitter=on </span><span style="color: #7a94df;">\</span>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orga0da083" class="outline-3">
-<h3 id="orga0da083">Underlying Code</h3>
-<div id="text-orga0da083" class="outline-text-3">
+<div id="outline-container-orgf6e509d" class="outline-3">
+<h3 id="orgf6e509d">Underlying Code</h3>
+<div id="text-orgf6e509d" class="outline-text-3">
+<p>
+<b>EDIT 9/18/2023:</b> as the <code>package</code> record's <code>source</code> field is not thunked, I'm instead using a <code>#:lambda</code> inside the <code>next</code> package parameter to change it.
+</p>
+
 <p>
 Under the hood, this is what the implementation looks like.
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">package-with-parameters</span>
-<span style="color: #43bfb0;"> [</span><span style="color: #7f98fb;">parameter-spec</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">local</span>
-<span style="color: #abc3e1;">      (</span><span style="color: #cbb5fb;">list</span>
-<span style="color: #cbb5fb;">       (</span><span style="color: #62baaf;">package-parameter (</span><span style="color: #a7b7f7;">name 'next</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-       <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">package-parameter (</span><span style="color: #a7b7f7;">name 'tree-sitter</span><span style="color: #62baaf;">)</span>
-                          <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">dependencies '(</span><span style="color: #cad7e6;">tree-sitter</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-       <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">package-parameter</span>
-<span style="color: #62baaf;">        (</span><span style="color: #a7b7f7;">name 'pgtk</span><span style="color: #62baaf;">)</span>
-        <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">variants</span>
-<span style="color: #a7b7f7;">         (</span><span style="color: #cad7e6;">parameter-variant-match</span>
-<span style="color: #cad7e6;">          (</span><span style="color: #e6dcfb;">_ </span><span style="color: #e6dcfb; font-weight: bold;">#:transform</span><span style="color: #e6dcfb;"> (</span><span style="color: #7db8b1;">with-configure-flag</span>
-<span style="color: #7db8b1;">                          </span><span style="color: #7db8b1; font-weight: bold;">#:package-name</span><span style="color: #7db8b1;"> </span><span style="color: #bebedc5bd8d8;">&quot;=--with-pgtk&quot;</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span>
-        <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">dependencies '(</span><span style="color: #cad7e6;">tree-sitter x11</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-       <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">package-parameter</span>
-<span style="color: #62baaf;">        (</span><span style="color: #a7b7f7;">name 'xwidgets</span><span style="color: #62baaf;">)</span>
-        <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">variants</span>
-<span style="color: #a7b7f7;">         (</span><span style="color: #cad7e6;">parameter-variant-match</span>
-<span style="color: #cad7e6;">          (</span><span style="color: #e6dcfb;">_ </span><span style="color: #e6dcfb; font-weight: bold;">#:transform</span><span style="color: #e6dcfb;"> (</span><span style="color: #7db8b1;">with-configure-flag</span>
-<span style="color: #7db8b1;">                          </span><span style="color: #7db8b1; font-weight: bold;">#:package-name</span><span style="color: #7db8b1;"> </span><span style="color: #bebedc5bd8d8;">&quot;=--with-xwidgets&quot;</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-       <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">package-parameter</span>
-<span style="color: #62baaf;">        (</span><span style="color: #a7b7f7;">name 'wide-int</span><span style="color: #62baaf;">)</span>
-        <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">variants</span>
-<span style="color: #a7b7f7;">         (</span><span style="color: #cad7e6;">parameter-variant-match</span>
-<span style="color: #cad7e6;">          (</span><span style="color: #e6dcfb;">_ </span><span style="color: #e6dcfb; font-weight: bold;">#:transform</span><span style="color: #e6dcfb;"> (</span><span style="color: #7db8b1;">with-configure-flag</span>
-<span style="color: #7db8b1;">                          </span><span style="color: #7db8b1; font-weight: bold;">#:package-name</span><span style="color: #7db8b1;"> </span><span style="color: #bebedc5bd8d8;">&quot;=--with-wide-int&quot;</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span>
-  <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">one-of '(</span><span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">_ (</span><span style="color: #a7b7f7;">x11 </span><span style="color: #a7b7f7; font-weight: bold;">#:off</span><span style="color: #62baaf;">)</span> <span style="color: #62baaf;">pgtk</span><span style="color: #cbb5fb;">)</span>
-            <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">_ (</span><span style="color: #a7b7f7;">x11 </span><span style="color: #a7b7f7; font-weight: bold;">#:off</span><span style="color: #62baaf;">)</span> <span style="color: #62baaf;">xwidgets</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">]</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">inherit emacs</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">name </span><span style="color: #bfbfcc4bfdfd;">&quot;emacs-parameterized&quot;</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">source</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">parameter-if</span>
-<span style="color: #abc3e1;">   'next</span>
-<span style="color: #abc3e1;">   (</span><span style="color: #cbb5fb;">origin</span>
-<span style="color: #cbb5fb;">    (</span><span style="color: #62baaf;">inherit (</span><span style="color: #a7b7f7;">package-source emacs</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-    <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">method git-fetch</span><span style="color: #cbb5fb;">)</span>
-    <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">uri (</span><span style="color: #a7b7f7;">git-reference</span>
-<span style="color: #a7b7f7;">          (</span><span style="color: #cad7e6;">url </span><span style="color: #e564ebebf372;">&quot;https://git.savannah.gnu.org/git/emacs.git/&quot;</span><span style="color: #a7b7f7;">)</span>
-          <span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">commit (</span><span style="color: #e6dcfb;">string-append </span><span style="color: #f372ee6dfdfd;">&quot;emacs-&quot;</span> <span style="color: #e6dcfb;">version</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-    <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">file-name (</span><span style="color: #a7b7f7;">git-file-name name version</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-    <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">patches</span>
-<span style="color: #62baaf;">     (</span><span style="color: #a7b7f7;">search-patches</span>
-<span style="color: #a7b7f7;">      </span><span style="color: #d3d3dbdbfbfb;">&quot;emacs-exec-path.patch&quot;</span>
-      <span style="color: #d3d3dbdbfbfb;">&quot;emacs-fix-scheme-indent-function.patch&quot;</span>
-      <span style="color: #d3d3dbdbfbfb;">&quot;emacs-native-comp-driver-options.patch&quot;</span>
-      <span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">parameter-if 'pgtk</span>
-<span style="color: #cad7e6;">                    </span><span style="color: #e564ebebf372;">&quot;emacs-pgtk-super-key-fix.patch&quot;</span>
-                    <span style="color: #cad7e6;">nil</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-    <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">sha256</span>
-<span style="color: #62baaf;">     (</span><span style="color: #a7b7f7;">base32</span>
-<span style="color: #a7b7f7;">      </span><span style="color: #d3d3dbdbfbfb;">&quot;09jm1q5pvd1dc0xq5rhn66v1j235zlr72kwv5i27xigvi9nfqkv1&quot;</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span>
-   <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">origin</span>
-<span style="color: #cbb5fb;">    (</span><span style="color: #62baaf;">inherit (</span><span style="color: #a7b7f7;">package-source emacs</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">arguments</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">substitute-keyword-arguments (</span><span style="color: #cbb5fb;">package-arguments emacs</span><span style="color: #abc3e1;">)</span>
-    <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">parameter-match</span>
-<span style="color: #cbb5fb;">     [</span><span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">x11 </span><span style="color: #cad7e6; font-weight: bold;">#:off</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span>
-      <span style="color: #62baaf;">'(</span><span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb; font-weight: bold;">#:configure-flags</span><span style="color: #e6dcfb;"> flags #~'()</span><span style="color: #cad7e6;">)</span>
-         <span style="color: #cad7e6;">#~(</span><span style="color: #e6dcfb;">delete </span><span style="color: #f372ee6dfdfd;">&quot;--with-cairo&quot;</span> <span style="color: #e6dcfb;">#$flags</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span>
-        <span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb; font-weight: bold;">#:modules</span><span style="color: #e6dcfb;"> _</span><span style="color: #cad7e6;">)</span> <span style="color: #cad7e6;">(</span><span style="color: #e6dcfb;">%emacs-modules build-system</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span>
-        <span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb; font-weight: bold;">#:phases</span><span style="color: #e6dcfb;"> phases</span><span style="color: #cad7e6;">)</span>
-         <span style="color: #cad7e6;">#~(</span><span style="color: #e6dcfb;">modify-phases #$phases</span>
-<span style="color: #e6dcfb;">             (</span><span style="color: #7db8b1;">delete 'restore-emacs-pdmp</span><span style="color: #e6dcfb;">)</span>
-             <span style="color: #e6dcfb;">(</span><span style="color: #7db8b1;">delete 'strip-double-wrap</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">]</span>
-     <span style="color: #cbb5fb;">[</span><span style="color: #62baaf;">(</span><span style="color: #a7b7f7; font-weight: bold;">#:all</span><span style="color: #a7b7f7;"> xwidgets (</span><span style="color: #cad7e6;">pgtk </span><span style="color: #cad7e6; font-weight: bold;">#:off</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span>
-      <span style="color: #62baaf;">'(</span><span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb; font-weight: bold;">#:configure-flags</span><span style="color: #e6dcfb;"> flags #~'()</span><span style="color: #cad7e6;">)</span>
-         <span style="color: #cad7e6;">#~(</span><span style="color: #e6dcfb;">cons </span><span style="color: #f372ee6dfdfd;">&quot;--with-xwidgets&quot;</span> <span style="color: #e6dcfb;">#$flags</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span>
-        <span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb; font-weight: bold;">#:modules</span><span style="color: #e6dcfb;"> _</span><span style="color: #cad7e6;">)</span> <span style="color: #cad7e6;">(</span><span style="color: #e6dcfb;">%emacs-modules build-system</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span>
-        <span style="color: #a7b7f7;">(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb; font-weight: bold;">#:phases</span><span style="color: #e6dcfb;"> phases</span><span style="color: #cad7e6;">)</span>
-         <span style="color: #cad7e6;">#~(</span><span style="color: #e6dcfb;">modify-phases #$phases</span>
-<span style="color: #e6dcfb;">             (</span><span style="color: #7db8b1;">delete 'restore-emacs-pdmp</span><span style="color: #e6dcfb;">)</span>
-             <span style="color: #e6dcfb;">(</span><span style="color: #7db8b1;">delete 'strip-double-wrap</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">]</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">inputs</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">parameter-modify-inputs</span>
-<span style="color: #abc3e1;">   [</span><span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">next</span><span style="color: #cbb5fb;">)</span> <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">prepend sqlite</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">]</span>
-   <span style="color: #abc3e1;">[</span><span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">tree-sitter</span><span style="color: #cbb5fb;">)</span> <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">prepend tree-sitter</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">]</span>
-   <span style="color: #abc3e1;">[</span><span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">xwidgets</span><span style="color: #cbb5fb;">)</span> <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">prepend gsettings-desktop-schemas</span>
-<span style="color: #62baaf;">                        webkitgtk-with-libsoup2</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">]</span>
-   <span style="color: #abc3e1;">[</span><span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">x11 </span><span style="color: #a7b7f7; font-weight: bold;">#:off</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span>
-    <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">delete </span><span style="color: #b130dd5cd7d7;">&quot;libx11&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;gtk+&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libxft&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libtiff&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;giflib&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libjpeg&quot;</span>
-            <span style="color: #b130dd5cd7d7;">&quot;imagemagick&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libpng&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;librsvg&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libxpm&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libice&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libsm&quot;</span>
-            <span style="color: #b130dd5cd7d7;">&quot;cairo&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;pango&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;harfbuzz&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;libotf&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;m17n-lib&quot;</span> <span style="color: #b130dd5cd7d7;">&quot;dbus&quot;</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">]</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">package-with-parameters</span>
+<span style="color: #c6a6b3;"> [</span><span style="color: #6f9e77;">parameter-spec</span>
+<span style="color: #6f9e77;">  (</span><span style="color: #d4878a;">local</span>
+<span style="color: #d4878a;">    (</span><span style="color: #d0b29e;">list</span>
+<span style="color: #d0b29e;">     (</span><span style="color: #bbcde3;">package-parameter </span>
+<span style="color: #bbcde3;">      (</span><span style="color: #6eb0eb;">name 'next</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">variants</span>
+<span style="color: #6eb0eb;">       (</span><span style="color: #d6a7c4;">parameter-variant-match</span>
+<span style="color: #d6a7c4;">        (</span><span style="color: #3cae42;">_</span>
+<span style="color: #3cae42;">         </span><span style="color: #3cae42; font-weight: bold;">#:lambda</span>
+<span style="color: #3cae42;">         (</span><span style="color: #ebb4b6; font-weight: bold;">lambda</span><span style="color: #ebb4b6;"> (</span><span style="color: #d69b21;">pkg</span><span style="color: #ebb4b6;">)</span>
+           <span style="color: #ebb4b6;">(</span><span style="color: #d69b21;">package</span>
+<span style="color: #d69b21;">            (</span><span style="color: #a0c1cb;">inherit pkg</span><span style="color: #d69b21;">)</span>
+            <span style="color: #d69b21;">(</span><span style="color: #a0c1cb;">version </span><span style="color: #d04fe0e0e5e4;">&quot;29.0.92&quot;</span><span style="color: #d69b21;">)</span>
+            <span style="color: #d69b21;">(</span><span style="color: #a0c1cb;">source</span>
+<span style="color: #a0c1cb;">             (</span><span style="color: #d6dbe9;">origin</span>
+<span style="color: #d6dbe9;">              (</span><span style="color: #ebebeb;">inherit (</span><span style="color: #adadad;">package-source pkg</span><span style="color: #ebebeb;">)</span><span style="color: #d6dbe9;">)</span>
+              <span style="color: #d6dbe9;">(</span><span style="color: #ebebeb;">method git-fetch</span><span style="color: #d6dbe9;">)</span>
+              <span style="color: #d6dbe9;">(</span><span style="color: #ebebeb;">uri</span>
+<span style="color: #ebebeb;">               (</span><span style="color: #adadad;">git-reference</span>
+<span style="color: #adadad;">                (</span><span style="color: #e4d9d9;">url </span><span style="color: #f271ecececec;">&quot;https://git.savannah.gnu.org/git/emacs.git/&quot;</span><span style="color: #adadad;">)</span>
+                <span style="color: #adadad;">(</span><span style="color: #e4d9d9;">commit (</span><span style="color: #eae9e8;">string-append </span><span style="color: #f574f4f3f473;">&quot;emacs-&quot;</span> <span style="color: #eae9e8;">version</span><span style="color: #e4d9d9;">)</span><span style="color: #adadad;">)</span><span style="color: #ebebeb;">)</span><span style="color: #d6dbe9;">)</span>
+              <span style="color: #d6dbe9;">(</span><span style="color: #ebebeb;">file-name</span>
+<span style="color: #ebebeb;">               (</span><span style="color: #adadad;">git-file-name (</span><span style="color: #e4d9d9;">package-name pkg</span><span style="color: #adadad;">)</span> <span style="color: #adadad;">version</span><span style="color: #ebebeb;">)</span><span style="color: #d6dbe9;">)</span>
+              <span style="color: #d6dbe9;">(</span><span style="color: #ebebeb;">patches</span>
+<span style="color: #ebebeb;">               (</span><span style="color: #adadad;">parameter-if </span><span style="color: #adadad; font-weight: bold;">#:package</span><span style="color: #adadad;"> pkg (</span><span style="color: #e4d9d9;">pgtk</span><span style="color: #adadad;">)</span>
+                             <span style="color: #adadad;">(</span><span style="color: #e4d9d9;">search-patches</span>
+<span style="color: #e4d9d9;">                              </span><span style="color: #f271ecececec;">&quot;emacs-exec-path.patch&quot;</span>
+                              <span style="color: #f271ecececec;">&quot;emacs-fix-scheme-indent-function.patch&quot;</span>
+                              <span style="color: #f271ecececec;">&quot;emacs-native-comp-driver-options.patch&quot;</span>
+                              <span style="color: #f271ecececec;">&quot;emacs-pgtk-super-key-fix.patch&quot;</span><span style="color: #adadad;">)</span>
+                             <span style="color: #adadad;">(</span><span style="color: #e4d9d9;">search-patches</span>
+<span style="color: #e4d9d9;">                              </span><span style="color: #f271ecececec;">&quot;emacs-exec-path.patch&quot;</span>
+                              <span style="color: #f271ecececec;">&quot;emacs-fix-scheme-indent-function.patch&quot;</span>
+                              <span style="color: #f271ecececec;">&quot;emacs-native-comp-driver-options.patch&quot;</span><span style="color: #adadad;">)</span><span style="color: #ebebeb;">)</span><span style="color: #d6dbe9;">)</span>
+              <span style="color: #d6dbe9;">(</span><span style="color: #ebebeb;">sha256</span>
+<span style="color: #ebebeb;">               (</span><span style="color: #adadad;">base32</span>
+<span style="color: #adadad;">         </span><span style="color: #d6d6d6d6d6d6;">&quot;1h3p325859svcy43iv7wr27dp68049j9d44jq5akcynqdkxz4jjn&quot;</span><span style="color: #ebebeb;">)</span><span style="color: #d6dbe9;">)</span><span style="color: #a0c1cb;">)</span><span style="color: #d69b21;">)</span><span style="color: #ebb4b6;">)</span><span style="color: #3cae42;">)</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+     <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">package-parameter (</span><span style="color: #6eb0eb;">name 'tree-sitter</span><span style="color: #bbcde3;">)</span>
+                        <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">dependencies '(</span><span style="color: #d6a7c4;">next</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+     <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">package-parameter</span>
+<span style="color: #bbcde3;">      (</span><span style="color: #6eb0eb;">name 'pgtk</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">variants</span>
+<span style="color: #6eb0eb;">       (</span><span style="color: #d6a7c4;">parameter-variant-match</span>
+<span style="color: #d6a7c4;">        (</span><span style="color: #3cae42;">_ </span><span style="color: #3cae42; font-weight: bold;">#:transform</span><span style="color: #3cae42;"> (</span><span style="color: #ebb4b6;">with-configure-flag</span>
+<span style="color: #ebb4b6;">                        </span><span style="color: #ebb4b6; font-weight: bold;">#:package-name</span><span style="color: #ebb4b6;"> </span><span style="color: #f5f4da59db5a;">&quot;=--with-pgtk&quot;</span><span style="color: #3cae42;">)</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">dependencies '(</span><span style="color: #d6a7c4;">tree-sitter x11</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+     <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">package-parameter</span>
+<span style="color: #bbcde3;">      (</span><span style="color: #6eb0eb;">name 'xwidgets</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">variants</span>
+<span style="color: #6eb0eb;">       (</span><span style="color: #d6a7c4;">parameter-variant-match</span>
+<span style="color: #d6a7c4;">        (</span><span style="color: #3cae42;">_ </span><span style="color: #3cae42; font-weight: bold;">#:transform</span><span style="color: #3cae42;"> (</span><span style="color: #ebb4b6;">with-configure-flag</span>
+<span style="color: #ebb4b6;">                        </span><span style="color: #ebb4b6; font-weight: bold;">#:package-name</span><span style="color: #ebb4b6;"> </span><span style="color: #f5f4da59db5a;">&quot;=--with-xwidgets&quot;</span><span style="color: #3cae42;">)</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+     <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">package-parameter</span>
+<span style="color: #bbcde3;">      (</span><span style="color: #6eb0eb;">name 'wide-int</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">variants</span>
+<span style="color: #6eb0eb;">       (</span><span style="color: #d6a7c4;">parameter-variant-match</span>
+<span style="color: #d6a7c4;">        (</span><span style="color: #3cae42;">_ </span><span style="color: #3cae42; font-weight: bold;">#:transform</span><span style="color: #3cae42;"> (</span><span style="color: #ebb4b6;">with-configure-flag</span>
+<span style="color: #ebb4b6;">                        </span><span style="color: #ebb4b6; font-weight: bold;">#:package-name</span><span style="color: #ebb4b6;"> </span><span style="color: #f5f4da59db5a;">&quot;=--with-wide-int&quot;</span><span style="color: #3cae42;">)</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span>
+  <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">one-of '(</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">_ (</span><span style="color: #6eb0eb;">x11 </span><span style="color: #6eb0eb; font-weight: bold;">#:off</span><span style="color: #bbcde3;">)</span> <span style="color: #bbcde3;">pgtk</span><span style="color: #d0b29e;">)</span>
+            <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">_ (</span><span style="color: #6eb0eb;">x11 </span><span style="color: #6eb0eb; font-weight: bold;">#:off</span><span style="color: #bbcde3;">)</span> <span style="color: #bbcde3;">xwidgets</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">]</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">inherit emacs</span><span style="color: #c6a6b3;">)</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">name </span><span style="color: #b7b7cf4ebbbb;">&quot;emacs-parameterized&quot;</span><span style="color: #c6a6b3;">)</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">arguments</span>
+<span style="color: #6f9e77;">  (</span><span style="color: #d4878a;">parameter-substitute-keyword-arguments </span>
+<span style="color: #d4878a;">   (</span><span style="color: #d0b29e;">package-arguments emacs</span><span style="color: #d4878a;">)</span>
+   <span style="color: #d4878a;">[</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">x11 </span><span style="color: #6eb0eb; font-weight: bold;">#:off</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+    <span style="color: #d0b29e;">'(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4; font-weight: bold;">#:configure-flags</span><span style="color: #d6a7c4;"> flags #~'()</span><span style="color: #6eb0eb;">)</span>
+       <span style="color: #6eb0eb;">#~(</span><span style="color: #d6a7c4;">delete </span><span style="color: #eb6ad3d3e261;">&quot;--with-cairo&quot;</span> <span style="color: #d6a7c4;">#$flags</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4; font-weight: bold;">#:modules</span><span style="color: #d6a7c4;"> _</span><span style="color: #6eb0eb;">)</span> <span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4;">%emacs-modules build-system</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4; font-weight: bold;">#:phases</span><span style="color: #d6a7c4;"> phases</span><span style="color: #6eb0eb;">)</span>
+       <span style="color: #6eb0eb;">#~(</span><span style="color: #d6a7c4;">modify-phases #$phases</span>
+<span style="color: #d6a7c4;">                        (</span><span style="color: #3cae42;">delete 'restore-emacs-pdmp</span><span style="color: #d6a7c4;">)</span>
+                        <span style="color: #d6a7c4;">(</span><span style="color: #3cae42;">delete 'strip-double-wrap</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">]</span>
+   <span style="color: #d4878a;">[</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3; font-weight: bold;">#:all</span><span style="color: #bbcde3;"> (</span><span style="color: #6eb0eb;">xwidgets on</span><span style="color: #bbcde3;">)</span> <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">pgtk </span><span style="color: #6eb0eb; font-weight: bold;">#:off</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+    <span style="color: #d0b29e;">'(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4; font-weight: bold;">#:configure-flags</span><span style="color: #d6a7c4;"> flags #~'()</span><span style="color: #6eb0eb;">)</span>
+       <span style="color: #6eb0eb;">#~(</span><span style="color: #d6a7c4;">cons </span><span style="color: #eb6ad3d3e261;">&quot;--with-xwidgets&quot;</span> <span style="color: #d6a7c4;">#$flags</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4; font-weight: bold;">#:modules</span><span style="color: #d6a7c4;"> _</span><span style="color: #6eb0eb;">)</span> <span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4;">%emacs-modules build-system</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+      <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4; font-weight: bold;">#:phases</span><span style="color: #d6a7c4;"> phases</span><span style="color: #6eb0eb;">)</span>
+       <span style="color: #6eb0eb;">#~(</span><span style="color: #d6a7c4;">modify-phases #$phases</span>
+<span style="color: #d6a7c4;">                        (</span><span style="color: #3cae42;">delete 'restore-emacs-pdmp</span><span style="color: #d6a7c4;">)</span>
+                        <span style="color: #d6a7c4;">(</span><span style="color: #3cae42;">delete 'strip-double-wrap</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">]</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">inputs</span>
+<span style="color: #6f9e77;">  (</span><span style="color: #d4878a;">parameter-modify-inputs</span>
+<span style="color: #d4878a;">   [</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">next</span><span style="color: #d0b29e;">)</span> <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">prepend sqlite</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">]</span>
+   <span style="color: #d4878a;">[</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">tree-sitter</span><span style="color: #d0b29e;">)</span> <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">prepend tree-sitter</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">]</span>
+   <span style="color: #d4878a;">[</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">xwidgets</span><span style="color: #d0b29e;">)</span> <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">prepend gsettings-desktop-schemas</span>
+<span style="color: #bbcde3;">                        webkitgtk-with-libsoup2</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">]</span>
+   <span style="color: #d4878a;">[</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">x11 </span><span style="color: #6eb0eb; font-weight: bold;">#:off</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span>
+    <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">delete </span><span style="color: #dddde6e6f1f1;">&quot;libx11&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;gtk+&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libxft&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libtiff&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;giflib&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libjpeg&quot;</span>
+            <span style="color: #dddde6e6f1f1;">&quot;imagemagick&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libpng&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;librsvg&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libxpm&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libice&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libsm&quot;</span>
+            <span style="color: #dddde6e6f1f1;">&quot;cairo&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;pango&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;harfbuzz&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;libotf&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;m17n-lib&quot;</span> <span style="color: #dddde6e6f1f1;">&quot;dbus&quot;</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">]</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgeba6ac6" class="outline-3">
-<h3 id="orgeba6ac6">Step-by-step Explanation</h3>
-<div id="text-orgeba6ac6" class="outline-text-3">
+<div id="outline-container-org01c4f8b" class="outline-3">
+<h3 id="org01c4f8b">Step-by-step Explanation</h3>
+<div id="text-org01c4f8b" class="outline-text-3">
 <ol class="org-ol">
-<li><code>package-with-parameters</code>
+<li><code>package-with-parameters</code>:
 This macro takes a <code>parameter-spec</code> as its first argument and applies the parameter specification to the package in its body. The <i>default parameters</i> are then activated within the package.</li>
-<li><code>parameter-spec</code>
+<li><code>parameter-spec</code>:
 This record type contains all of the logic necessary to declare and resolve parameters for a package. This normally goes inside the <code>properties</code> field of the <code>package</code> record.
 In the previous post, it was necessary to put this record inside the properties, but now <code>package-with-parameters</code> handles that for us.
 The parameter specification record contains various fields, all of which are optional.
@@ -311,82 +322,89 @@ I have gone over the fields in detail in the <a href="https://blog.lispy.tech/pa
 The only big change is that <code>one-of</code> now has a functionality wherein if you start a list within it with <code>_</code>, you can have a case where none of the values in it are positive. Otherwise, it throws an error as one and only one value is expected to be positive.
 Also notice the usage of <code>#:off</code> to indicate negation.
 We have also not declared <code>x11</code>, which will hence be treated as a global parameter. In general global parameters must either have their <code>predicate</code> set to something that returns <code>#t</code> or be present <i>anywhere</i> in the <code>parameter-spec</code> to be applicable. Users are advised to put them in the <code>optional</code> field, as it was created with this use case in mind.</li>
-<li>package body
+<li>local parameter <code>next</code>:
+The local parameter <code>next</code> has an interesting <code>#:lambda</code> statement inside it. This statement takes the current <code>package</code> record as an argument and returns a new <code>package</code> record, which is then used in its place. This is an extremely powerful method for changing otherwise unchangeable options, such as the ones here; because the <code>version</code> and <code>source</code> fields are not thunked, this is the only way of modifying them. The <code>#:lambda</code>'s functions can be passed 0, 1 or 2 arguments. In the case that it asks for 1 argument, the current <code>package</code> record is passed. If it asks for 2, the current <code>package</code> record along with the given parameter's value are passed. In all cases, the function is expected to return a <code>package</code> record that will then be taken as the new current <code>package</code> record.</li>
+<li>package body:
 Within the package body, we have the usual fields you would expect.
 <code>(inherit emacs)</code> signifies that this package inherits all of emacs' base fields, and the rest of the fields are overrides of that.
 Please note that the <code>name</code> field cannot be influenced by parameters as it is not <code>thunked</code>.</li>
-<li><code>parameter-match</code>
+<li><code>parameter-match</code>:
+<b>note: this has been substituted by parameter-substitute-keyword-arguments in the latest edit</b>
 This is an extremely useful macro that matches <i>all</i> the parameter lists that has any positive parameters. It is also possible to require all the parameters in a list to be positive by using <code>#:all</code>. Please keep in mind that it does not short-circuit by default like <code>cond</code>. It will keep matching parameters until all the lists have been combed through. A short-circuiting version exists in the form of <code>parameter-match-case</code>. I've gone over the functionality offered by this macro in detail in the <a href="https://blog.lispy.tech/parameterized-packages-an-update.html">previous blog post</a>, however it has one small improvement:
 all conditionals now support checking if a parameter is set to a particular value instead of just checking if it is positive or not. This is very useful for enumerated types, where you might for example want to disable some features if and only if a parameter is set to the second positive value. To illustrate this, if you wanted to check whether a parameter <code>y</code> is set to <code>v1</code> or if the parameter list <code>z</code> is <i>non-negative</i>, the list would be <code>((y v1) z)</code>.
 You can also use this to check for the default or negative value, with <code>(parameter-name #:default)</code> and <code>(parameter-name #:off)</code> respectively. <code>_</code> is a similar special symbol which matches all <i>non-negative</i> values, but it is not necessary to use it since the parameter name by itself, say <code>parameter-name</code> is the same as <code>(parameter-name _)</code>.
 We can see this in the <code>((y v1) z)</code> example above, where <code>z</code> is matching all non-negative values of <code>z</code> even though we did not specify it as <code>(z _)</code>.
 You can also use this in all of the fields in <code>parameter-spec</code> that require you to specify parameters. The parameter value list syntax is the same everywhere.</li>
+<li><code>parameter-substitute-keyword-arguments</code> and <code>parameter-modify-inputs</code>:
+As explained in the previous blog post, because <code>modify-inputs</code> is a macro, we cannot use <code>parameter-match</code> within it. To counter this, I have written <code>parameter-modify-inputs</code> that behaves a lot like if <code>modify-inputs</code> had a <code>parameter-match</code> macro within it. I have similarly written <code>parameter-substitute-keyword-arguments</code> for another commonly used macro called <code>substitute-keyword-arguments</code>.</li>
 </ol>
 <p>
 I have gone over the rest of the conditionals in the  <a href="https://blog.lispy.tech/parameterized-packages-an-update.html">previous blog post</a> too, they remain more or less the same with the exception that we use <code>#:all</code> inside lists instead of <code>all</code> like last time. This is to make it obvious at a glance that <code>#:all</code> is not a parameter like the rest of the list.
 </p>
 </div>
 </div>
-</div><div id="outline-container-orgf735ed6" class="outline-2">
-<h2 id="orgf735ed6">Bonus Examples</h2>
-<div id="text-orgf735ed6" class="outline-text-2">
+</div><div id="outline-container-org6ceb6ea" class="outline-2">
+<h2 id="org6ceb6ea">Bonus Examples</h2>
+<div id="text-org6ceb6ea" class="outline-text-2">
 <p>
 Here are some bonus examples for enumerated parameters:
 </p>
 </div>
-<div id="outline-container-org63fbd80" class="outline-3">
-<h3 id="org63fbd80">GCC Optimization Flags</h3>
-<div id="text-org63fbd80" class="outline-text-3">
+<div id="outline-container-org5cca620" class="outline-3">
+<h3 id="org5cca620">GCC Optimization Flags</h3>
+<div id="text-org5cca620" class="outline-text-3">
 <p>
 <code>gcc</code> has a set of <a href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html">optimization flags</a> that can be used to make programs faster or smaller at the expense of stability.
 This is a very basic attempt at adding that functionality to the <code>gnu-build-system</code> through the <code>CFLAGS</code> make-flag.
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">package-parameter</span>
-<span style="color: #43bfb0;"> (</span><span style="color: #7f98fb;">name 'gcc-oflag</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">type</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">parameter-type</span>
-<span style="color: #abc3e1;">   (</span><span style="color: #cbb5fb;">name '_</span><span style="color: #abc3e1;">)</span>
-   <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">accepted-values '(</span><span style="color: #62baaf;">-O0 -O1 -O2 -O3 -Os -Ofast -Og -Oz</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span>
-   <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">negation #f</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">variants</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">parameter-variant-match</span>
-<span style="color: #abc3e1;">   (</span><span style="color: #cbb5fb;">_ </span><span style="color: #cbb5fb; font-weight: bold;">#:build-system</span><span style="color: #cbb5fb;"> gnu-build-system</span>
-<span style="color: #cbb5fb;">      </span><span style="color: #cbb5fb; font-weight: bold;">#:lambda</span>
-<span style="color: #cbb5fb;">      (</span><span style="color: #62baaf;">package/inherit </span><span style="color: #62baaf; font-weight: bold;">#:package</span>
-<span style="color: #62baaf;">        (</span><span style="color: #a7b7f7;">arguments</span>
-<span style="color: #a7b7f7;">         (</span><span style="color: #cad7e6;">substitute-keyword-arguments</span>
-<span style="color: #cad7e6;">          (</span><span style="color: #e6dcfb;">package-arguments </span><span style="color: #e6dcfb; font-weight: bold;">#:package</span><span style="color: #cad7e6;">)</span>
-          <span style="color: #cad7e6;">(</span><span style="color: #e6dcfb;">(</span><span style="color: #7db8b1; font-weight: bold;">#:make-flags</span><span style="color: #7db8b1;"> flags #~'()</span><span style="color: #e6dcfb;">)</span>
-           <span style="color: #e6dcfb;">#~(</span><span style="color: #7db8b1;">append</span>
-<span style="color: #7db8b1;">              #$flags</span>
-<span style="color: #7db8b1;">              (</span><span style="color: #cbd4f7;">list (</span><span style="color: #e5eaf0;">string-append </span><span style="color: #f2f2f574f877;">&quot;CFLAGS=&quot;</span>
-                                   <span style="color: #e5eaf0; font-weight: bold;">#:parameter-value</span><span style="color: #cbd4f7;">)</span><span style="color: #7db8b1;">)</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">package-parameter</span>
+<span style="color: #c6a6b3;"> (</span><span style="color: #6f9e77;">name 'gcc-oflag</span><span style="color: #c6a6b3;">)</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">type</span>
+<span style="color: #6f9e77;">  (</span><span style="color: #d4878a;">parameter-type</span>
+<span style="color: #d4878a;">   (</span><span style="color: #d0b29e;">name '_</span><span style="color: #d4878a;">)</span>
+   <span style="color: #d4878a;">(</span><span style="color: #d0b29e;">accepted-values '(</span><span style="color: #bbcde3;">-O0 -O1 -O2 -O3 -Os -Ofast -Og -Oz</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span>
+   <span style="color: #d4878a;">(</span><span style="color: #d0b29e;">negation #f</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">variants</span>
+<span style="color: #6f9e77;">  (</span><span style="color: #d4878a;">parameter-variant-match</span>
+<span style="color: #d4878a;">   (</span><span style="color: #d0b29e;">_ </span><span style="color: #d0b29e; font-weight: bold;">#:build-system</span><span style="color: #d0b29e;"> gnu-build-system</span>
+<span style="color: #d0b29e;">      </span><span style="color: #d0b29e; font-weight: bold;">#:lambda</span>
+<span style="color: #d0b29e;">      (</span><span style="color: #bbcde3; font-weight: bold;">lambda</span><span style="color: #bbcde3;"> (</span><span style="color: #6eb0eb;">pkg parameter-value</span><span style="color: #bbcde3;">)</span>
+        <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">package</span>
+<span style="color: #6eb0eb;">         (</span><span style="color: #d6a7c4;">inherit pkg</span><span style="color: #6eb0eb;">)</span>
+         <span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4;">arguments</span>
+<span style="color: #d6a7c4;">          (</span><span style="color: #3cae42;">substitute-keyword-arguments</span>
+<span style="color: #3cae42;">           (</span><span style="color: #ebb4b6;">package-arguments package</span><span style="color: #3cae42;">)</span>
+           <span style="color: #3cae42;">(</span><span style="color: #ebb4b6;">(</span><span style="color: #d69b21; font-weight: bold;">#:make-flags</span><span style="color: #d69b21;"> flags #~'()</span><span style="color: #ebb4b6;">)</span>
+            <span style="color: #ebb4b6;">#~(</span><span style="color: #d69b21;">append</span>
+<span style="color: #d69b21;">               #$flags</span>
+<span style="color: #d69b21;">               (</span><span style="color: #a0c1cb;">list (</span><span style="color: #d6dbe9;">string-append </span><span style="color: #eb6aededf4f3;">&quot;CFLAGS=&quot;</span>
+                                    <span style="color: #d6dbe9;">parameter-value</span><span style="color: #a0c1cb;">)</span><span style="color: #d69b21;">)</span><span style="color: #ebb4b6;">)</span><span style="color: #3cae42;">)</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org262ac0e" class="outline-3">
-<h3 id="org262ac0e">Static Libraries</h3>
-<div id="text-org262ac0e" class="outline-text-3">
+<div id="outline-container-org87ee5e9" class="outline-3">
+<h3 id="org87ee5e9">Static Libraries</h3>
+<div id="text-org87ee5e9" class="outline-text-3">
 <p>
 In <a href="https://hpc.guix.info/">High-Performance Computing</a>, it's often necessary to produce static builds of packages to share them with others. This parameter is a basic attempt at making it possible to do so with any given library.
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">package-parameter</span>
-<span style="color: #43bfb0;"> (</span><span style="color: #7f98fb;">name 'static-lib</span><span style="color: #43bfb0;">)</span>
- <span style="color: #43bfb0;">(</span><span style="color: #7f98fb;">variants</span>
-<span style="color: #7f98fb;">  (</span><span style="color: #abc3e1;">parameter-variant-match</span>
-<span style="color: #abc3e1;">   (</span><span style="color: #cbb5fb;">_ </span><span style="color: #cbb5fb; font-weight: bold;">#:transform</span>
-<span style="color: #cbb5fb;">      (</span><span style="color: #62baaf;">with-configure-flag </span><span style="color: #62baaf; font-weight: bold;">#:package-name</span><span style="color: #62baaf;"> </span><span style="color: #b130dd5cd7d7;">&quot;=--disable-shared&quot;</span><span style="color: #cbb5fb;">)</span>
-      <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">with-configure-flag </span><span style="color: #62baaf; font-weight: bold;">#:package-name</span><span style="color: #62baaf;"> </span><span style="color: #b130dd5cd7d7;">&quot;=--enable-static&quot;</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">package-parameter</span>
+<span style="color: #c6a6b3;"> (</span><span style="color: #6f9e77;">name 'static-lib</span><span style="color: #c6a6b3;">)</span>
+ <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">variants</span>
+<span style="color: #6f9e77;">  (</span><span style="color: #d4878a;">parameter-variant-match</span>
+<span style="color: #d4878a;">   (</span><span style="color: #d0b29e;">_ </span><span style="color: #d0b29e; font-weight: bold;">#:transform</span>
+<span style="color: #d0b29e;">      (</span><span style="color: #bbcde3;">with-configure-flag </span><span style="color: #bbcde3; font-weight: bold;">#:package-name</span><span style="color: #bbcde3;"> </span><span style="color: #dddde6e6f1f1;">&quot;=--disable-shared&quot;</span><span style="color: #d0b29e;">)</span>
+      <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">with-configure-flag </span><span style="color: #bbcde3; font-weight: bold;">#:package-name</span><span style="color: #bbcde3;"> </span><span style="color: #dddde6e6f1f1;">&quot;=--enable-static&quot;</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orge9a5231" class="outline-3">
-<h3 id="orge9a5231">Sneak Peak: A RESTful API for Parameterization</h3>
-<div id="text-orge9a5231" class="outline-text-3">
+<div id="outline-container-org579a516" class="outline-3">
+<h3 id="org579a516">Sneak Peak: A RESTful API for Parameterization</h3>
+<div id="text-org579a516" class="outline-text-3">
 <p>
 I recently made a <a href="https://emacs.ch/@cel7t/110695688332787396">post on Mastodon</a> that claimed that the real advantage of Guix is that it's extensible with <a href="https://www.gnu.org/software/guile/">Guile Scheme</a>. To back up this claim, once parameters have been merged to trunk I'll be writing a set of tutorials on hacking Guix with Guile Scheme.
 One of these planned tutorials is going to be about writing a <b>RESTful API</b> using Guile that'll allow users to request a package with specific parameters.
@@ -413,9 +431,9 @@ Content-Length: 194
 </div>
 </div>
 </div>
-</div><div id="outline-container-orgbe0c253" class="outline-2">
-<h2 id="orgbe0c253">Future work</h2>
-<div id="text-orgbe0c253" class="outline-text-2">
+</div><div id="outline-container-org31a552e" class="outline-2">
+<h2 id="org31a552e">Future work</h2>
+<div id="text-org31a552e" class="outline-text-2">
 <p>
 Here I have demonstrated a basic DSL that is more-or-less just S-expressions. There is however scope for making it a lot more convenient to use parameters, and thus there are plans on building a convenience syntax on top of this simple one.
 One example is using <code>~parameter-name</code> to indicate the negation of a parameter. However, syntax like this may not be obvious to everyone at a glance, which is why we have decided to make a convenience DSL with these features only after heavy deliberation and discussion.
@@ -425,9 +443,9 @@ One example is using <code>~parameter-name</code> to indicate the negation of a 
 The next few updates will focus on the UI for Parameterization. The primary goals for the UI are to make it easy to discover parameterization options, tell what type a parameter is and to figure out parameter combinations that work for a given package.
 </p>
 </div>
-</div><div id="outline-container-org10fbf42" class="outline-2">
-<h2 id="org10fbf42">Closing Thoughts</h2>
-<div id="text-org10fbf42" class="outline-text-2">
+</div><div id="outline-container-org97c2394" class="outline-2">
+<h2 id="org97c2394">Closing Thoughts</h2>
+<div id="text-org97c2394" class="outline-text-2">
 <p>
 As can be seen with the Parameterized Emacs example in this post, parameterization will make it possible to join a large number of variations of packages and <b>reduce</b> the amount of code requiring maintenance. One of the aims of this project is to also create procedures that test parameter combinations and measure the combinatorial complexity brought about by parameterization, which should make testing parameteric variants easy too.
 </p>

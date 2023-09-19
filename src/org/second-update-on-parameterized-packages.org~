@@ -19,7 +19,7 @@ A brief summary of additions is
 ** Parametric Variants
 To make global parameters useful, it is necessary to be able to change the contents of a package in ways that [[https://guix.gnu.org/manual/devel/en/html_node/Package-Transformation-Options.html][Package Transformations]] might not be able to by themselves. Additionally, users might find themselves in situations where they wish to perform different operations for different values of an enumerated type.
 
-"Parametric Variants" refers to matching against enumerated values and using methods of [[https://guix.gnu.org/manual/en/html_node/Defining-Package-Variants.html][Defining Package Variants]], such as package transforms, ~modify-inputs~ and procedures that return packages. Parameters now have the ability to use any of these methods instead of just using transformations.
+"Parametric Variants" refers to matching against enumerated values and using methods of [[https://guix.gnu.org/manual/en/html_node/Defining-Package-Variants.html][Defining Package Variants]], such as package transforms, ~modify-inputs~ and procedures that return packages. Parameters now can use any of these methods instead of just using transformations.
 
 For a better understanding of them, please look at any of the examples using the ~variant-match~ macro.
 
@@ -66,7 +66,7 @@ The fields of this record are
   #+BEGIN_SRC scheme
   (list ... (parameter-name #:off) ...)
   #+END_SRC
-  Normally, you would place a /value/ from ~accepted-values~ in the right part of the cell, however ~#:off~ gives the 'negative' value for all parameters that support negation.
+  Normally, you would place a /value/ from ~accepted-values~ in the right part of the cell, however, ~#:off~ gives the 'negative' value for all parameters that support negation.
 + ~default~ is a value taken by the parameter if the keyword ~#:default~ is used on it.
   This works similar to negation, but you put ~#:default~ instead of a ~#:negation~ in the right part of the cell. In the case of ~default~, its default value is the second element of ~accepted-values~ if ~negation~ is not set to ~#f~, and the first element otherwise.
   In our example, it is set to ~'en_US~.
@@ -116,7 +116,9 @@ The record accepts values for the fields ~name~, ~type~, ~variants~, ~predicate~
   Otherwise, the user may set this to any lambda that takes a ~package~ record as its argument and returns ~#t~ or ~#f~. The global parameter will be applied if this lambda returns ~#t~.
 + ~dependencies~ is a list of parameters and packages that a given parameter depends on. The list is punctuated by keywords to indicate parameter and package dependencies, with ~#:parameter~ and ~#:package~ respectively. If no keywords are given, the arguments are assumed to be parameters.
   #+BEGIN_SRC scheme
-    (dependencies `(#:parameter a b ... #:package git ,(package (name "some-package") ...) ...))
+    (dependencies
+    `(#:parameter a b ...
+      #:package git ,(package (name "some-package") ...) ...))
   #+END_SRC
 + ~description~ is a simple description of the parameter.
 * What does using parameters look like?
@@ -125,94 +127,102 @@ Here is an example use-case for parameterization, which packages Emacs' ~next~, 
 The usage format for parameters is the same as that for other package transforms- you specify them through the CLI. In the future, it will also be possible to have a global set of transforms.
 #+BEGIN_SRC bash
   guix install emacs-parameterized \
-       --with-parameters=emacs-parameterized=pgtk=on \
-       --with-parameters=emacs-parameterized=tree-sitter=on \
+       --with-parameter=emacs-parameterized=pgtk=on \
+       --with-parameter=emacs-parameterized=tree-sitter=on \
 #+END_SRC
 ** Underlying Code
+*EDIT 15th Sep 2023:* as the ~package~ record's ~source~ field is not thunked, I'm instead using a ~#:lambda~ inside the ~next~ package parameter to change it.
+
 Under the hood, this is what the implementation looks like.
 #+BEGIN_SRC scheme
-(package-with-parameters
- [parameter-spec
-  (local
-      (list
-       (package-parameter (name 'next))
-       (package-parameter (name 'tree-sitter)
-                          (dependencies '(tree-sitter)))
-       (package-parameter
-        (name 'pgtk)
-        (variants
-         (parameter-variant-match
-          (_ #:transform (with-configure-flag
-                          #:package-name "=--with-pgtk"))))
-        (dependencies '(tree-sitter x11)))
-       (package-parameter
-        (name 'xwidgets)
-        (variants
-         (parameter-variant-match
-          (_ #:transform (with-configure-flag
-                          #:package-name "=--with-xwidgets")))))
-       (package-parameter
-        (name 'wide-int)
-        (variants
-         (parameter-variant-match
-          (_ #:transform (with-configure-flag
-                          #:package-name "=--with-wide-int")))))))
-  (one-of '((_ (x11 #:off) pgtk)
-            (_ (x11 #:off) xwidgets)))]
- (inherit emacs)
- (name "emacs-parameterized")
- (source
-  (parameter-if
-   'next
-   (origin
-    (inherit (package-source emacs))
-    (method git-fetch)
-    (uri (git-reference
-          (url "https://git.savannah.gnu.org/git/emacs.git/")
-          (commit (string-append "emacs-" version))))
-    (file-name (git-file-name name version))
-    (patches
-     (search-patches
-      "emacs-exec-path.patch"
-      "emacs-fix-scheme-indent-function.patch"
-      "emacs-native-comp-driver-options.patch"
-      (parameter-if 'pgtk
-                    "emacs-pgtk-super-key-fix.patch"
-                    nil)))
-    (sha256
-     (base32
-      "09jm1q5pvd1dc0xq5rhn66v1j235zlr72kwv5i27xigvi9nfqkv1")))
-   (origin
-    (inherit (package-source emacs)))))
- (arguments
-  (substitute-keyword-arguments (package-arguments emacs)
-    (parameter-match
+  (package-with-parameters
+   [parameter-spec
+    (local
+        (list
+         (package-parameter 
+  			  (name 'next)
+  			  (variants
+  			   (parameter-variant-match
+  			    (_ #:lambda (lambda (pkg)
+  					              (package
+  					               (inherit pkg)
+  					               (version "29.0.92")
+                           (source
+                            (origin
+                             (inherit (package-source pkg))
+                             (method git-fetch)
+                             (uri (git-reference
+                                   (url "https://git.savannah.gnu.org/git/emacs.git/")
+                                   (commit (string-append "emacs-" version))))
+                             (file-name (git-file-name (package-name pkg) version))
+                             (patches
+                              (parameter-if #:package pkg (pgtk)
+                                            (search-patches
+                                             "emacs-exec-path.patch"
+                                             "emacs-fix-scheme-indent-function.patch"
+                                             "emacs-native-comp-driver-options.patch"
+                                             "emacs-pgtk-super-key-fix.patch")
+                                            (search-patches
+                                             "emacs-exec-path.patch"
+                                             "emacs-fix-scheme-indent-function.patch"
+                                             "emacs-native-comp-driver-options.patch")))
+                             (sha256
+                              (base32
+                               "1h3p325859svcy43iv7wr27dp68049j9d44jq5akcynqdkxz4jjn"))))))))))
+         (package-parameter (name 'tree-sitter)
+                            (dependencies '(next)))
+         (package-parameter
+          (name 'pgtk)
+          (variants
+           (parameter-variant-match
+            (_ #:transform (with-configure-flag
+                            #:package-name "=--with-pgtk"))))
+          (dependencies '(tree-sitter x11)))
+         (package-parameter
+          (name 'xwidgets)
+          (variants
+           (parameter-variant-match
+            (_ #:transform (with-configure-flag
+                            #:package-name "=--with-xwidgets")))))
+         (package-parameter
+          (name 'wide-int)
+          (variants
+           (parameter-variant-match
+            (_ #:transform (with-configure-flag
+                            #:package-name "=--with-wide-int")))))))
+    (one-of '((_ (x11 #:off) pgtk)
+              (_ (x11 #:off) xwidgets)))]
+   (inherit emacs)
+   (name "emacs-parameterized")
+   (arguments
+    (parameter-substitute-keyword-arguments 
+     (package-arguments emacs)
      [((x11 #:off))
       '(((#:configure-flags flags #~'())
          #~(delete "--with-cairo" #$flags))
         ((#:modules _) (%emacs-modules build-system))
         ((#:phases phases)
          #~(modify-phases #$phases
-             (delete 'restore-emacs-pdmp)
-             (delete 'strip-double-wrap))))]
-     [(#:all xwidgets (pgtk #:off))
+                          (delete 'restore-emacs-pdmp)
+                          (delete 'strip-double-wrap))))]
+     [(#:all (xwidgets on) (pgtk #:off))
       '(((#:configure-flags flags #~'())
          #~(cons "--with-xwidgets" #$flags))
         ((#:modules _) (%emacs-modules build-system))
         ((#:phases phases)
          #~(modify-phases #$phases
-             (delete 'restore-emacs-pdmp)
-             (delete 'strip-double-wrap))))])))
- (inputs
-  (parameter-modify-inputs
-   [(next) (prepend sqlite)]
-   [(tree-sitter) (prepend tree-sitter)]
-   [(xwidgets) (prepend gsettings-desktop-schemas
-                        webkitgtk-with-libsoup2)]
-   [((x11 #:off))
-    (delete "libx11" "gtk+" "libxft" "libtiff" "giflib" "libjpeg"
-            "imagemagick" "libpng" "librsvg" "libxpm" "libice" "libsm"
-            "cairo" "pango" "harfbuzz" "libotf" "m17n-lib" "dbus")])))
+                          (delete 'restore-emacs-pdmp)
+                          (delete 'strip-double-wrap))))]))
+   (inputs
+    (parameter-modify-inputs
+     [(next) (prepend sqlite)]
+     [(tree-sitter) (prepend tree-sitter)]
+     [(xwidgets) (prepend gsettings-desktop-schemas
+                          webkitgtk-with-libsoup2)]
+     [((x11 #:off))
+      (delete "libx11" "gtk+" "libxft" "libtiff" "giflib" "libjpeg"
+              "imagemagick" "libpng" "librsvg" "libxpm" "libice" "libsm"
+              "cairo" "pango" "harfbuzz" "libotf" "m17n-lib" "dbus")])))
 #+END_SRC
 
 ** Step-by-step Explanation
@@ -230,8 +240,11 @@ Under the hood, this is what the implementation looks like.
    Within the package body, we have the usual fields you would expect.
    ~(inherit emacs)~ signifies that this package inherits all of emacs' base fields, and the rest of the fields are overrides of that.
    Please note that the ~name~ field cannot be influenced by parameters as it is not ~thunked~.
-4. ~parameter-match~
-   This is an extremely useful macro which matches /all/ the parameter lists that has any positive parameters. It is also possible to require all the parameters in a list to be positive by using ~#:all~. Please keep in mind that it does not short-circuit by default like ~cond~. It will keep matching parameters until all the lists have been combed through. A short-circuiting version exists in the form of ~parameter-match-case~. I've gone over the functionality offered by this macro in detail in the [[https://blog.lispy.tech/parameterized-packages-an-update.html][previous blog post]], however it has one small improvement:
+4. ~parameter-substitute-keyword-arguments~ and ~parameter-modify-inputs~
+   XXX
+5. ~parameter-match~
+   /note: this has been substituted by parameter-substitute-keyword-arguments in the latest edit/
+   This is an extremely useful macro that matches /all/ the parameter lists that has any positive parameters. It is also possible to require all the parameters in a list to be positive by using ~#:all~. Please keep in mind that it does not short-circuit by default like ~cond~. It will keep matching parameters until all the lists have been combed through. A short-circuiting version exists in the form of ~parameter-match-case~. I've gone over the functionality offered by this macro in detail in the [[https://blog.lispy.tech/parameterized-packages-an-update.html][previous blog post]], however it has one small improvement:
    all conditionals now support checking if a parameter is set to a particular value instead of just checking if it is positive or not. This is very useful for enumerated types, where you might for example want to disable some features if and only if a parameter is set to the second positive value. To illustrate this, if you wanted to check whether a parameter ~y~ is set to ~v1~ or if the parameter list ~z~ is /non-negative/, the list would be ~((y v1) z)~.
    You can also use this to check for the default or negative value, with ~(parameter-name #:default)~ and ~(parameter-name #:off)~ respectively. ~_~ is a similar special symbol which matches all /non-negative/ values, but it is not necessary to use it since the parameter name by itself, say ~parameter-name~ is the same as ~(parameter-name _)~.
    We can see this in the ~((y v1) z)~ example above, where ~z~ is matching all non-negative values of ~z~ even though we did not specify it as ~(z _)~.
@@ -243,26 +256,28 @@ Here are some bonus examples for enumerated parameters:
 ~gcc~ has a set of [[https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html][optimization flags]] that can be used to make programs faster or smaller at the expense of stability.
 This is a very basic attempt at adding that functionality to the ~gnu-build-system~ through the ~CFLAGS~ make-flag.
 #+BEGIN_SRC scheme
-(package-parameter
- (name 'gcc-oflag)
- (type
-  (parameter-type
-   (name '_)
-   (accepted-values '(-O0 -O1 -O2 -O3 -Os -Ofast -Og -Oz))
-   (negation #f)))
- (variants
-  (parameter-variant-match
-   (_ #:build-system gnu-build-system
-      #:lambda
-      (package/inherit #:package
-        (arguments
-         (substitute-keyword-arguments
-          (package-arguments #:package)
-          ((#:make-flags flags #~'())
-           #~(append
-              #$flags
-              (list (string-append "CFLAGS="
-                                   #:parameter-value)))))))))))
+  (package-parameter
+   (name 'gcc-oflag)
+   (type
+    (parameter-type
+     (name '_)
+     (accepted-values '(-O0 -O1 -O2 -O3 -Os -Ofast -Og -Oz))
+     (negation #f)))
+   (variants
+    (parameter-variant-match
+     (_ #:build-system gnu-build-system
+        #:lambda
+        (lambda (pkg parameter-value)
+          (package
+           (inherit pkg)
+           (arguments
+            (substitute-keyword-arguments
+             (package-arguments package)
+             ((#:make-flags flags #~'())
+              #~(append
+                 #$flags
+                 (list (string-append "CFLAGS="
+                                      parameter-value))))))))))))
 #+END_SRC
 ** Static Libraries
 In [[https://hpc.guix.info/][High-Performance Computing]], it's often necessary to produce static builds of packages to share them with others. This parameter is a basic attempt at making it possible to do so with any given library.

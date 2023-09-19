@@ -23,7 +23,9 @@
               (h2 "Hello 👋")
               (p "My name is Sarthak (IPA: /s̪äːɾ.t̪ʰək/).")
               (p "I like computers, mathematics and music.")
-              (p "I am currently working as a " 
+              (p "I worked on "
+                 ,(anchor "Parameterized Packages" "https://summerofcode.withgoogle.com/programs/2023/projects/heQYLzrz")
+                 " as a " 
                  ,(anchor "GSoC" "https://summerofcode.withgoogle.com") 
                  " intern at "
                  ,(anchor "GNU Guix" "https://guix.gnu.org")

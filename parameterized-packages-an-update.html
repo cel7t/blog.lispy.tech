@@ -1,8 +1,8 @@
 <!DOCTYPE html><head><meta charset="utf-8" /><title>(parameterized-packages:-an-update . (blog . (lispy . tech)))</title><script type="module" src="js/seia.js"></script><script>if (localStorage.theme) 
                       document.documentElement.setAttribute('data-theme', localStorage.theme);</script><link rel="stylesheet" href="/css/reset.css" /><link rel="stylesheet" href="/css/fonts.css" /><link rel="stylesheet" href="/css/blog.css" /></head><body><div class="container"><div class="nav"><ul><li><a href="/">(blog . (lispy . tech))</a></li><li class="fade-text"> </li><li><a href="/about.html">#:about</a></li><li><a href="/index.html">#:posts</a></li></ul><div class="modeBox"><input id="modeBox" type="checkbox" /><label for="modeBox"><img src="images/sun.svg" style="margin: 0.2em" /><img src="images/moon.svg" style="margin: 0.2em" /><span class="ball"></span></label></div></div><h1 class="title">Parameterized Packages: An Update</h1><div class="date">June 22, 2023 • <a href="/about.html">Sarthak Shah</a></div><div class="tags"><ul><li>#:<a href="/feeds/tags/Guix.xml">Guix</a></li><li>#:<a href="/feeds/tags/GSoC.xml">GSoC</a></li><li>#:<a href="/feeds/tags/Scheme.xml">Scheme</a></li></ul></div><div class="post"><p>
 I started work on adding <a href="https://guix.gnu.org/blog/2023/parameterized-packages-for-gnu-guix/">Parameterized Packages</a> to GNU Guix 3 weeks ago, and this post is a short status update on the things I've done so far.
-</p><div id="outline-container-org48bf534" class="outline-2">
-<h2 id="org48bf534"><span class="section-number-2">1.</span> Summary of additions</h2>
+</p><div id="outline-container-orgf4517e7" class="outline-2">
+<h2 id="orgf4517e7"><span class="section-number-2">1.</span> Summary of additions</h2>
 <div id="text-1" class="outline-text-2">
 <p>
 I have written
@@ -30,59 +30,53 @@ Next I wrote a macro <code>package-with-parameters</code> that returns a package
 Lastly, I wrote a modified <code>modify-inputs</code> macro that accepts parameters as conditions for the traditional modify inputs actions.
 </p>
 </div>
-</div><div id="outline-container-org5ef8c42" class="outline-2">
-<h2 id="org5ef8c42"><span class="section-number-2">2.</span> Illustrative example</h2>
+</div><div id="outline-container-orgb8edb35" class="outline-2">
+<h2 id="orgb8edb35"><span class="section-number-2">2.</span> Illustrative example</h2>
 <div id="text-2" class="outline-text-2">
 <p>
+<b>EDIT 9/18/2023:</b> The example has been updated to match the latest syntax.
 The following code builds Guile from the git source.
 Please keep in mind that the syntax is still heavily subject to change, however the underlying mechanisms will remain consistent.
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme">  <span style="color: #af8aff;">(</span><span style="color: #43bfb0; font-weight: bold;">define-public</span><span style="color: #43bfb0;"> </span><span style="color: #43bfb0;">guile-parameterized</span>
-<span style="color: #43bfb0;">         (</span><span style="color: #7f98fb;">package-with-parameters</span>
-<span style="color: #7f98fb;">     (</span><span style="color: #abc3e1;">inherit guile-3.0</span><span style="color: #7f98fb;">)</span>
-     <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">name </span><span style="color: #d5d4e1e1f0f0;">&quot;guile-parameterized&quot;</span><span style="color: #7f98fb;">)</span>
-     <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">properties</span>
-<span style="color: #abc3e1;">       `(</span><span style="color: #cbb5fb;">,(</span><span style="color: #62baaf;">parameter-spec-property</span>
-<span style="color: #62baaf;">      (</span><span style="color: #a7b7f7;">local (</span><span style="color: #cad7e6;">list</span>
-<span style="color: #cad7e6;">         (</span><span style="color: #e6dcfb;">package-parameter</span>
-<span style="color: #e6dcfb;">           (</span><span style="color: #7db8b1;">name </span><span style="color: #bebedc5bd8d8;">&quot;git&quot;</span><span style="color: #e6dcfb;">)</span>
-           <span style="color: #e6dcfb;">(</span><span style="color: #7db8b1;">transforms</span>
-<span style="color: #7db8b1;">             (</span><span style="color: #cbd4f7;">build-system/transform-match</span>
-<span style="color: #cbd4f7;">               (</span><span style="color: #e5eaf0;">_ -&gt;</span>
-<span style="color: #e5eaf0;">            (</span><span style="color: #ffffff;">with-git-url .</span>
-<span style="color: #ffffffffffff;">&quot;guile-parameterized=https://git.savannah.gnu.org/git/guile.git&quot;</span><span style="color: #e5eaf0;">)</span><span style="color: #cbd4f7;">)</span><span style="color: #7db8b1;">)</span><span style="color: #e6dcfb;">)</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span>
-      <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">defaults '(</span><span style="color: #cad7e6;">git</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span>
-      <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">use-transforms '(</span><span style="color: #cad7e6;">(</span><span style="color: #e6dcfb;">git . #t</span><span style="color: #cad7e6;">)</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span>
-     <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">inputs (</span><span style="color: #cbb5fb;">parameter/modify-inputs (</span><span style="color: #62baaf;">package-inputs guile-3.0</span><span style="color: #cbb5fb;">)</span>
-              <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">'git (</span><span style="color: #a7b7f7;">append autoconf</span><span style="color: #62baaf;">)</span>
-                    <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">append automake</span><span style="color: #62baaf;">)</span>
-                    <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">append libtool</span><span style="color: #62baaf;">)</span>
-                    <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">append gnu-gettext</span><span style="color: #62baaf;">)</span>
-                    <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">append flex</span><span style="color: #62baaf;">)</span>
-                    <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">append gperf</span><span style="color: #62baaf;">)</span>
-                    <span style="color: #62baaf;">(</span><span style="color: #a7b7f7;">append texinfo</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span>
-     <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">arguments (</span><span style="color: #cbb5fb;">append</span>
-<span style="color: #cbb5fb;">            (</span><span style="color: #62baaf;">parameter/if 'git</span>
-<span style="color: #62baaf;">        (</span><span style="color: #a7b7f7;">list </span><span style="color: #a7b7f7; font-weight: bold;">#:make-flags</span><span style="color: #a7b7f7;"> #~'(</span><span style="color: #e564ebebf372;">&quot;VERBOSE=1&quot;</span><span style="color: #a7b7f7;">)</span><span style="color: #62baaf;">)</span>
-              <span style="color: #62baaf;">'()</span><span style="color: #cbb5fb;">)</span>
-            <span style="color: #cbb5fb;">(</span><span style="color: #62baaf;">package-arguments guile-3.0</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3; font-weight: bold;">define-public</span><span style="color: #c6a6b3;"> </span><span style="color: #c6a6b3;">guile-parameterized</span>
+<span style="color: #c6a6b3;">  (</span><span style="color: #6f9e77;">package-with-parameters</span>
+<span style="color: #6f9e77;">   (</span><span style="color: #d4878a;">parameter-spec</span>
+<span style="color: #d4878a;">    (</span><span style="color: #d0b29e;">local</span>
+<span style="color: #d0b29e;">        (</span><span style="color: #bbcde3;">list</span>
+<span style="color: #bbcde3;">         (</span><span style="color: #6eb0eb;">package-parameter</span>
+<span style="color: #6eb0eb;">          (</span><span style="color: #d6a7c4;">name </span><span style="color: #eb6ad3d3e261;">&quot;git&quot;</span><span style="color: #6eb0eb;">)</span>
+          <span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4;">variant </span>
+<span style="color: #d6a7c4;">           (</span><span style="color: #3cae42;">parameter-variant-match</span>
+<span style="color: #3cae42;">            (</span><span style="color: #ebb4b6;">_ (</span><span style="color: #d69b21;">with-git-url </span><span style="color: #d69b21; font-weight: bold;">#:package-name</span>
+<span style="color: #d69b21;">                             </span><span style="color: #eb6acdcd9090;">&quot;https://git.savannah.gnu.org/git/guile.git&quot;</span><span style="color: #ebb4b6;">)</span><span style="color: #3cae42;">)</span><span style="color: #d6a7c4;">)</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span>
+    <span style="color: #d4878a;">(</span><span style="color: #d0b29e;">defaults '(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">git off</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">inherit guile-3.0</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">name </span><span style="color: #ea69c3c3c544;">&quot;guile-parameterized&quot;</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">inputs (</span><span style="color: #d0b29e;">parameter-modify-inputs (</span><span style="color: #bbcde3;">package-inputs guile-3.0</span><span style="color: #d0b29e;">)</span>
+                                    <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4;">git on</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span> <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append autoconf</span><span style="color: #bbcde3;">)</span>
+                                     <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append automake</span><span style="color: #bbcde3;">)</span>
+                                     <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append libtool</span><span style="color: #bbcde3;">)</span>
+                                     <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append gnu-gettext</span><span style="color: #bbcde3;">)</span>
+                                     <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append flex</span><span style="color: #bbcde3;">)</span>
+                                     <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append gperf</span><span style="color: #bbcde3;">)</span>
+                                     <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">append texinfo</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span>
+   <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">arguments (</span><span style="color: #d0b29e;">append</span>
+<span style="color: #d0b29e;">               (</span><span style="color: #bbcde3;">parameter-if (</span><span style="color: #6eb0eb;">(</span><span style="color: #d6a7c4;">git on</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+                             <span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">list </span><span style="color: #6eb0eb; font-weight: bold;">#:make-flags</span><span style="color: #6eb0eb;"> #~'(</span><span style="color: #eb6ad3d3e261;">&quot;VERBOSE=1&quot;</span><span style="color: #6eb0eb;">)</span><span style="color: #bbcde3;">)</span>
+                             <span style="color: #bbcde3;">'()</span><span style="color: #d0b29e;">)</span>
+               <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">package-arguments guile-3.0</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 <p>
-The <code>package-with-parameters</code> macro takes in a package definition and gets the default parameter alist from it, and applies transformations according to it.
+The <code>package-with-parameters</code> macro takes in a <code>parameter-spec</code> and a <code>package</code> definition and gets the default parameter alist from it, and applies transformations according to it.
 Here we're defining a version of guile that inherits guile code and adds a <code>parameter-spec</code> property.
-The <code>parameter-spec-property</code> takes a <code>parameter-spec</code> definition and returns it in the property format expected by the <code>package</code> record.
 Inside the <code>parameter-spec</code> definition, we start by defining <code>local</code> parameters. These parameters are only available to the package, and override any global parameters with the same name.
 This overriding feature will make parameter specifications resilient to globalization of previously local parameters, and also make it possible to globally declare what local parameters you'd like to access across packages.
 The name field of the parameter record accepts both strings and symbols, but when referring to a parameter in other fields one must use a symbol.
-The transforms field of the parameter record takes a hash-table of build systems mapped to a sequence of transforms.
-I have written a handy macro called <code>build-system/transform-match</code> that takes in a list of lists of the form <code>(build-systems -&gt; transforms ...)</code> and returns the expected value to the parameter.
-You can use a <code>_</code> to match all build systems, provide one build system or provide a list of build systems. Having <code>_</code> is particularly useful for <i>local</i> definitions as their transforms obviously apply to their package's build system.
+The variants field is explained in further detail in the <a href="https://blog.lispy.tech/parameterized-packages-the-second-update.html">next blog post</a>.
 The transforms follow the usual cons cell syntax used when <a href="https://guix.gnu.org/manual/en/html_node/Defining-Package-Variants.html">defining package variants</a>.
 Next we have the <code>defaults</code> field, which takes a list of parameters which are expected to be switched on by default.
-Lastly, we have the <code>use-transforms</code> field which takes an alist of the form <code>(parameter . transform)</code> where if the transform is <code>#t</code>, the parameter's default transform is used, and otherwise the transform defined there is used. This can save time when writing local parameters as you can define them just by putting a string or symbol with their name in the <code>local</code> field's list.
-It is important to note that transforms for a given parameter will only be used if the <code>use-transforms</code> alist contains it.
 Some fields of the parameter-spec record omitted from this example are:
 </p>
 <ul class="org-ul">
@@ -95,97 +89,80 @@ Some fields of the parameter-spec record omitted from this example are:
 <p>
 These all come together to make it possible to define an arbitrary combination of parameters in arbitrary states and test them against the parameter-spec to see if they work and apply them if they do.
 The <code>package-with-parameters</code> macro is proof of this working, it calculates transforms pertaining to default values and applies them to the <code>package</code> record defined inside it based on the contents of the <code>parameter-spec</code>.
-If you are just using parameters for conditionals within the package record and have no use for transforms, you do not need to use <code>package-with-parameters</code>.
 </p>
 </div>
-</div><div id="outline-container-org09a2789" class="outline-2">
-<h2 id="org09a2789"><span class="section-number-2">3.</span> Parametric Conditionals</h2>
+</div><div id="outline-container-org32da485" class="outline-2">
+<h2 id="org32da485"><span class="section-number-2">3.</span> Parametric Conditionals</h2>
 <div id="text-3" class="outline-text-2">
 <p>
 I have written a number of conditional macros that check if a given parameter is set to on in the <code>parameter-alist</code> and update the <code>package</code> record appropriately.
-<code>parameter/if</code> and <code>parameter/modify-inputs</code> have been used in the example above, and below is an explanation of how they work:
+<code>parameter-if</code> and <code>parameter-modify-inputs</code> have been used in the example above, and below is an explanation of how they work:
 </p>
 </div>
-<div id="outline-container-orgaef4bb8" class="outline-3">
-<h3 id="orgaef4bb8"><span class="section-number-3">3.1.</span> parameter/if</h3>
+<div id="outline-container-org8842226" class="outline-3">
+<h3 id="org8842226"><span class="section-number-3">3.1.</span> parameter-if</h3>
 <div id="text-3-1" class="outline-text-3">
 <p>
-<code>parameter/if</code> takes a parameter or a list of parameters and checks if any of them are on.
+<code>parameter-if</code> takes a parameter or a list of parameters and checks if any of them are on.
 If they are, it returns the first expression, but if all of them are off, it returns either nothing or the second expression. It behaves similarly to Guile's <code>if</code> macro.
 It is being used in this snippet from the <code>guile-parameterized</code> example:
 </p>
 <div class="org-src-container">
 <pre class="src src-scheme"><span style="color: #cf9f7f; font-style: italic;">;; </span><span style="color: #cf9f7f; font-style: italic;">inside package definition</span>
-<span style="color: #af8aff;">(</span><span style="color: #43bfb0;">arguments (</span><span style="color: #7f98fb;">append</span>
-<span style="color: #7f98fb;">            (</span><span style="color: #abc3e1;">parameter/if 'git</span>
-<span style="color: #abc3e1;">                          (</span><span style="color: #cbb5fb;">list </span><span style="color: #cbb5fb; font-weight: bold;">#:make-flags</span><span style="color: #cbb5fb;"> #~'(</span><span style="color: #b130dd5cd7d7;">&quot;VERBOSE=1&quot;</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span>
-                          <span style="color: #abc3e1;">'()</span><span style="color: #7f98fb;">)</span>
-            <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">package-arguments guile-3.0</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">arguments (</span><span style="color: #6f9e77;">append</span>
+<span style="color: #6f9e77;">            (</span><span style="color: #d4878a;">parameter-if (</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">git on</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span>
+                          <span style="color: #d4878a;">(</span><span style="color: #d0b29e;">list </span><span style="color: #d0b29e; font-weight: bold;">#:make-flags</span><span style="color: #d0b29e;"> #~'(</span><span style="color: #dddde6e6f1f1;">&quot;VERBOSE=1&quot;</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span>
+                          <span style="color: #d4878a;">'()</span><span style="color: #6f9e77;">)</span>
+            <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">package-arguments guile-3.0</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 <p>
-Here, the arguments field is given a list formed by appending <code>#:make-flags</code> with the value <code>&quot;VERBOSE=1&quot;</code> if the parameter <code>git</code> is switched on, or appending an empty list <code>'()</code> otherwise.
-</p>
-</div>
-<div id="outline-container-org9104194" class="outline-4">
-<h4 id="org9104194"><span class="section-number-4">3.1.1.</span> parameter/if-all</h4>
-<div id="text-3-1-1" class="outline-text-4">
-<p>
-<code>parameter/if-all</code> is similar to <code>parameter/if</code>, but unlike it it requires all parameters in the list to be switched on.
+Here, the arguments field is given a list formed by appending <code>#:make-flags</code> with the value <code>&quot;VERBOSE=1&quot;</code> if the parameter <code>git</code> is set to <code>on</code>, or appending an empty list <code>'()</code> otherwise.
 </p>
 </div>
 </div>
-</div>
-<div id="outline-container-org13535bf" class="outline-3">
-<h3 id="org13535bf"><span class="section-number-3">3.2.</span> parameter/match</h3>
+<div id="outline-container-org8a1a196" class="outline-3">
+<h3 id="org8a1a196"><span class="section-number-3">3.2.</span> parameter-match</h3>
 <div id="text-3-2" class="outline-text-3">
 <p>
-<code>parameter/match</code> is somewhat similar to Guile's <code>cond</code>, but also very different.
+<code>parameter-match</code> is somewhat similar to Guile's <code>cond</code>, but also very different.
 It takes in a set of lists of the form <code>((parameters ...) clauses ...)</code>, wherein if any in the list of parameters is set to on, the clauses are executed. This behavior is not short-circuiting, and the other lists are checked once one is evaluated regardless of the result.
-A list may be prefixed with <code>all</code> if all parameters are required to be switched on.
-Alternatively, a <code>_</code> can be used to match any and all parameters.
-For example, the <code>parameter/if</code> example above can be rewritten with <code>parameter/match</code> like this:
+A list may be prefixed with <code>#:all</code> if all parameters are required to be switched on.
+Also, a <code>_</code> can be used to always match.
+For example, the <code>parameter-if</code> example above can be rewritten with <code>parameter-match</code> like this:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">arguments (</span><span style="color: #7f98fb;">append</span>
-<span style="color: #7f98fb;">            (</span><span style="color: #abc3e1;">parameter/match</span>
-<span style="color: #abc3e1;">             (</span><span style="color: #cbb5fb;">'git (</span><span style="color: #62baaf;">list </span><span style="color: #62baaf; font-weight: bold;">#:make-flags</span><span style="color: #62baaf;"> #~'(</span><span style="color: #d3d3dbdbfbfb;">&quot;VERBOSE=1&quot;</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span>
-             <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">_ '()</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span>
-            <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">package-arguments guile-3.0</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">arguments (</span><span style="color: #6f9e77;">append</span>
+<span style="color: #6f9e77;">            (</span><span style="color: #d4878a;">parameter-match</span>
+<span style="color: #d4878a;">             (</span><span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">(</span><span style="color: #6eb0eb;">git on</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span> <span style="color: #d0b29e;">(</span><span style="color: #bbcde3;">list </span><span style="color: #bbcde3; font-weight: bold;">#:make-flags</span><span style="color: #bbcde3;"> #~'(</span><span style="color: #b736d857f5f4;">&quot;VERBOSE=1&quot;</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span>
+             <span style="color: #d4878a;">(</span><span style="color: #d0b29e;">_ '()</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span>
+            <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">package-arguments guile-3.0</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
-</div>
-<div id="outline-container-orgba61bc3" class="outline-4">
-<h4 id="orgba61bc3"><span class="section-number-4">3.2.1.</span> parameter/match variants</h4>
-<div id="text-3-2-1" class="outline-text-4">
-<ul class="org-ul">
-<li><code>parameter/match-case</code> is the same as <code>parameter/match</code>, but it short-circuits when a matching list is found</li>
-<li><code>parameter/match-any</code> a variant of <code>parameter/match</code> where <code>all</code> cannot be used</li>
-<li><code>parameter/match-all</code> a variant of <code>parameter/match</code> where <code>all</code> is the default and only method for evaluating parameters</li>
-<li><code>parameter/match-case-all</code> is a variant of <code>parameter/match-case</code> requiring all parameters to be switched on.</li>
-</ul>
+<p>
+<code>parameter-match</code> has a variant called <code>parameter-match-case</code> which is the same as <code>parameter/match</code>, but it short-circuits when a matching list is found.
+</p>
 </div>
 </div>
-</div>
-<div id="outline-container-orgd3cbed4" class="outline-3">
-<h3 id="orgd3cbed4"><span class="section-number-3">3.3.</span> parameter/modify-inputs</h3>
+<div id="outline-container-orgd201f2a" class="outline-3">
+<h3 id="orgd201f2a"><span class="section-number-3">3.3.</span> parameter/modify-inputs</h3>
 <div id="text-3-3" class="outline-text-3">
 <p>
-The <code>modify-inputs</code> macro is used very frequently when defining package variants, but due to it being a macro we cannot use <code>parameter/match</code> inside it to pick arguments.
-Because of this, I have defined a new macro called <code>parameter/modify-inputs</code> that takes in a list of parameters and a corresponding list of arguments to <code>modify-inputs</code> that can be used instead of it.
-<code>_</code> can be used to always execute the clauses, and <code>all</code> may be used to require all parameters to be on.
+The <code>modify-inputs</code> macro is used very frequently when defining package variants, but due to it being a macro we cannot use <code>parameter-match</code> inside it to pick arguments.
+To this end, I have defined a new macro called <code>parameter-modify-inputs</code> that takes in a list of parameters and a corresponding list of arguments to <code>modify-inputs</code> that can be used instead of it.
+<code>_</code> can be used to always execute the clauses, and <code>#:all</code> may be used to require all parameters to be positive.
 In the example package above, it has been used like this:
 </p>
 <div class="org-src-container">
 <pre class="src src-scheme"><span style="color: #cf9f7f; font-style: italic;">;; </span><span style="color: #cf9f7f; font-style: italic;">inside the package definition</span>
-<span style="color: #af8aff;">(</span><span style="color: #43bfb0;">inputs (</span><span style="color: #7f98fb;">parameter/modify-inputs (</span><span style="color: #abc3e1;">package-inputs guile-3.0</span><span style="color: #7f98fb;">)</span>
-            <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">'git (</span><span style="color: #cbb5fb;">append autoconf</span><span style="color: #abc3e1;">)</span>
-                  <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">append automake</span><span style="color: #abc3e1;">)</span>
-                  <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">append libtool</span><span style="color: #abc3e1;">)</span>
-                  <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">append gnu-gettext</span><span style="color: #abc3e1;">)</span>
-                  <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">append flex</span><span style="color: #abc3e1;">)</span>
-                  <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">append gperf</span><span style="color: #abc3e1;">)</span>
-                  <span style="color: #abc3e1;">(</span><span style="color: #cbb5fb;">append texinfo</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span><span style="color: #af8aff;">)</span>
+<span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">parameter-modify-inputs (</span><span style="color: #6f9e77;">package-inputs guile-3.0</span><span style="color: #c6a6b3;">)</span>
+                                    <span style="color: #c6a6b3;">(</span><span style="color: #6f9e77;">(</span><span style="color: #d4878a;">(</span><span style="color: #d0b29e;">git on</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span> <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append autoconf</span><span style="color: #6f9e77;">)</span>
+                                     <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append automake</span><span style="color: #6f9e77;">)</span>
+                                     <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append libtool</span><span style="color: #6f9e77;">)</span>
+                                     <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append gnu-gettext</span><span style="color: #6f9e77;">)</span>
+                                     <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append flex</span><span style="color: #6f9e77;">)</span>
+                                     <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append gperf</span><span style="color: #6f9e77;">)</span>
+                                     <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">append texinfo</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 <p>
@@ -193,35 +170,40 @@ Here, if the parameter <code>git</code> is switched on, <code>autoconf</code>, <
 </p>
 </div>
 </div>
-</div><div id="outline-container-orga6e70f7" class="outline-2">
-<h2 id="orga6e70f7"><span class="section-number-2">4.</span> Global Parameters</h2>
+</div><div id="outline-container-org865aa74" class="outline-2">
+<h2 id="org865aa74"><span class="section-number-2">4.</span> Global Parameters</h2>
 <div id="text-4" class="outline-text-2">
 <p>
 The handling of global parameters is an important topic that needs more discussion.
 Right now, the idea is to require all global parameters to be defined in one file and to access them through a hash-table called <code>%global-parameters</code>.
+This is to ensure that global parameter symbols are both short and unique.
 To make the process of adding values to this hash-table easier, I've written a macro called <code>define-global-parameter</code> that takes a parameter definition and makes it global.
 For example, if I wanted to define a global parameter that disables tests for <code>guile-3.0</code>, I can do it like this:
 </p>
 <div class="org-src-container">
-<pre class="src src-scheme"><span style="color: #af8aff;">(</span><span style="color: #43bfb0;">define-global-parameter</span>
-<span style="color: #43bfb0;">  (</span><span style="color: #7f98fb;">package-parameter</span>
-<span style="color: #7f98fb;">    (</span><span style="color: #abc3e1;">name </span><span style="color: #d5d4e1e1f0f0;">&quot;guile-3.0-tests!&quot;</span><span style="color: #7f98fb;">)</span>
-    <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">description </span><span style="color: #d5d4e1e1f0f0;">&quot;Disables tests for Guile 3.0&quot;</span><span style="color: #7f98fb;">)</span>
-    <span style="color: #7f98fb;">(</span><span style="color: #abc3e1;">transforms</span>
-<span style="color: #abc3e1;">     (</span><span style="color: #cbb5fb;">build-system/transforms</span>
-<span style="color: #cbb5fb;">      (</span><span style="color: #62baaf;">_ -&gt; (</span><span style="color: #a7b7f7;">without-tests . </span><span style="color: #d3d3dbdbfbfb;">&quot;guile-3.0&quot;</span><span style="color: #62baaf;">)</span><span style="color: #cbb5fb;">)</span><span style="color: #abc3e1;">)</span><span style="color: #7f98fb;">)</span><span style="color: #43bfb0;">)</span>
+<pre class="src src-scheme"><span style="color: #7a94df;">(</span><span style="color: #c6a6b3;">define-global-parameter</span>
+<span style="color: #c6a6b3;">  (</span><span style="color: #6f9e77;">package-parameter</span>
+<span style="color: #6f9e77;">    (</span><span style="color: #d4878a;">name </span><span style="color: #ea69c3c3c544;">&quot;guile-3.0-tests!&quot;</span><span style="color: #6f9e77;">)</span>
+    <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">description </span><span style="color: #ea69c3c3c544;">&quot;Disables tests for Guile 3.0&quot;</span><span style="color: #6f9e77;">)</span>
+    <span style="color: #6f9e77;">(</span><span style="color: #d4878a;">variants</span>
+<span style="color: #d4878a;">     (</span><span style="color: #d0b29e;">parameter-variant-match</span>
+<span style="color: #d0b29e;">      (</span><span style="color: #bbcde3;">_ (</span><span style="color: #6eb0eb;">without-tests . </span><span style="color: #b736d857f5f4;">&quot;guile-3.0&quot;</span><span style="color: #bbcde3;">)</span><span style="color: #d0b29e;">)</span><span style="color: #d4878a;">)</span><span style="color: #6f9e77;">)</span><span style="color: #c6a6b3;">)</span><span style="color: #7a94df;">)</span>
 </pre>
 </div>
 <p>
 Now any package that uses this global transform will have <code>guile-3.0</code>'s tests disabled.
 </p>
 </div>
-</div><div id="outline-container-org52fea3a" class="outline-2">
-<h2 id="org52fea3a"><span class="section-number-2">5.</span> Results</h2>
+</div><div id="outline-container-org95401e1" class="outline-2">
+<h2 id="org95401e1"><span class="section-number-2">5.</span> Results</h2>
 <div id="text-5" class="outline-text-2">
 <p>
 It is now possible to define a package with parameters and change the parameter-alist to use the parameters.
 Next, I'll be working on parsing negated and enumerated parameters, along with adding support for modify-inputs and package-rewriting in the parameter record itself.
+</p>
+
+<p>
+EDIT: This work has been done, and can be seen in the <a href="https://blog.lispy.tech/parameterized-packages-the-second-update.html">next blog post</a>.
 </p>
 
 <p>
