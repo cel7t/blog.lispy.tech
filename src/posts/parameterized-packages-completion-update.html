@@ -7,32 +7,32 @@ This post is a small completion update for my <a href="https://summerofcode.with
 You can find the source code for the same on the main <a href="https://notabug.org/cel7t/guix-parameters">notabug</a> repository or on the <a href="https://github.com/cel7t/guix-parameters/">github</a> mirror.
 This post is broken into two parts; the first is a simple overview of the uses of parameters and the second answers some commonly asked questions.
 </p>
-<div id="outline-container-org4f2354a" class="outline-2">
-<h2 id="org4f2354a">What is Package Parameterization?</h2>
-<div class="outline-text-2" id="text-org4f2354a">
+<div id="outline-container-org0fe00da" class="outline-2">
+<h2 id="org0fe00da">What is Package Parameterization?</h2>
+<div class="outline-text-2" id="text-org0fe00da">
 <p>
 In its current state, Package Parameterization makes it possible to add compile-time options to any Guix package, regardless of whether it was defined with support for a given compile-time option or not. This makes it a very powerful tool for hackers seeking to extend their packages in unorthodox and interesting ways. <b>But that's not all!</b> Parameters can be used to make any kind of changes to package definitions conditionally, making them very useful substitutes for unimplemented <a href="https://guix.gnu.org/manual/en/html_node/Package-Transformation-Options.html">package transformation options</a> in a lot of cases.
 </p>
 </div>
-<div id="outline-container-org4580751" class="outline-3">
-<h3 id="org4580751">What are compile-time options?</h3>
-<div class="outline-text-3" id="text-org4580751">
+<div id="outline-container-org7f2c9fa" class="outline-3">
+<h3 id="org7f2c9fa">What are compile-time options?</h3>
+<div class="outline-text-3" id="text-org7f2c9fa">
 <p>
 Compile-time options are package features that can be selected only when a package is being compiled from source. Most binary-based GNU/Linux distributions pick these options for the users, often selecting options that the user might not need while leaving out some options that they might really need. These become especially relevant in the context of High-Performance Computing and computing on alternate ISAs, where greater flexibility with compile-time options is greatly needed.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org1514732" class="outline-2">
-<h2 id="org1514732">What makes Package Parameterization special?</h2>
-<div class="outline-text-2" id="text-org1514732">
+<div id="outline-container-orgc3f2940" class="outline-2">
+<h2 id="orgc3f2940">What makes Package Parameterization special?</h2>
+<div class="outline-text-2" id="text-orgc3f2940">
 <p>
 The strength of package parameterization lies in the fact that users will now be able to create <i>generic compile-time options</i> that they will be able to apply to any number of packages they like. It's almost akin to being able to create custom package transformation options, with the caveat that only an enumerated set of options will be available for choosing.
 </p>
 </div>
-<div id="outline-container-org52f002a" class="outline-3">
-<h3 id="org52f002a">Generic Compile-time Options</h3>
-<div class="outline-text-3" id="text-org52f002a">
+<div id="outline-container-org3843239" class="outline-3">
+<h3 id="org3843239">Generic Compile-time Options</h3>
+<div class="outline-text-3" id="text-org3843239">
 <p>
 The compile-time options created by parameters will be <i>generic</i> if the author chooses to write a <i>global parameter</i> for a given parameterization. This means that if, for example, I write a global parameter that enables text-to-speech support, it will work on <i>any</i> package that satisfies this parameter's predicate.
 The predicate is a user-defined function that returns <code>#t</code> or <code>#f</code> after checking a number of things about the package passed to it like the package's build system, inputs or arguments among other things. This helps prevent the usage of parameters on packages that they are not compatible with.
@@ -40,70 +40,70 @@ The predicate is a user-defined function that returns <code>#t</code> or <code>#
 </div>
 </div>
 </div>
-<div id="outline-container-org224174c" class="outline-2">
-<h2 id="org224174c">What does this look like in action?</h2>
-<div class="outline-text-2" id="text-org224174c">
+<div id="outline-container-orgee9ade8" class="outline-2">
+<h2 id="orgee9ade8">What does this look like in action?</h2>
+<div class="outline-text-2" id="text-orgee9ade8">
 <p>
 I have demonstrated this in great detail in <a href="https://blog.lispy.tech/parameterized-packages-the-second-update.html">this</a> post, for a quick example please head to the section where I've parameterized a bunch of variants of Emacs ("What does using parameters look like?").
 All of the examples in the post work and you can try them out by applying the <a href="https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch">parameterization patch</a> to a local copy of Guix.
 </p>
 </div>
 </div>
-<div id="outline-container-org6c7eb3b" class="outline-2">
-<h2 id="org6c7eb3b">Reasons for trying Package Parameters</h2>
-<div class="outline-text-2" id="text-org6c7eb3b">
+<div id="outline-container-orga133e2b" class="outline-2">
+<h2 id="orga133e2b">Reasons for trying Package Parameters</h2>
+<div class="outline-text-2" id="text-orga133e2b">
 <p>
 In no particular order, here are some good reasons why you should try using Package Parameters
 </p>
 </div>
-<div id="outline-container-orgbd9bad7" class="outline-3">
-<h3 id="orgbd9bad7">1. Speeding up packages that you use very often</h3>
-<div class="outline-text-3" id="text-orgbd9bad7">
+<div id="outline-container-orgd9a1a56" class="outline-3">
+<h3 id="orgd9a1a56">1. Speeding up packages that you use very often</h3>
+<div class="outline-text-3" id="text-orgd9a1a56">
 <p>
 To maintain stability and ensure that packages work across a wide variety of devices, Guix usually does not build packages with a lot of compile-time speed optimizations. However, with parameterization it is possible to speed up packages that you use very often for a much smoother and faster computing experience.
 </p>
 </div>
 </div>
-<div id="outline-container-org3e807ca" class="outline-3">
-<h3 id="org3e807ca">2. Easily creating and accessing multiple variants for packages</h3>
-<div class="outline-text-3" id="text-org3e807ca">
+<div id="outline-container-orgbe2192d" class="outline-3">
+<h3 id="orgbe2192d">2. Easily creating and accessing multiple variants for packages</h3>
+<div class="outline-text-3" id="text-orgbe2192d">
 <p>
 Parameters make it easy to succinctly write packages with multiple variants and switch between them with the <code>--with-parameter</code> transform.
 It is also possible to take an existing package and add a number of variants to it, like in the Emacs example mentioned in the previous heading.
 </p>
 </div>
 </div>
-<div id="outline-container-org4075578" class="outline-3">
-<h3 id="org4075578">3. Applying compile-time customizations to a number of packages</h3>
-<div class="outline-text-3" id="text-org4075578">
+<div id="outline-container-orgd3ccb63" class="outline-3">
+<h3 id="orgd3ccb63">3. Applying compile-time customizations to a number of packages</h3>
+<div class="outline-text-3" id="text-orgd3ccb63">
 <p>
 Using global parameters, it's possible to have common parameterized options across a huge number of packages. This makes it easy to use parameterized variants of packages without having to rewrite each of them with the compile-time option you want to use.
 </p>
 </div>
 </div>
-<div id="outline-container-org79fa117" class="outline-3">
-<h3 id="org79fa117">4. Learning more about your packages</h3>
-<div class="outline-text-3" id="text-org79fa117">
+<div id="outline-container-orgcfe2ef6" class="outline-3">
+<h3 id="orgcfe2ef6">4. Learning more about your packages</h3>
+<div class="outline-text-3" id="text-orgcfe2ef6">
 <p>
 This last reason is a bit opinionated, but I think that you get to learn a lot more about how the packages you're using work when you tweak them like this. It makes you mindful of all the packages that you are using, and sometimes even helps you discover new things about them that you otherwise wouldn't know about!
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgfe400fd" class="outline-2">
-<h2 id="orgfe400fd">Answers to some commonly asked questions</h2>
-<div class="outline-text-2" id="text-orgfe400fd">
+<div id="outline-container-orgfaa74f9" class="outline-2">
+<h2 id="orgfaa74f9">Answers to some commonly asked questions</h2>
+<div class="outline-text-2" id="text-orgfaa74f9">
 </div>
-<div id="outline-container-org4f7127a" class="outline-3">
-<h3 id="org4f7127a">Changes in the Syntax</h3>
-<div class="outline-text-3" id="text-org4f7127a">
+<div id="outline-container-org9493e0b" class="outline-3">
+<h3 id="org9493e0b">Changes in the Syntax</h3>
+<div class="outline-text-3" id="text-org9493e0b">
 <p>
 The main point of confusion so far has been the <i>syntax</i> for package parameterization, which has gone through a couple of changes over time.
 </p>
 </div>
-<div id="outline-container-orgb402d68" class="outline-4">
-<h4 id="orgb402d68">The Parameter List</h4>
-<div class="outline-text-4" id="text-orgb402d68">
+<div id="outline-container-org879d658" class="outline-4">
+<h4 id="org879d658">The Parameter List</h4>
+<div class="outline-text-4" id="text-org879d658">
 <p>
 The parameter list is a fundamental component of this project.
 At any place that accepts a list of parameters, the user passes a parameter list.
@@ -112,9 +112,9 @@ The first value in the cell is the symbol of the parameter, and the second value
 </p>
 </div>
 </div>
-<div id="outline-container-org3f15cf4" class="outline-4">
-<h4 id="org3f15cf4">Negation and <code>!</code></h4>
-<div class="outline-text-4" id="text-org3f15cf4">
+<div id="outline-container-org826a939" class="outline-4">
+<h4 id="org826a939">Negation and <code>!</code></h4>
+<div class="outline-text-4" id="text-org826a939">
 <p>
 Previously, we were using <code>!</code> to denote the negation of a parameter.
 <b>This has been removed in newer versions</b>.
@@ -134,9 +134,9 @@ Instead, we now use <code>#:off</code> to denote the <i>negative</i> value for a
 </div>
 </div>
 </div>
-<div id="outline-container-org20295e3" class="outline-3">
-<h3 id="org20295e3">Handling of Global Parameters</h3>
-<div class="outline-text-3" id="text-org20295e3">
+<div id="outline-container-orga6aa05a" class="outline-3">
+<h3 id="orga6aa05a">Handling of Global Parameters</h3>
+<div class="outline-text-3" id="text-orga6aa05a">
 <p>
 This topic is still under debate, but for now I have opted to use a <i>separate namespace</i> for global parameters. I'm accomplishing this with the help of a global hash-table.
 This is for two main reasons:
@@ -150,33 +150,33 @@ Furthermore, a lot of the existing processing functions work on unique symbols d
 </p>
 </div>
 </div>
-<div id="outline-container-org622e155" class="outline-3">
-<h3 id="org622e155">Support for setting Global Parameter Values</h3>
-<div class="outline-text-3" id="text-org622e155">
+<div id="outline-container-org39adff6" class="outline-3">
+<h3 id="org39adff6">Support for setting Global Parameter Values</h3>
+<div class="outline-text-3" id="text-org39adff6">
 <p>
 Due to the very alpha state of parameterization, this has not yet been implemented. However parameters are a package transformation option and can be used just like any other package transformation option, so it's possible to create manifest files with parameterization for the packages a user is using.
 </p>
 </div>
 </div>
-<div id="outline-container-org4b10309" class="outline-3">
-<h3 id="org4b10309">Documentation and Tests?</h3>
-<div class="outline-text-3" id="text-org4b10309">
+<div id="outline-container-orgb234df6" class="outline-3">
+<h3 id="orgb234df6">Documentation and Tests?</h3>
+<div class="outline-text-3" id="text-orgb234df6">
 <p>
 I have not written texinfo documentation or unit tests for Package Parameterization yet as they're expected to change considerably in the process of being merged into master.
 </p>
 </div>
 </div>
-<div id="outline-container-org76e8185" class="outline-3">
-<h3 id="org76e8185">When will Parameters be merged to master?</h3>
-<div class="outline-text-3" id="text-org76e8185">
+<div id="outline-container-orgb2cd078" class="outline-3">
+<h3 id="orgb2cd078">When will Parameters be merged to master?</h3>
+<div class="outline-text-3" id="text-orgb2cd078">
 <p>
-While Package Parameterization itself works great, among other things a host of tools for writing parameterized packages more easily and measuring the complexity of parameterized packages are necessary before this project is merged to master. In the meantime, I would really appreciate feedback and bug reports on the current parameterized packages patch. It can be added to a source install of Guix with a <a href="https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch">simple patch</a> that does not affect any other component of Guix. Please raise issues on the <a href="https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch">notabug repository</a> or send me an <a href="mailto:shahsarthakw@gmail.com">email</a> if you encounter any issues with this patch, it would greatly help with development.
+While Package Parameterization itself works great, among other things a host of tools for writing parameterized packages more easily and measuring the complexity of parameterized packages are necessary before this project is merged to master. In the meantime, I would really appreciate feedback and bug reports on the current parameterized packages patch. It can be added to a source install of Guix with a <a href="https://notabug.org/cel7t/guix-parameters/raw/master/parameterization.patch">simple patch</a> that does not affect any other component of Guix. Please raise issues on the <a href="https://notabug.org/cel7t/guix-parameters">notabug repository</a> or send me an <a href="mailto:shahsarthakw@gmail.com">email</a> if you encounter any issues with this patch, it would greatly help with development.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf59c54d" class="outline-3">
-<h3 id="orgf59c54d">Installing the patch</h3>
-<div class="outline-text-3" id="text-orgf59c54d">
+<div id="outline-container-org21c90a9" class="outline-3">
+<h3 id="org21c90a9">Installing the patch</h3>
+<div class="outline-text-3" id="text-org21c90a9">
 <p>
 To install the patch, you will need to build a git copy of Guix. You can find instructions to do the same <a href="https://guix.gnu.org/manual/en/html_node/Building-from-Git.html">here</a>.
 After building Guix from git, copy the patch into the directory and run <code>git apply parameterization.patch</code> to apply it to the source.
@@ -185,9 +185,9 @@ Using <code>./pre-inst-env</code> (see <a href="https://guix.gnu.org/manual/en/h
 </div>
 </div>
 </div>
-<div id="outline-container-org15edf7b" class="outline-2">
-<h2 id="org15edf7b">Thanks</h2>
-<div class="outline-text-2" id="text-org15edf7b">
+<div id="outline-container-org18e2d6d" class="outline-2">
+<h2 id="org18e2d6d">Thanks</h2>
+<div class="outline-text-2" id="text-org18e2d6d">
 <p>
 I owe a great deal of credit for this project to my mentors Pjotr Prins and Gabor Boskovits as their guidance was instrumental to its completion. I would also like to thank Ludovic Courtes, Arun Isaac and Efraim Flashner for their feedback and suggestions, which shaped this project into something much more beautiful than what I had originally envisioned. I also learned a lot about writing good Scheme code in the process, and I'm very thankful to Arun Isaac in particular for his detailed and insightful explanations about good practices for writing Scheme code. I also really appreciate the Guix community's enthusiastic and helpful comments on this project, which motivated me to keep working on it.
 </p>
